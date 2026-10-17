@@ -1,5 +1,6 @@
 import type { Scenario } from './types';
 import { F, short, baseWorld, verdictOut, anchorAndVerify, seconds } from './common';
+import type { Out } from '../engine/actions';
 import { listing, purchase, payout, signOffer, consent, onboardAva, reqsSummary, tagNet } from '../engine/actions';
 import { LAB_KIND, verifyEvent, sha256hex, tagv, decodeInvoice, checkLink, type Event } from '../engine/lab';
 import { makeZapRequest, makeZapReceipt, validateZapRequest } from 'nostr-tools/nip57';
@@ -15,7 +16,7 @@ const requestStep = (buyer: string, offerName: string, store: string, sec = 60) 
       summary: inside ? `Request ${short(r.request.id)} signed by a brand-new key ${short(r.request.pubkey)}, not by ${lab.name(buyer)}'s main key.` : `The request is outside the offer: ${why}. The seller will not invoice it (check 5).`,
       fields: [F('fresh licence key', short(r.request.pubkey, 10)), F('use', use.join(' · '), false), F('amount (signed by buyer)', `${Number(tagv(r.request, 'amount')) / 1000} sats`), F('not-before block', short(tagv(r.request, 'not-before')))],
       code: `const { request, link } = makePrivateRequest(${buyer}Sk, { offer, binding, use: ${JSON.stringify(use)}, network, notBefore })\n// a fresh key per licence: deriveLicenceKey(mainSk, offer.id, nonce)` } as any; } });
-const invoiceStep = (buyer: string, offerName: string, store: string) => (lab: any) => {
+const invoiceStep = (buyer: string, offerName: string, store: string) => (lab: any): Out => {
   const { offer, binding, consents } = listing(lab, offerName); const { request } = lab.a[store];
   const x = lab.issueInvoice({ nodeId: 'node.ava', creditTo: 'ava', offer, binding, consents, request, label: `${offerName} for ${buyer}` }); lab.a[store + '.inv'] = x;
   const dh = decodeInvoice(x.rec.bolt11).descriptionHash; lab.flow('ava', buyer, `402 + invoice ${Number(x.reqs.amount) / 1000} sats`, 'invoice');

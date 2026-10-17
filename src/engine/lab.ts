@@ -174,7 +174,7 @@ export class Lab {
     return { rec, reqs, url };
   }
   /** Plain invoice (zaps, payouts, refunds, OP_RETURN service fees). */
-  plainInvoice(nodeId: string, creditTo: string, amountSat: number, label: string, descriptionHash?: string) {
+  plainInvoice(nodeId: string, creditTo: string, amountSat: number, label: string, descriptionHash?: string): InvoiceRec {
     const node = this.nodes[nodeId]; const pre = randomBytes(32);
     const bolt11 = encodeInvoice({ currency: 'tbs', amountMsat: BigInt(amountSat * 1000), timestamp: this.now, expiry: 600, paymentHash: sha256hex(pre), descriptionHash: descriptionHash ?? sha256hex(label), paymentSecret: bytesToHex(h2('ps' + bytesToHex(pre))) }, hexToBytes(node.priv));
     return (this.invoices[sha256hex(pre)] = { bolt11, paymentHash: sha256hex(pre), preimage: bytesToHex(pre), node: nodeId, creditTo, amountMsat: amountSat * 1000, paid: false, label });

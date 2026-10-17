@@ -1,0 +1,11 @@
+import { Card } from './bits';
+import SOURCE from '../lib/mll/SOURCE.json';
+import { Pre } from './tabs/Tabs';
+export function AboutPage({ which }: { which: string }) {
+  const W = ({ t, children }: { t: string; children: React.ReactNode }) => <div className="mx-auto max-w-[860px] px-5 py-6 md:px-8"><h1 className="mb-4 text-[20px] font-semibold">{t}</h1><div className="space-y-4 text-[14px] leading-6 text-neutral-700">{children}</div></div>;
+  if (which === 'library') return <W t="📚 Protocol library"><p>The Lab runs a byte-for-byte copy of the audited protocol library. A test checks the copy against the source on every run.</p><Pre>{JSON.stringify(SOURCE, null, 2)}</Pre>
+    <Card className="p-4"><b>Files used in the browser:</b> util, events, bolt11, lnmsg, x402, chain, ots, verify. The node-only parts (LND, relays, NWC, anchoring) are replaced by the Lab's simulated world.</Card></W>;
+  if (which === 'paper') return <W t="📄 White paper and spec"><p>The nine checks, in white-paper order:</p><ol className="list-decimal pl-6"><li>Offer signed by the artist</li><li>Node binding by the same key names the invoice node</li><li>Every co-owner consented; shares add up</li><li>Request signed by the buyer, for this offer, on this network</li><li>The requested use is inside the offer</li><li>The invoice comes from the bound node and commits to the exact request</li><li>The amount is the signed price</li><li>The preimage matches the payment hash</li><li>The timestamp is in Bitcoin, and nothing was revoked before it</li></ol>
+    <p>Event kinds: offer 30402, request 3410, binding 3411, revocation 3412, consent 3413, statement 3414, link 3415. Lab-only placeholders: vouch 1985, report 1984, app data 30078, badges 30009/8, refund 3416.</p></W>;
+  return <W t="❓ Help"><p><b>Is any money real?</b> No. All sats are simulated test sats. Signatures, invoices, proofs and checks are real.</p><p><b>Are my keys safe?</b> The Lab makes its own test keys from a public seed. Never paste a real key or wallet connection.</p><p><b>Does it talk to the internet?</b> No. There are no relays, no analytics and no server. It works offline once loaded.</p><p><b>Console:</b> open your developer tools and type <code>lab</code>.</p></W>;
+}

@@ -26,6 +26,7 @@ export const CAST: Record<string, Persona> = Object.fromEntries([
   P('host', 'HostCo', '🏠', 'infra', 'Runs hosted Lightning nodes for artists.', '#78716c'),
   P('relays', 'Relays', '📡', 'infra', 'Store and pass on signed Nostr events.', '#a855f7'),
   P('indexes', 'Indexes', '🗂️', 'infra', 'Search offers and track revocations.', '#6366f1'),
+  P('ots', 'OTS calendar', '🕰️', 'infra', 'OpenTimestamps calendar. Batches digests into one Bitcoin commitment.', '#ea580c'),
   P('bitcoin', 'Bitcoin', '⛓️', 'infra', 'Fixes when things happened (simulated blocks here).', '#f7931a'),
   P('observer', 'Observer', '👁️', 'checker', 'A stranger reading public relays.', '#525252'),
   P('mallory', 'Mallory', '🦹', 'attacker', 'Tries every trick to cheat.', '#dc2626', 10_000),
