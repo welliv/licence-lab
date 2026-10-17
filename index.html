@@ -1,13 +1,17 @@
 <!doctype html>
 <html lang="en-GB" class="dark">
   <head>
+    <script>/* ?fresh=1 (in the address or after the #): a true first view. Forget the saved persona, licences, parties and scores
+       (the theme and any user-test timings stay), then drop the flag from the address so a reload does not reset again. */
+    try{var u=location.search+location.hash;if(/[?&]fresh=1\b/.test(u)){Object.keys(localStorage).forEach(function(k){if(k.indexOf("ll.")===0&&k!=="ll.theme"&&k.indexOf("ll.test")!==0)localStorage.removeItem(k)});
+      var strip=function(x){return x.replace(/([?&])fresh=1\b&?/,"$1").replace(/[?&]$/,"")};history.replaceState(null,"",location.pathname+strip(location.search)+strip(location.hash))}}catch(e){}</script>
     <script>try{if(localStorage.getItem("ll.theme")==="light")document.documentElement.classList.remove("dark")}catch{}</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌧️</text></svg>" />
     <title>Licence Lab · explore music licensing on Nostr, Lightning and Bitcoin</title>
-    <script type="module" crossorigin src="./assets/index-D9tG5yBV.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-C3taYRLg.css">
+    <script type="module" crossorigin src="./assets/index-CNDG-AbW.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D8JbfIhx.css">
   </head>
   <body class="bg-white text-neutral-900 antialiased">
     <div id="root"></div>
