@@ -1,0 +1,10 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }); const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+await p.goto('http://localhost:5180/#/verify'); await p.waitForTimeout(1200);
+await p.getByRole('button', { name: /example/i }).first().click(); await p.waitForTimeout(800);
+await p.getByRole('button', { name: /^Verify/ }).first().click(); await p.waitForTimeout(1200);
+await p.locator('input[accept="audio/*"]').setInputFiles('public/music/01-ava-rain.mp3'); await p.waitForTimeout(1500);
+await p.screenshot({ path: 'screenshots/23-verify-audio-file-match.png' });
+await p.locator('input[accept="audio/*"]').setInputFiles('public/music/02-nova.mp3'); await p.waitForTimeout(1500);
+console.log((await p.locator('main').innerText()).match(/.*(match|differ|not).*sha|.*SHA-256.*/gi)?.slice(0,4));
+await p.screenshot({ path: 'screenshots/24-verify-audio-file-mismatch.png' }); await b.close();

@@ -3,6 +3,8 @@ import { useSyncExternalStore } from 'react';
 import { Lab } from '../engine/lab';
 import { prepare, runStep, defaults, type StepRun } from '../engine/runner';
 import { byId, type Scenario } from '../scenarios';
+import { music } from './music';
+import { tagv } from '../engine/lab';
 export interface Session { sc: Scenario; lab: Lab | null; ready: Set<string>; runs: StepRun[]; busy: boolean; inputs: Record<string, Record<string, any>>; lastVerdictStep?: string }
 const sessions = new Map<string, Session>(); let version = 0; const subs = new Set<() => void>();
 export const bump = () => { version++; subs.forEach(f => f()); };
@@ -27,7 +29,9 @@ async function exec(s: Session, i: number) {
   const r = await runStep(s.lab!, st, { ...defaults(st), ...(s.inputs[st.id] ?? {}) }, { onError: e => {
     if (!missing.length) return undefined; const need = missing[missing.length - 1]; const k = s.sc.steps.indexOf(need) + 1;
     return looksInternal(e.message) ? `Not yet: this needs step ${k} ("${need.title}") first.` : `Refused: ${e.message}. Step ${k} ("${need.title}") has not happened yet.`; } });
-  s.runs.push(r); if (r.out.verdict) s.lastVerdictStep = st.id; return r;
+  s.runs.push(r); if (r.out.verdict) s.lastVerdictStep = st.id;
+  const v = r.out.verdict; if (v?.result.ok && v.passed === 9 && !r.guard) { const x = v.file?.offerHash; const t = music.bySha(x); if (t) music.unlock(t.id, { how: `verifyLicence 9/9 in scenario ${s.sc.n} (${s.sc.title})${v.file?.ok ? '; file hash matches the offer' : ''}`, fileOk: v.file?.ok, holder: r.step.actor }); }
+  return r;
 }
 /** Run step i now, whatever has happened before (free play). */
 export async function runAt(id: string, i: number) { const s = session(id); if (!s.lab || s.busy) return; s.busy = true; bump(); try { await exec(s, i); } finally { s.busy = false; bump(); } }

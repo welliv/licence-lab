@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Copy, Check, Lightbulb, Play, Pause } from 'lucide-react';
 import { persona } from '../engine/cast';
-import { rainWav } from '../engine/track';
+import { music, useMusic } from './music';
 export const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 export function Card({ children, className, ...p }: { children: ReactNode; className?: string } & React.HTMLAttributes<HTMLDivElement>) { return <div {...p} className={cx('rounded-xl border border-neutral-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]', className)}>{children}</div>; }
 export function Button({ children, variant = 'primary', className, ...p }: { variant?: 'primary' | 'outline' | 'ghost' | 'danger' | 'subtle' } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
@@ -33,17 +33,15 @@ export function Bulb({ children, label = 'Learn more' }: { children: ReactNode; 
     {open && <div className="fade-in absolute left-0 top-8 z-30 w-[360px] rounded-lg border border-neutral-200 bg-white p-4 text-[13px] leading-5 text-neutral-700 shadow-lg">{children}</div>}</span>;
 }
 /** Cover art for "Rain": generated, so there is no third-party image. */
-export function Cover({ size = 40, className }: { size?: number; className?: string }) {
-  const drops = useMemo(() => Array.from({ length: 14 }, (_, i) => ({ x: (i * 37) % 100, y: (i * 53) % 100, l: 8 + (i % 4) * 4 })), []);
-  return <svg viewBox="0 0 100 100" width={size} height={size} className={cx('rounded-md', className)} aria-label="Rain cover art"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#312e81" /><stop offset=".55" stopColor="#7c3aed" /><stop offset="1" stopColor="#0ea5e9" /></linearGradient></defs>
-    <rect width="100" height="100" fill="url(#rg)" />{drops.map((d, i) => <line key={i} x1={d.x} y1={d.y} x2={d.x - 3} y2={d.y + d.l} stroke="white" strokeOpacity=".45" strokeWidth="1.4" strokeLinecap="round" />)}
-    <circle cx="70" cy="30" r="13" fill="white" fillOpacity=".15" /><text x="8" y="90" fontSize="17" fontWeight="700" fill="white" fontFamily="Inter, sans-serif">Rain</text></svg>;
+export function Cover({ size = 40, className, title = 'Rain', colours = ['#312e81', '#7c3aed', '#0ea5e9'] }: { size?: number; className?: string; title?: string; colours?: string[] }) {
+  const id = useId().replace(/:/g, ''); const drops = useMemo(() => Array.from({ length: 14 }, (_, i) => ({ x: (i * 37) % 100, y: (i * 53) % 100, l: 8 + (i % 4) * 4 })), []);
+  const label = title.length > 11 ? title.slice(0, 10) + '…' : title;
+  return <svg viewBox="0 0 100 100" width={size} height={size} className={cx('shrink-0 rounded-md', className)} aria-label={`${title} cover art`}><defs><linearGradient id={id} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={colours[0]} /><stop offset=".55" stopColor={colours[1]} /><stop offset="1" stopColor={colours[2]} /></linearGradient></defs>
+    <rect width="100" height="100" fill={`url(#${id})`} />{drops.map((d, i) => <line key={i} x1={d.x} y1={d.y} x2={d.x - 3} y2={d.y + d.l} stroke="white" strokeOpacity=".45" strokeWidth="1.4" strokeLinecap="round" />)}
+    <circle cx="70" cy="30" r="13" fill="white" fillOpacity=".15" /><text x="8" y="90" fontSize={label.length > 6 ? 13 : 17} fontWeight="700" fill="white" fontFamily="Inter, sans-serif">{label}</text></svg>;
 }
-let audioUrl: string | null = null;
-export function Player({ compact }: { compact?: boolean }) {
-  const [playing, setPlaying] = useState(false); const a = useRef<HTMLAudioElement | null>(null);
-  const toggle = () => { if (!audioUrl) audioUrl = URL.createObjectURL(new Blob([rainWav() as BlobPart], { type: 'audio/wav' })); if (!a.current) { a.current = new Audio(audioUrl); a.current.onended = () => setPlaying(false); }
-    if (playing) { a.current.pause(); setPlaying(false); } else { a.current.currentTime = 0; a.current.play().catch(() => {}); setPlaying(true); } };
-  return <button onClick={toggle} aria-label={playing ? 'Pause Rain' : 'Play Rain'} className={cx('inline-flex items-center gap-1.5 rounded-full bg-neutral-900 text-white hover:bg-neutral-700', compact ? 'h-6 w-6 justify-center' : 'h-8 px-3 text-[12px]')}>{playing ? <Pause size={12} /> : <Play size={12} />}{!compact && (playing ? 'Pause' : 'Play "Rain" (demo)')}</button>;
+export function Player({ compact, cast = 'ava' }: { compact?: boolean; cast?: string }) {
+  useMusic(); const t = music.byCast(cast); const playing = music.isPlaying(t?.id);
+  return <button onClick={() => music.toggle(t?.id)} aria-label={playing ? 'Pause' : `Play ${t?.demoTitle ?? 'Rain'}`} className={cx('inline-flex items-center gap-1.5 rounded-full bg-neutral-900 text-white hover:bg-neutral-700', compact ? 'h-6 w-6 justify-center' : 'h-8 px-3 text-[12px]')}>{playing ? <Pause size={12} /> : <Play size={12} />}{!compact && (playing ? 'Pause' : `Play "${t?.demoTitle ?? 'Rain'}" (${music.unlocked(t?.id) ? 'full track' : '30 s preview'})`)}</button>;
 }
 export function Section({ title, right, children }: { title: string; right?: ReactNode; children: ReactNode }) { return <div><div className="mb-3 flex items-center justify-between"><h3 className="text-[15px] font-semibold">{title}</h3>{right}</div>{children}</div>; }

@@ -13,7 +13,7 @@ import { type ChainOracle, MLA1 } from '../lib/mll/chain';
 import { writeOts, verifyOts, type Op } from '../lib/mll/ots';
 import { sha256hex, sha256, bytesToHex, hexToBytes, utf8ToBytes, concatBytes, randomBytes } from '../lib/mll/util';
 import { CAST, persona } from './cast';
-import { rainWav } from './track';
+import { rainWav, trackFile, type TrackFile } from './track';
 export type { Event, LicenceBundle, Result, Requirements, Invoice };
 export { KIND, tagv, verifyEvent, decodeInvoice, grantDigest, checkLink, sha256hex };
 
@@ -46,7 +46,10 @@ export interface Nwc { maxPerPaymentSat: number; dailyCapSat: number; monthlyCap
 export interface PayRecord { status: 'in_flight' | 'paid' | 'failed'; amountSat: number; preimage?: string; invoice: string; requestId?: string }
 export interface Block { height: number; hash: string; time: number; merkleRoot: string; ors: { payload: string; txid: string }[]; note?: string }
 export interface DocCheck { n: number; label: string; status: 'pass' | 'fail' | 'skip' | 'todo'; detail?: string }
-export interface Verdict { result: Result; checks: DocCheck[]; ms: number; passed: number }
+export interface FileCheck { ok: boolean; offerHash: string; fileHash?: string; label?: string; recomputed?: boolean; reason?: string }
+export interface Verdict { result: Result; checks: DocCheck[]; ms: number; passed: number; file?: FileCheck }
+const HCACHE = new WeakMap<Uint8Array, string>();
+export const hashBytes = (b: Uint8Array) => { let h = HCACHE.get(b); if (!h) { h = sha256hex(b); HCACHE.set(b, h); } return h; };
 
 export const NINE = ['Offer signed by the artist', 'Node binding by the same key names the invoice node', 'Every co-owner consented; shares add up',
   'Request signed and names this offer', 'Use, territory and term allowed by the offer', 'Invoice signed by the bound node and commits to the request',
@@ -120,11 +123,19 @@ export class Lab {
   a: Record<string, any> = {};
   logs: LogEntry[] = []; flows: Flow[] = []; history: { step: string; t: number; balances: Record<string, number> }[] = [];
   currentStep?: string;
-  track: Uint8Array; trackHash: string;
+  track: Uint8Array; trackHash: string; trackLabel = 'demo tone (synthesised)';
+  /** Hash of Kai's remix file (real file when registered, else a changed copy of the master). */
+  remixHash() { return trackFile('remix')?.sha256 ?? sha256hex(this.track.map((b, k) => k > this.track.length - 4000 ? b ^ 0x5a : b)); }
+  novaHash() { return trackFile('nova')?.sha256 ?? sha256hex('Dawn master v1'); }
+  /** Extra check (not one of the nine): do the audio bytes we hold hash to the offer's "x" tag? */
+  fileCheck(offer: Event): FileCheck { const x = tagv(offer, 'x') ?? '';
+    const known: TrackFile[] = [{ role: 'rain', sha256: this.trackHash, label: this.trackLabel, bytes: this.track }, ...(['remix', 'nova'].map(r => trackFile(r)).filter(Boolean) as TrackFile[])];
+    const f = known.find(k => k.sha256 === x); if (!f) return { ok: false, offerHash: x, reason: 'no audio file here hashes to the offer\'s track hash' };
+    const fileHash = f.bytes ? hashBytes(f.bytes) : f.sha256; return { ok: fileHash === x, offerHash: x, fileHash, label: f.label, recomputed: !!f.bytes, reason: fileHash === x ? undefined : 'file bytes changed' }; }
   constructor(seed = 'rain') {
     this.seed = seed; this.now = Math.floor(Date.now() / 1000);
     this.chain = new SimChain(seed, 250_000, this.now);
-    this.track = rainWav(); this.trackHash = sha256hex(this.track);
+    { const m = trackFile('rain'); this.track = m?.bytes ?? rainWav(); this.trackHash = m?.sha256 ?? sha256hex(this.track); this.trackLabel = m?.label ?? 'demo tone (synthesised)'; }
     this.makeNode('node.wallets', 'host', 'Test wallet service (people without a node)');
   }
   // ---------- parties ----------
@@ -252,7 +263,7 @@ export class Lab {
   async verify(b: LicenceBundle, o: { chain?: ChainOracle | false; link?: Event } = {}): Promise<Verdict> {
     const t0 = performance.now(); const chain = o.chain === false ? undefined : (o.chain ?? this.chain);
     const result = await verifyLicence(structuredClone(b), chain, { link: o.link }); const checks = mapChecks(result, !!chain);
-    return { result, checks, ms: performance.now() - t0, passed: checks.filter(c => c.status === 'pass').length };
+    return { result, checks, ms: performance.now() - t0, passed: checks.filter(c => c.status === 'pass').length, file: b.offer ? this.fileCheck(b.offer) : undefined };
   }
   // ---------- protocol building blocks, re-exported so scenario code reads plainly ----------
   lib = { makeOffer, makeConsent, makeRequest, makePrivateRequest, makeRevocation, makeStatement, checkDeal, revocationPayloadCompact, clientCheck, requestHash, httpBinding, requestBytes, grantDigest, MLA1 };

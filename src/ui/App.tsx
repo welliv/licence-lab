@@ -10,6 +10,7 @@ import { AboutPage } from './About';
 import { byId } from '../scenarios';
 import { exposeRepl } from './repl';
 import { LivePage } from './LivePage';
+import { MiniPlayer } from './MiniPlayer';
 export function App() {
   const { path, params } = useRoute(); const [open, setOpen] = useState(false);
   useEffect(() => { exposeRepl(); }, []);
@@ -29,6 +30,7 @@ export function App() {
     <div className="flex min-w-0 flex-1 flex-col">
       <div className="flex items-center gap-2 border-b border-neutral-200 px-3 py-2 md:hidden"><button aria-label="Menu" onClick={() => setOpen(!open)}>{open ? <X size={18} /> : <Menu size={18} />}</button><span className="font-semibold">Licence Lab</span></div>
       <main className="scroll-thin flex-1 overflow-y-auto">{page}
-        <footer className="border-t border-neutral-100 px-6 py-4 text-center text-[11px] text-neutral-400">Licence Lab · runs the open music-licence protocol library in your browser · test keys and test money only · Nostr · Lightning · Bitcoin</footer></main>
+        <footer className="border-t border-neutral-100 px-6 py-4 text-center text-[11px] text-neutral-400">Licence Lab · runs the open music-licence protocol library in your browser · test keys and test money only · Nostr · Lightning · Bitcoin · music: demo names on owner-supplied recordings (see Credits)</footer></main>
+      <MiniPlayer />
     </div></div>;
 }

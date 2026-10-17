@@ -18,3 +18,14 @@ export function rainWav(): Uint8Array {
 }
 /** A remix: the same file with a changed tail, so it hashes differently. */
 export function remixWav(): Uint8Array { const b = rainWav().slice(); for (let i = b.length - 4000; i < b.length; i++) b[i] = b[i] ^ 0x5a; return b; }
+
+// ---------- Real audio files (the owner's tracks in public/music). When registered, offers bind to their SHA-256. ----------
+export interface TrackFile { role: 'rain' | 'remix' | 'nova' | string; sha256: string; label: string; bytes?: Uint8Array }
+const FILES: Record<string, TrackFile> = {};
+/** Register a real file. If bytes are given, their hash is recomputed here and must match. */
+export function registerTrackFile(f: TrackFile, hash?: (b: Uint8Array) => string) {
+  if (f.bytes && hash && hash(f.bytes) !== f.sha256) throw new Error(`${f.label}: file bytes do not match the expected SHA-256`);
+  FILES[f.role] = f;
+}
+export const trackFile = (role: string): TrackFile | undefined => FILES[role];
+export const clearTrackFiles = () => { for (const k of Object.keys(FILES)) delete FILES[k]; };

@@ -82,7 +82,8 @@ export function NineChecks({ v, compact }: { v?: Verdict; compact?: boolean }) {
     return <li key={i} className={cx('flex items-start gap-2 rounded-md px-2 py-1.5 text-[13px]', st === 'pass' && 'bg-emerald-50', st === 'fail' && 'bounce-x bg-red-50', st === 'skip' && 'bg-neutral-50')}>
       <span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-[11px] font-bold', st === 'pass' ? 'bg-emerald-500 text-white' : st === 'fail' ? 'bg-red-500 text-white' : 'bg-neutral-200 text-neutral-500')}>{i + 1}</span>
       <span className="flex-1"><span className={cx(st === 'todo' && 'text-neutral-400')}>{label}</span>{c?.detail && !compact && <span className={cx('block text-[11px]', st === 'fail' ? 'text-red-700' : 'text-neutral-500')}>{c.detail}</span>}</span>
-      <span className="text-[11px] text-neutral-500">{st === 'pass' ? 'pass' : st === 'fail' ? 'FAIL' : st === 'skip' ? 'skipped' : 'not reached'}</span></li>; })}</ol>;
+      <span className="text-[11px] text-neutral-500">{st === 'pass' ? 'pass' : st === 'fail' ? 'FAIL' : st === 'skip' ? 'skipped' : 'not reached'}</span></li>; })}
+    {v?.file && <FileRow f={v.file} />}</ol>;
 }
 function ChecksTab({ sid }: { sid: string }) {
   const s = session(sid); const r = [...s.runs].reverse().find(x => x.out.verdict); const proven = [...new Set(s.runs.flatMap(x => x.out.proves ?? []))].sort();
@@ -112,3 +113,10 @@ export function BundleTray({ name, b }: { name: string; b: any }) {
 function PromptsTab({ sid }: { sid: string }) { const sc = session(sid).sc;
   return <div className="space-y-3"><h3 className="text-[15px] font-semibold">Example Prompts</h3><p className="text-[12px] text-neutral-500">Paste into your coding agent. Each assumes the protocol library and ends with real tests.</p>
     {sc.prompts.map(p => <Card key={p.title} className="p-3"><div className="mb-2 text-[13px] font-semibold">{p.title}</div><Pre>{p.prompt + ' Use only test keys and test wallets. Write vitest tests and a Playwright test that takes screenshots, then review them.'}</Pre></Card>)}</div>; }
+
+export function FileRow({ f }: { f: NonNullable<Verdict['file']> }) {
+  return <li className={cx('mt-2 flex items-start gap-2 rounded-md border px-2 py-1.5 text-[13px]', f.ok ? 'border-emerald-200 bg-emerald-50' : 'border-dashed border-neutral-300')} data-testid="file-check">
+    <span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-[11px] font-bold', f.ok ? 'bg-emerald-500 text-white' : 'bg-neutral-200 text-neutral-500')}>♪</span>
+    <span className="flex-1">Extra check: the audio file matches the offer's track hash<span className="block break-all font-mono text-[10px] text-neutral-500">offer x = {f.offerHash.slice(0, 16)}…{f.ok ? ` = sha256(${f.label})${f.recomputed ? ', recomputed from the bytes' : ''}` : ` (${f.reason})`}</span></span>
+    <span className="text-[11px] text-neutral-500">{f.ok ? 'match' : 'no file'}</span></li>;
+}

@@ -7,6 +7,8 @@ import { persona } from '../engine/cast';
 import { Bulb, Button, Card, CopyField, Pill, TierBadge, cx } from './bits';
 import { bump, go, useVersion } from './store';
 import { NineChecks } from './tabs/Tabs';
+import { music } from './music';
+import { tagv } from '../engine/lab';
 import type { Verdict } from '../engine/lab';
 const ls = { get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} }, del: (k: string) => { try { localStorage.removeItem(k); } catch {} } };
 let W: LiveWorld | null = null; const world = () => { if (!W) { W = new LiveWorld(ls); W.onChange = bump; } return W; };
@@ -48,7 +50,7 @@ export function LivePage() {
       <Card className="p-4"><div className="mb-2 flex items-center gap-2 font-semibold"><span className="text-lg">{persona('mia').emoji}</span>Mia: buy a licence</div>
         <label className="block text-[11px] text-neutral-500">Seconds of "Rain" in her video<input type="number" value={secs} onChange={e => setSecs(Number(e.target.value))} className="mt-1 h-9 w-full rounded-md border border-neutral-200 bg-white px-3 text-[13px]" /></label>
         <div className="mt-3 space-y-2"><B k="request" icon={<Send size={14} />} f={() => w.requestLicence('mia', secs)} okText={() => `Request signed by fresh key ${w.request!.pubkey.slice(0, 10)}….`}>Sign a licence request</B><R k="request" />
-          <B k="pay" variant="outline" icon={<Rocket size={14} />} f={() => w.pay('mia')} okText={r => `Paid. Preimage ${r.slice(0, 16)}….`}>Check and pay the invoice</B><R k="pay" />
+          <B k="pay" variant="outline" icon={<Rocket size={14} />} f={async () => { const r = await w.pay('mia'); const t = music.bySha(tagv(w.offer!, 'x')); if (t) music.unlock(t.id, { how: 'Paid for real on the NWC faucet (Live test wallets). Check 2 cannot pass on the faucet', holder: 'mia' }); return r; }} okText={r => `Paid. Preimage ${r.slice(0, 16)}…. The full track is unlocked in the player.`}>Check and pay the invoice</B><R k="pay" />
           <B k="verify" variant="outline" icon={<ShieldCheck size={14} />} f={async () => { const v = await w.verify(); setVerdict(v); return v; }} okText={v => v.strict.result.ok ? 'Valid licence.' : `verifyLicence stopped at check 2 (${v.strict.result.code}), as expected on the faucet. ${v.facts.filter((f: any) => f.ok).length}/6 payment facts proven.`}>Verify the licence</B><R k="verify" /></div>
         {w.preimage && <div className="mt-3"><CopyField label="Payment preimage (real)" value={w.preimage} /></div>}</Card>
       <Card className="p-4"><div className="mb-2 flex items-center gap-2 font-semibold"><span className="text-lg">{persona('scout').emoji}</span>Scout: buy as an agent <TierBadge b="sim" /></div>

@@ -1,3 +1,5 @@
 node_modules
 dist
 *.log
+public/music/*.mp3
+public/music/previews/

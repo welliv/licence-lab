@@ -19,3 +19,7 @@ npm run shots                      # screenshots/
 ```
 
 See `docs/vs-alby.md` for the comparison.
+
+## Music
+
+Put audio files in `public/music/` (.mp3 .m4a .aac .ogg .oga .opus .wav .flac .webm; any file names), then run `npm run music`. This also runs before `dev` and `build`. It writes 30 s previews to `public/music/previews/`, plus `tracks.json` and `CREDITS.md`. Edit titles, artists and licences in `public/music/music.json`. The offer's `x` tag is the SHA-256 of the full file. Audio files are gitignored.

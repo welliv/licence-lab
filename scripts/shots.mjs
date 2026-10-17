@@ -7,6 +7,8 @@ const runAll = async id => { await p.goto(`${base}#/${id}`); await p.waitForTime
 const tab = async name => { await p.getByRole('tab', { name }).click(); await p.waitForTimeout(250); };
 const shot = async (name, full = false) => { await p.waitForTimeout(300); await p.screenshot({ path: `${out}/${name}.png`, fullPage: full }); console.log(`${out}/${name}.png`); };
 await p.goto(`${base}#/start`); await p.evaluate(() => localStorage.clear()); await p.reload(); await shot('01-getting-started');
+const bar = p.getByRole('region', { name: 'Music player' }); await bar.getByRole('button', { name: 'Play' }).click(); await p.waitForTimeout(3000); await shot('20-player-preview-playing'); await bar.getByRole('button', { name: 'Pause' }).click();
+await bar.getByRole('button', { name: 'Credits' }).click(); await p.waitForTimeout(300); await shot('22-music-credits'); await p.getByRole('button', { name: 'Close' }).click();
 await p.getByRole('button', { name: 'Next →' }).click(); await shot('01b-getting-started-slide-2'); await p.getByRole('button', { name: 'Next →' }).click(); await shot('01c-getting-started-slide-3');
 await p.goto(`${base}#/s3`); await p.waitForTimeout(300); await shot('02-s3-set-up-parties');
 await p.getByRole('button', { name: /Set up all/ }).click(); await p.getByRole('button', { name: 'Run all steps' }).waitFor(); await p.waitForTimeout(400);
@@ -16,6 +18,7 @@ await runAll('s3'); await p.evaluate(() => document.querySelector('main').scroll
 await tab('Flow Diagram'); await p.getByRole('tablist').scrollIntoViewIfNeeded(); await p.evaluate(() => document.querySelector('main').scrollBy(0, -60)); await shot('04-s3-flow-diagram');
 await tab('Log'); await p.locator('text=Show code and data').first().click(); await p.getByRole('tablist').scrollIntoViewIfNeeded(); await shot('05-s3-log-with-code');
 await tab('Nine Checks'); await p.getByRole('tablist').scrollIntoViewIfNeeded(); await shot('06-s3-nine-checks');
+await p.getByRole('region', { name: 'Music player' }).getByRole('button', { name: 'Play' }).click(); await p.waitForTimeout(3000); await p.locator('[data-testid=file-check]').first().scrollIntoViewIfNeeded(); await shot('21-player-licensed-full-track-and-file-check'); await p.getByRole('region', { name: 'Music player' }).getByRole('button', { name: 'Pause' }).click();
 await runAll('s4'); await p.evaluate(() => document.querySelector('main').scrollTo(0, 0)); await shot('07-s4-agent-buys');
 await runAll('s11'); await tab('Code'); await p.getByRole('tablist').scrollIntoViewIfNeeded(); await shot('08-s11-code-tab');
 await p.getByRole('button', { name: 'REPL', exact: true }).click(); await p.getByLabel('REPL input').fill("await w.verify(w.a['bundle.mia'] ?? w.a[Object.keys(w.a).find(k => k.startsWith('bundle'))]).then(v => v.result)"); await p.getByRole('button', { name: 'Run', exact: true }).click(); await p.waitForTimeout(600); await shot('08b-s11-repl');

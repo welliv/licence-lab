@@ -9,6 +9,7 @@ import { clientCheck, httpBinding, requestHash, NETWORKS, type Requirements } fr
 import { decodeInvoice } from '../lib/mll/bolt11';
 import { tagv, type Event } from '../engine/lab';
 import { Nwc, faucetWallet, faucetTopUp } from './nwc';
+import { trackFile } from '../engine/track';
 import { mapChecks, TERMS, USES, type Verdict } from '../engine/lab';
 export const LIVE_PARTIES = ['ava', 'mia', 'jay', 'nova', 'lena', 'scout'] as const;
 export type LiveParty = (typeof LIVE_PARTIES)[number];
@@ -53,7 +54,7 @@ export class LiveWorld {
     this.need('ava', 'The binding names the node behind her wallet.'); this.priceSat = priceSat;
     // The faucet refuses sign_message (RESTRICTED), so the node cannot sign Ava's key. The binding is real but has no node signature.
     this.binding = makeBinding(this.keys.ava, this.faucetNode, '', ['*']);
-    this.offer = makeOffer(this.keys.ava, { track: 'rain', title: 'Rain', masterSha256: bytesToHex(sha256(new TextEncoder().encode('Rain (Licence Lab demo master)'))), use: USES.creator.slice(1), termsText: TERMS.creator, priceSats: priceSat,
+    this.offer = makeOffer(this.keys.ava, { track: 'rain', title: 'Rain', masterSha256: trackFile('rain')?.sha256 ?? bytesToHex(sha256(new TextEncoder().encode('Rain (Licence Lab demo master)'))), use: USES.creator.slice(1), termsText: TERMS.creator, priceSats: priceSat,
       payLink: 'https://ava.lab.test/licence/rain/creator', bindingId: this.binding.id, validUntil: 999_999_999, coOwners: Object.entries(SHARES).map(([p, bps]) => ({ pubkey: this.pub(p), role: p, bps })) });
     this.consents = Object.entries(SHARES).map(([p, bps]) => makeConsent(this.keys[p], this.offer!, bps, this.lud16[p as LiveParty] ?? `${p}@lab.test`));
     this.request = this.link = this.reqs = this.invoice = this.preimage = undefined;

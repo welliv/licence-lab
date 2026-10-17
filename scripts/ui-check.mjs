@@ -30,5 +30,19 @@ if (process.env.LIVE) { await p.goto(`${base}#/live`); await p.waitForTimeout(50
   for (const name of [/Publish offer/, /Sign a licence request/, /Make invoice/, /Check and pay/, /Verify the licence/, /Pay the co-owners/]) { await p.getByRole('button', { name }).click(); await p.waitForFunction(() => !document.querySelector('.animate-spin'), null, { timeout: 60000 }); await p.waitForTimeout(300); }
   const t = await p.locator('main').innerText(); const liveOk = /Paid\. Preimage/.test(t) && /stopped at check 2/.test(t) && /Paid: Jay/.test(t); console.log(liveOk ? '✓' : '✗', 'live page: real pay, verify, payout'); if (!liveOk) { bad++; console.log(t.slice(0, 1500)); } }
 
+// Music: preview before buying, real playback, unlock after 9/9, file-hash row
+await p.goto(`${base}#/start`); await p.evaluate(() => localStorage.clear()); await p.reload(); await p.waitForTimeout(800);
+const bar = p.getByRole('region', { name: 'Music player' }); const pre = /30 s preview/.test(await bar.innerText());
+await bar.getByRole('button', { name: 'Play' }).click(); await p.waitForTimeout(2500);
+const prog = await bar.getByRole('slider').getAttribute('aria-valuenow'); const src1 = await p.evaluate(() => (window).lab?.music?.src ?? '');
+await bar.getByRole('button', { name: 'Pause' }).click();
+console.log(pre && Number(prog) >= 1 ? '✓' : '✗', 'player: preview plays', `t=${prog}s`, src1); if (!(pre && Number(prog) >= 1)) bad++;
+await p.goto(`${base}#/s3`); await p.waitForTimeout(200); await p.getByRole('button', { name: /Set up all/ }).click(); await p.getByRole('button', { name: 'Run all steps' }).click({ timeout: 20000 });
+await p.waitForFunction(() => [...document.querySelectorAll('button')].some(x => x.textContent?.includes('Run all steps') && x.disabled) && !document.querySelector('.animate-spin'), null, { timeout: 60000 });
+await p.getByRole('tab', { name: 'Nine Checks' }).click(); await p.waitForTimeout(300);
+const fileRow = await p.locator('[data-testid=file-check]').first().innerText().catch(() => ''); const unlocked = /Licensed · full track/.test(await bar.innerText());
+const src2 = await p.evaluate(() => (window).lab?.music?.src ?? '');
+const ok3 = /match/.test(fileRow) && unlocked && /01-ava-rain\.mp3$/.test(src2); console.log(ok3 ? '✓' : '✗', 'S3 9/9 unlocks the full file; file row:', fileRow.replace(/\n/g, ' ').slice(0, 140), src2); if (!ok3) bad++;
+
 for (const a of ['A1', 'A18']) { await p.goto(`${base}#/attack/${a}`); await p.waitForTimeout(800); await p.getByRole('button', { name: /Present to the verifier|Run the attack/ }).click(); await p.waitForTimeout(1500); console.log(a, (await p.locator('.fade-in').first().textContent())?.slice(0, 100)); }
 console.log('page errors:', errs.length, errs.slice(0, 5)); await b.close(); process.exit(bad || errs.length ? 1 : 0);

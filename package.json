@@ -10,7 +10,10 @@
     "test": "vitest run",
     "scenarios": "tsx scripts/run-all.ts",
     "sync-lib": "node scripts/sync-lib.mjs",
-    "shots": "node scripts/shots.mjs"
+    "shots": "node scripts/shots.mjs",
+    "music": "node scripts/music-index.mjs",
+    "predev": "node scripts/music-index.mjs",
+    "prebuild": "node scripts/music-index.mjs"
   },
   "dependencies": {
     "@noble/curves": "^1.9.7",

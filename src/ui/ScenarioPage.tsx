@@ -20,6 +20,7 @@ export function ScenarioPage({ id, autorun = 0 }: { id: string; autorun?: number
       <Pill className={COMPLEXITY_STYLE[sc.complexity]}>{sc.complexity}</Pill><Pill className="bg-rain-50 text-rain-600 ring-1 ring-rain-100">S{sc.n} · {sc.status}</Pill></div>
     <p className="mt-1.5 flex flex-wrap items-center gap-2 text-[14px] text-neutral-600">{sc.summary}
       <Bulb><div className="mb-2 font-semibold text-neutral-900">How it works</div><p className="mb-3">{sc.education}</p><ul className="space-y-2">{sc.how.map(h => <li key={h.title}><b>{h.title}.</b> {h.description}</li>)}</ul><p className="mt-3 text-[12px] text-neutral-500">Situation: {sc.situation}</p></Bulb>
+      {sc.cast.includes('ava') && <Player />}
       <button aria-label="Jump to code" onClick={toCode} className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 text-sky-600 hover:bg-sky-200"><Code2 size={13} /></button></p>
     <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-[12px] text-neutral-600">
       <span className="font-semibold text-neutral-800">⚡ Instant mode</span><span>Real signatures, invoices, timestamp proofs and verifyLicence run in your browser. Money, relays and Bitcoin blocks are simulated.</span>

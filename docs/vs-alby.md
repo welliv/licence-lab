@@ -156,3 +156,7 @@ Evidence: `docs/live-evidence.json`, run at 10:15 EAT on 17 Oct 2026 (`npx tsx s
 4. **Outside links** (skill, feedback, public source) wait until the user approves a push.
 5. **Bundle size:** about 705 kB (231 kB gzipped) in one chunk.
 6. **Protocol open issues:** A18, A12b, S21 fiat lock.
+
+## Music and file-hash binding (added)
+
+Alby's sandbox has no audio. Licence Lab now plays the owner-supplied recordings in `public/music/`. Before a purchase you hear a 30 s preview. Once a licence verifies 9/9, or after a Live faucet payment, the full file plays. Every offer's `x` tag is the SHA-256 of the full original file. An extra check, shown after the nine, re-hashes the file bytes and compares them with `x`. The Verify page can also hash any audio file you pick. This is a lab-only addition: on a static site the full file is still publicly reachable. A real shop would gate it behind the licence.
