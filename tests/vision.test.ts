@@ -4,7 +4,7 @@ import { describe, it, expect } from 'vitest';
 import { Lab } from '../src/engine/lab';
 import { CATALOGUE, LICENCES, defaultPriceCents, shareCents, licenseTrack, toSats, CENTS_PER_SAT, PRICE_MIN_CENTS, PRICE_MAX_CENTS, PRICE_STEP_CENTS } from '../src/engine/catalogue';
 import { videoLicences, subscribe, renew, catalogueHash, PLAN, VIDEOS, budgetLeftCents, setBudget } from '../src/engine/company';
-import { usd } from '../src/ui/money';
+import { usd } from '../src/engine/money';
 const fakeSha = (s: string) => Array.from({ length: 64 }, (_, i) => '0123456789abcdef'[(s.charCodeAt(i % s.length) + i * 7) % 16]).join('');
 describe('licence types and prices', () => {
   it('Rain: Personal $1, Creator $5, Business $50; each allows something plain; only Personal is draft', () => {

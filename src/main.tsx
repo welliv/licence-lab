@@ -1,7 +1,8 @@
-import './engine/polyfill';
-import './index.css';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { App } from './ui/App';
-import { music } from './ui/music';
-// Load the track list and the hero file first, so every offer binds to the real file's SHA-256 (falls back to the demo tone after 8 s).
-Promise.race([music.load(), new Promise(r => setTimeout(r, 8000))]).finally(() => createRoot(document.getElementById('root')!).render(<App />));
+import './one/one.css';
+import { App } from './one/App';
+createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>);
+// Warm the engine (crypto and checks) once the page is idle, so the first tap is instant. It is never needed for first paint.
+const warm = () => { void import('./one/actions').then(m => m.loadEngine()); };
+addEventListener('pointerdown', warm, { once: true, capture: true }); addEventListener('keydown', warm, { once: true, capture: true });

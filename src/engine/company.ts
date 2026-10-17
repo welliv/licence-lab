@@ -49,33 +49,34 @@ export async function videoLicences(lab: Lab, shas: Record<string, string>, mont
 }
 /** The catalogue fingerprint: a hash of the sorted file hashes of the recordings in Harbour Music's catalogue. */
 export const catalogueHash = (shas: string[]) => sha256hex([...shas].sort().join('\n'));
-function planOffer(lab: Lab, x: string) {
+export type PlanShare = { who: string; role: string; bps: number };
+function planOffer(lab: Lab, x: string, shares: PlanShare[] = PLAN.shares) {
   if (lab.a['offer.plan']) return 'offer.plan';
-  lab.setUpAll(['harbour', 'dave', 'erin', 'frank', 'distributor']); if (!lab.a['binding.harbour']) onboardAlice(lab, 'harbour', { quiet: true });
+  lab.setUpAll(['harbour', ...shares.map(s => s.who).filter(w => w !== 'harbour'), 'distributor']); if (!lab.a['binding.harbour']) onboardAlice(lab, 'harbour', { quiet: true });
   lab.ownerVouch('distributor', 'harbour', 'catalogue record: Harbour Music publishes these recordings', x);
-  const co = PLAN.shares.filter(s => s.who !== 'harbour').map(s => ({ pubkey: lab.pub(s.who), role: s.role, bps: s.bps }));
+  const co = shares.filter(s => s.who !== 'harbour').map(s => ({ pubkey: lab.pub(s.who), role: s.role, bps: s.bps }));
   signOffer(lab, 'harbour', 'catalogue', { name: 'offer.plan', price: toSats(PLAN.priceCents), coOwners: co, masterSha256: x, title: PLAN.title, track: 'harbour-catalogue',
     termsText: 'Catalogue licence (DRAFT subscription) for the Harbour Music catalogue: use any recording in it in online creator videos, worldwide, for one month from payment, non-exclusive. Renewed by paying again for the next month. I grant this licence to the holder of the key that signed any request naming this offer, when an invoice signed by the node in my binding, whose description hash commits to that request, is paid. The preimage of that invoice is the proof of acceptance.' });
-  for (const s of PLAN.shares) if (s.who !== 'harbour') consent(lab, s.who, 'offer.plan');
+  for (const s of shares) if (s.who !== 'harbour') consent(lab, s.who, 'offer.plan');
   lab.stamp(lab.a['offer.plan'].id, 'catalogue plan'); lab.anchorBatch('Catalogue plan'); return 'offer.plan';
 }
 /** One month of the catalogue: the agent pays inside its budget and gets a one-month licence. Used for the first month and each renewal. */
-export async function subscribe(lab: Lab, x: string, monthlyCents: number) {
-  setBudget(lab, monthlyCents); const name = planOffer(lab, x); const offer = lab.a[name]; const binding = lab.a['binding.harbour']; const consents = lab.a['offer.plan.consents'] ?? [];
+export async function subscribe(lab: Lab, x: string, monthlyCents: number, shares: PlanShare[] = PLAN.shares) {
+  setBudget(lab, monthlyCents); const name = planOffer(lab, x, shares); const offer = lab.a[name]; const binding = lab.a['binding.harbour']; const consents = lab.a['offer.plan.consents'] ?? [];
   const months = (lab.a['plan.months'] as number[] | undefined) ?? []; const use = [...offer.tags.find((t: string[]) => t[0] === 'use')!.slice(1, 5), 'seconds=240'];
   const request = lab.lib.makePrivateRequest(lab.key(AGENT), { offer, binding, use, network: tagNet(), notBefore: lab.notBefore() }).request;
   const { reqs, rec } = lab.issueInvoice({ nodeId: lab.a['node.harbour'], creditTo: 'harbour', offer, binding, consents, request, label: `catalogue month ${months.length + 1}` });
-  const before = Object.fromEntries(PLAN.shares.map(s => [s.who, lab.balances[s.who] ?? 0])); const p = lab.agentPay(AGENT, reqs, request, offer, binding);
+  const before = Object.fromEntries(shares.map(s => [s.who, lab.balances[s.who] ?? 0])); const p = lab.agentPay(AGENT, reqs, request, offer, binding);
   if (!p.ok) return { ok: false as const, month: months.length + 1, reason: p.error ?? 'refused', budgetLeftCents: budgetLeftCents(lab) };
   const b = lab.bundle(`bundle.plan.${months.length + 1}`, { offer, binding, consents, request, invoice: rec.bolt11, preimage: p.preimage! });
   lab.stamp(lab.lib.grantDigest(b), `catalogue month ${months.length + 1}`); lab.advance(1800); lab.anchorBatch(); lab.attachProof(b); const verdict = await lab.verify(b);
   const pay = payout(lab, name, b, 'harbour'); const paidAt = lab.now; const from = Math.max(paidAt, months[months.length - 1] ?? 0); const until = from + 30 * DAY; lab.a['plan.months'] = [...months, until]; // a renewal starts the day the old month ends, so the dates line up
-  const split = PLAN.shares.map(s => ({ id: s.who, who: lab.name(s.who), sats: (lab.balances[s.who] ?? 0) - before[s.who] }));
+  const split = shares.map(s => ({ id: s.who, who: lab.name(s.who), sats: (lab.balances[s.who] ?? 0) - before[s.who] }));
   return { ok: true as const, month: months.length + 1, verdict, bundle: b, split, statements: pay.statements.length, paidAt, from, until, budgetLeftCents: budgetLeftCents(lab) };
 }
 /** A month passes: the budget starts again, and the agent renews the catalogue before the old month runs out (DRAFT renewal rule). */
-export async function renew(lab: Lab, x: string, monthlyCents: number) {
+export async function renew(lab: Lab, x: string, monthlyCents: number, shares: PlanShare[] = PLAN.shares) {
   const w = lab.nwc[AGENT]; lab.advance(29 * DAY); if (w) { w.spentMonthSat = 0; w.spentTodaySat = 0; w.expiresAt = lab.now + 30 * DAY; }
-  return subscribe(lab, x, monthlyCents);
+  return subscribe(lab, x, monthlyCents, shares);
 }
 export type { CatalogueTrack };

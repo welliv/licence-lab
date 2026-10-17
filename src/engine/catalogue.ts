@@ -5,7 +5,7 @@ import type { Lab } from './lab';
 import { onboardAlice, signOffer, consent, purchase, payout, release } from './actions-story';
 import { anchorAndVerify } from '../scenarios/common';
 import { hearAndLicense, PRICE } from './story';
-export const CENTS_PER_SAT = 5; // keep in step with DEMO_CENTS_PER_SAT in src/ui/money.ts (a test checks this)
+export const CENTS_PER_SAT = 5; // keep in step with DEMO_CENTS_PER_SAT in src/engine/money.ts (a test checks this)
 export interface Share { who: string; role: string; bps: number }
 export interface CatalogueTrack { cast: string; title: string; seller: string; priceCents: number; shares: Share[]; blurb: string }
 /** Keyed by the cast name in tracks.json. priceCents is the Creator price. The first share is the seller's. */

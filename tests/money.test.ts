@@ -1,6 +1,6 @@
 // Dollars on the main path: the demo rate, and splits that always add up to the price exactly.
 import { describe, it, expect } from 'vitest';
-import { splitCents, usd, usdFromSats, satsToCents, PRICE_CENTS, BUDGET_USD, SCALE_CENTS } from '../src/ui/money';
+import { splitCents, usd, usdFromSats, satsToCents, PRICE_CENTS, BUDGET_USD, SCALE_CENTS } from '../src/engine/money';
 import { Lab } from '../src/engine/lab';
 import * as S from '../src/engine/story';
 describe('dollars (demo rate)', () => {

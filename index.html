@@ -1,17 +1,17 @@
 <!doctype html>
 <html lang="en-GB" class="dark">
   <head>
-    <script>/* ?fresh=1 (in the address or after the #): a true first view. Forget the saved persona, licences, parties and scores
-       (the theme and any user-test timings stay), then drop the flag from the address so a reload does not reset again. */
-    try{var u=location.search+location.hash;if(/[?&]fresh=1\b/.test(u)){Object.keys(localStorage).forEach(function(k){if(k.indexOf("ll.")===0&&k!=="ll.theme"&&k.indexOf("ll.test")!==0)localStorage.removeItem(k)});
-      var strip=function(x){return x.replace(/([?&])fresh=1\b&?/,"$1").replace(/[?&]$/,"")};history.replaceState(null,"",location.pathname+strip(location.search)+strip(location.hash))}}catch(e){}</script>
-    <script>try{if(localStorage.getItem("ll.theme")==="light")document.documentElement.classList.remove("dark")}catch{}</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌧️</text></svg>" />
-    <title>Licence Lab · explore music licensing on Nostr, Lightning and Bitcoin</title>
+    <script>/* ?fresh=1 starts a true first visit (the theme stays). */
+    try{var u=location.search+location.hash;if(/[?&]fresh=1\b/.test(u)){localStorage.removeItem("one.v1");var s=function(x){return x.replace(/([?&])fresh=1\b&?/,"$1").replace(/[?&]$/,"")};history.replaceState(null,"",location.pathname+s(location.search)+s(location.hash))}
+    if(localStorage.getItem("one.theme")==="light")document.documentElement.classList.remove("dark")}catch(e){}</script>
+    <title>Licence Lab · artists license their music directly</title>
+    <meta name="description" content="Artists license their music directly. Any agent can buy it in seconds and prove it on Bitcoin. Try 11 short scenarios with test money." />
+    <meta name="theme-color" content="#0c0d10" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♪</text></svg>" />
   </head>
-  <body class="bg-white text-neutral-900 antialiased">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

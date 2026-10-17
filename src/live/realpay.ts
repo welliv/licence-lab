@@ -18,3 +18,18 @@ export async function realLicence(o: { priceSat?: number; buyer?: 'bob' | 'bobag
   for (const p of ['alice', buyer] as const) w.wallets[p]?.close();
   return { strict, facts, paymentHash: decodeInvoice(inv).paymentHash, preimage, invoice: inv, aliceWallet: w.lud16.alice, bobWallet: w.lud16[buyer], ms: performance.now() - t0, aliceGot: (w.balances.alice ?? 0) - before, offerSha256: w.offer?.tags.find(t => t[0] === 'x')?.[1] };
 }
+
+/** Make the two test wallets ahead of time (the visitor never waits for this), then finish the sale on tap with `finishLicence`. */
+export interface Warm { w: LiveWorld; buyer: 'bob' | 'bobagent'; before: number; at: number; fund: number }
+export async function warmWallets(o: { buyer?: 'bob' | 'bobagent'; fundSat: number }): Promise<Warm> {
+  const w = new LiveWorld(memoryStore()); const buyer = o.buyer ?? 'bob'; const fund = Math.min(5000, o.fundSat);
+  await Promise.all([w.connect('alice', 50), w.connect(buyer, fund)]); return { w, buyer, before: w.balances.alice ?? 0, at: Date.now(), fund };
+}
+export async function finishLicence(warm: Warm, o: { priceSat: number; song?: { title: string; sha256: string; termsText: string; use?: string[] }; onStep?: (s: string) => void }): Promise<RealResult> {
+  const { w, buyer, before } = warm; const step = o.onStep ?? (() => {}); const t0 = performance.now();
+  w.publish(o.priceSat, o.song); w.requestLicence(buyer); step('Asking for the invoice…'); await w.issueInvoice();
+  step(`Paying ${o.priceSat} test sats…`); const preimage = await w.pay(buyer); step('Checking the licence…'); const { strict, facts } = await w.verify(); await w.refresh('alice');
+  const inv = w.reqs!.extra.invoice as string; const { decodeInvoice } = await import('../lib/mll/bolt11');
+  for (const p of ['alice', buyer] as const) w.wallets[p]?.close();
+  return { strict, facts, paymentHash: decodeInvoice(inv).paymentHash, preimage, invoice: inv, aliceWallet: w.lud16.alice, bobWallet: w.lud16[buyer], ms: performance.now() - t0, aliceGot: (w.balances.alice ?? 0) - before, offerSha256: w.offer?.tags.find(t => t[0] === 'x')?.[1] };
+}

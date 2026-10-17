@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { Lab } from '../src/engine/lab';
 import { CATALOGUE, CENTS_PER_SAT, licenseTrack, priceSats, shareCents } from '../src/engine/catalogue';
-import { DEMO_CENTS_PER_SAT, usd, splitCents } from '../src/ui/money';
+import { DEMO_CENTS_PER_SAT, usd, splitCents } from '../src/engine/money';
 const fakeSha = (s: string) => Array.from({ length: 64 }, (_, i) => '0123456789abcdef'[(s.charCodeAt(i % s.length) + i) % 16]).join('');
 describe('playlist prices and splits', () => {
   it('uses the same demo rate as the page', () => { expect(CENTS_PER_SAT).toBe(DEMO_CENTS_PER_SAT); });
