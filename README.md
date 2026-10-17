@@ -23,3 +23,10 @@ See `docs/vs-alby.md` for the comparison.
 ## Music
 
 Put audio files in `public/music/` (.mp3 .m4a .aac .ogg .oga .opus .wav .flac .webm; any file names), then run `npm run music`. This also runs before `dev` and `build`. It writes 30 s previews to `public/music/previews/`, plus `tracks.json` and `CREDITS.md`. Edit titles, artists and licences in `public/music/music.json`. The offer's `x` tag is the SHA-256 of the full file. Audio files are gitignored.
+
+## Branch `simple`: the main path and rights transfer
+
+- **Home** (`#/`): hear "Rain", tap "License for 100 sats", and see "Licensed ✓ Proven on Bitcoin" with the real Mutinynet tx from `public/mutinynet-status.json`. The full track then unlocks.
+- **Chapters** `#/c1` to `#/c4`: Artist sells, Agent buys, Anyone verifies, Rights change hands. Each has one sentence of why, one button and one result. Technical terms are only in each chapter's "Under the hood" layer.
+- **Under the hood** (`#/hood`): every scenario (27), the attacks (24), the Verify page, Live test wallets, the Mutinynet runs, the library and a one-line glossary. The audit of what was deleted, merged or moved is in `docs/simplify-plan.md`.
+- **Rights extension** (`src/lib/mll/rights.ts`, Lab only; mll-audit is unchanged): transfers (3417), succession plans (3418), co-signatures (3419), the "MLT1" timestamp, and the chain of title folded into check 9. See scenarios S25–S27 and attacks A12c and A20–A23.

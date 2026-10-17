@@ -29,6 +29,12 @@ export const CAST: Record<string, Persona> = Object.fromEntries([
   P('ots', 'OTS calendar', '🕰️', 'infra', 'OpenTimestamps calendar. Batches digests into one Bitcoin commitment.', '#ea580c'),
   P('bitcoin', 'Bitcoin', '⛓️', 'infra', 'Fixes when things happened (simulated blocks here).', '#f7931a'),
   P('observer', 'Observer', '👁️', 'checker', 'A stranger reading public relays.', '#525252'),
+  P('harbour', 'Harbour Music', '⚓', 'artist', 'A music publisher. Buys the rights to "Rain" from Ava.', '#0e7490', 0),
+  P('iris', 'Iris', '👧🏾', 'collaborator', "Ava's daughter. Named heir in Ava's succession plan.", '#db2777'),
+  P('leo', 'Leo', '👨🏻', 'collaborator', "Ava's brother. Named heir in Ava's succession plan.", '#65a30d'),
+  P('rosa', 'Rosa', '⚖️', 'collaborator', "Ava's executor (her lawyer). Third key in the plan.", '#7c2d12'),
+  P('estate', "Ava's estate", '🏛️', 'artist', 'The new key that sells "Rain" after Ava has died.', '#57534e', 0),
+  P('court', 'Court registry', '🏛', 'checker', 'Publishes signed notes that a court order exists.', '#44403c'),
   P('mallory', 'Mallory', '🦹', 'attacker', 'Tries every trick to cheat.', '#dc2626', 10_000),
   P('thief', '"Ava Official"', '🎭', 'attacker', 'A fake account that copies Ava\'s song.', '#b91c1c', 1_000),
 ].map(p => [p.id, p]));

@@ -11,5 +11,9 @@
     "ots.ts",
     "verify.ts"
   ],
-  "note": "Byte-for-byte copy. Do not edit here; edit the library and re-run npm run sync-lib."
+  "note": "Byte-for-byte copy. Do not edit here; edit the library and re-run npm run sync-lib.",
+  "extensions": [
+    "rights.ts"
+  ],
+  "extensionsNote": "Licence Lab extension, not in mll-audit: rights transfer, succession plans, key rotation and the chain-of-title check (verifyLicenceWithTitle wraps verifyLicence). The eight files above stay byte-for-byte."
 }

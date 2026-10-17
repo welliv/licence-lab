@@ -68,8 +68,8 @@ export const S11: Scenario = {
       run: lab => ({ ok: true, summary: '' }) },
   ],
   proven: 'Exactly when sales stopped, and which licences were bought before.',
-  canGoWrong: [{ text: 'Revoking 1 hour after a sale voids it', attack: 'A13' }, { text: 'Thief uses the key after the revocation', attack: 'A12' }, { text: 'Thief signs a new binding (open issue)', attack: 'A12b' }, { text: 'An index hides the revocation', attack: 'A17' }],
-  limits: ['A licence inside the 2-hour window before an offer revocation is voided.', 'A binding revocation does not yet stop a NEW binding signed by the stolen key (open issue, A12b).'],
+  canGoWrong: [{ text: 'Revoking 1 hour after a sale voids it', attack: 'A13' }, { text: 'Thief uses the key after the revocation', attack: 'A12' }, { text: 'Thief signs a new binding (open issue)', attack: 'A12b' }, { text: 'Same thief after Ava rotates her key', attack: 'A12c' }, { text: 'An index hides the revocation', attack: 'A17' }],
+  limits: ['A licence inside the 2-hour window before an offer revocation is voided.', 'A binding revocation alone does not stop a NEW binding signed by the stolen key (A12b). A key rotation does (A12c, part 6).'],
   prompts: [{ title: 'One-tap revocation', prompt: 'Build a one-tap revocation: sign a revocation for a binding or offer, encode it as an 80-byte MLR2 OP_RETURN, pay an OP-RETURN-Bot style service whose invoice description hash commits to the message, and show which licences still verify.' }],
 };
 S11.steps[7].run = lab => { const e = lab.sign('distributor', LAB_KIND.VOUCH, [['L', 'mll.vouch'], ['l', 'artist-key', 'mll.vouch'], ['p', lab.pub('ava', 'rotated')], ['replaces', lab.pub('ava')]], 'Ava has moved to a new key after a theft.'); lab.publish(e, 'distributor', 'vouch (new key)');

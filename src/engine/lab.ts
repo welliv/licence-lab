@@ -11,6 +11,7 @@ import { httpBinding, requestHash, NETWORKS, clientCheck, type Requirements } fr
 import { checkDeal, verifyLicence, requestBytes, grantDigest, revocationPayloadCompact, type LicenceBundle, type Result } from '../lib/mll/verify';
 import { type ChainOracle, MLA1 } from '../lib/mll/chain';
 import { writeOts, verifyOts, type Op } from '../lib/mll/ots';
+import { verifyLicenceWithTitle, makeTransfer, makeSuccessionPlan, makeCosign, makeCourtVouch, titlePayload, titleDigest, checkTitle, type Anchored, type TitleRecords, type Title, type TransferInput, type PlanInput } from '../lib/mll/rights';
 import { sha256hex, sha256, bytesToHex, hexToBytes, utf8ToBytes, concatBytes, randomBytes } from '../lib/mll/util';
 import { CAST, persona } from './cast';
 import { rainWav, trackFile, type TrackFile } from './track';
@@ -47,13 +48,14 @@ export interface PayRecord { status: 'in_flight' | 'paid' | 'failed'; amountSat:
 export interface Block { height: number; hash: string; time: number; merkleRoot: string; ors: { payload: string; txid: string }[]; note?: string }
 export interface DocCheck { n: number; label: string; status: 'pass' | 'fail' | 'skip' | 'todo'; detail?: string }
 export interface FileCheck { ok: boolean; offerHash: string; fileHash?: string; label?: string; recomputed?: boolean; reason?: string }
-export interface Verdict { result: Result; checks: DocCheck[]; ms: number; passed: number; file?: FileCheck }
+export interface Verdict { result: Result & { title?: Title }; checks: DocCheck[]; ms: number; passed: number; file?: FileCheck }
+export type { Title, TitleRecords };
 const HCACHE = new WeakMap<Uint8Array, string>();
 export const hashBytes = (b: Uint8Array) => { let h = HCACHE.get(b); if (!h) { h = sha256hex(b); HCACHE.set(b, h); } return h; };
 
 export const NINE = ['Offer signed by the artist', 'Node binding by the same key names the invoice node', 'Every co-owner consented; shares add up',
   'Request signed and names this offer', 'Use, territory and term allowed by the offer', 'Invoice signed by the bound node and commits to the request',
-  'Invoice amount equals the price', 'Preimage matches (it was paid)', 'Timestamped, and no revocation cancels it'];
+  'Invoice amount equals the price', 'Preimage matches (it was paid)', 'Timestamped; no revocation or rights transfer cancels it'];
 // Where each library failure code lands in the document's nine checks, and its order inside verifyLicence.
 const CODE_MAP: [RegExp, number, number][] = [[/^offer_/, 1, 0], [/^consent_/, 3, 1], [/^binding_(?!not_before)/, 2, 2], [/^request_use$/, 5, 3.5], [/^request_/, 4, 3], [/^link_invalid$/, 4, 3.9],
   [/^invoice_(decode|description|not_committed)$/, 6, 4], [/^invoice_wrong_node$/, 6, 5], [/^invoice_amount$/, 7, 5.5], [/^invoice_network$/, 6, 5.7], [/^preimage$/, 8, 6], [/./, 9, 7]];
@@ -121,6 +123,16 @@ export class Lab {
   proofs: Record<string, { ots: string; height: number; label: string }> = {};
   /** Named artefacts: events, bundles, requirements, anything a later step needs. */
   a: Record<string, any> = {};
+  /** Chain of title for "Rain" (rights transfers, succession plans, co-signatures, vouches). Used by verify() once titleOrigin is set. */
+  title: Required<TitleRecords> = { transfers: [], plans: [], cosigns: [], vouches: [] }; titleOrigin?: string; titleTrust: string[] = [];
+  /** Timestamp a title record on the (simulated) chain with an "MLT1" OP_RETURN that commits to the record and the co-signatures collected so far. A record can be timestamped again (new entry) after more co-signatures. */
+  anchorTitle(r: Anchored, note: string) { const co = this.title.cosigns.filter(c => tagv(c, 'e') === r.event.id).map(c => c.id); const b = this.chain.mine({ time: this.now, opReturns: [titlePayload(titleDigest(r.event.id, co))], note }); const o = b.ors[0];
+    if (r.anchor) { r = { event: r.event }; this.title.transfers.push(r); } r.anchor = { type: 'opreturn', txid: o.txid, blockhash: b.hash, height: b.height }; r.cosigns = co; this.flow('bitcoin', 'bitcoin', `⛓ title record in block ${b.height}`, 'anchor'); return r; }
+  addTransfer(signer: string, t: TransferInput, o: { anchor?: boolean; note?: string } = {}) { const e = makeTransfer(this.key(signer), t); const r: Anchored = { event: e }; this.title.transfers.push(r); this.publish(e, signer, `transfer ✍ (${t.reason})`); if (o.anchor !== false) this.anchorTitle(r, o.note ?? `rights transfer (${t.reason})`); return r; }
+  addPlan(owner: string, p: PlanInput) { const e = makeSuccessionPlan(this.key(owner), p); const r: Anchored = { event: e }; this.title.plans.push(r); this.publish(e, owner, 'succession plan ✍'); const b = this.chain.mine({ time: this.now, opReturns: [titlePayload(titleDigest(e.id))], note: 'succession plan' }); r.anchor = { type: 'opreturn', txid: b.ors[0].txid, blockhash: b.hash, height: b.height }; return r; }
+  cosign(who: string, t: Event, role: 'co-owner' | 'plan-key') { const c = makeCosign(this.key(who), t, role); this.title.cosigns.push(c); this.publish(c, who, 'co-sign ✍'); return c; }
+  courtVouch(who: string, t: Event, ref: string) { const v = makeCourtVouch(this.key(who), t, ref); this.title.vouches.push(v); this.publish(v, who, 'court voucher ✍'); return v; }
+  async titleAt(key: string, height = this.chain.tip.height) { return checkTitle(this.trackHash, key, height, this.chain, this.title, { origin: this.titleOrigin ?? this.pub('ava'), trust: this.titleTrust }); }
   logs: LogEntry[] = []; flows: Flow[] = []; history: { step: string; t: number; balances: Record<string, number> }[] = [];
   currentStep?: string;
   track: Uint8Array; trackHash: string; trackLabel = 'demo tone (synthesised)';
@@ -260,13 +272,13 @@ export class Lab {
   bundle(name: string, b: Omit<LicenceBundle, 'version'>) { const x: LicenceBundle = { version: 1, ...b }; this.a[name] = x; return x; }
   /** Anchor a bundle: queue its grant digest; after anchorBatch() attach the proof. */
   attachProof(b: LicenceBundle) { const D = grantDigest(b); const p = this.proofs[D]; if (p) b.anchor = { type: 'ots', ots: p.ots, height: p.height }; return !!p; }
-  async verify(b: LicenceBundle, o: { chain?: ChainOracle | false; link?: Event } = {}): Promise<Verdict> {
+  async verify(b: LicenceBundle, o: { chain?: ChainOracle | false; link?: Event; title?: false } = {}): Promise<Verdict> {
     const t0 = performance.now(); const chain = o.chain === false ? undefined : (o.chain ?? this.chain);
-    const result = await verifyLicence(structuredClone(b), chain, { link: o.link }); const checks = mapChecks(result, !!chain);
+    const result = await verifyLicenceWithTitle(structuredClone(b), chain, { link: o.link, title: this.titleOrigin && o.title !== false ? { ...this.title, origin: this.titleOrigin, trust: this.titleTrust } : undefined }); const checks = mapChecks(result, !!chain);
     return { result, checks, ms: performance.now() - t0, passed: checks.filter(c => c.status === 'pass').length, file: b.offer ? this.fileCheck(b.offer) : undefined };
   }
   // ---------- protocol building blocks, re-exported so scenario code reads plainly ----------
-  lib = { makeOffer, makeConsent, makeRequest, makePrivateRequest, makeRevocation, makeStatement, checkDeal, revocationPayloadCompact, clientCheck, requestHash, httpBinding, requestBytes, grantDigest, MLA1 };
+  lib = { makeTransfer, makeSuccessionPlan, makeCosign, makeOffer, makeConsent, makeRequest, makePrivateRequest, makeRevocation, makeStatement, checkDeal, revocationPayloadCompact, clientCheck, requestHash, httpBinding, requestBytes, grantDigest, MLA1 };
   offerInput(artist: string, kind: keyof typeof USES, o: Partial<OfferInput> & { coOwners?: OfferInput['coOwners'] }): OfferInput {
     return { track: 'rain', title: 'Rain', masterSha256: this.trackHash, use: USES[kind].slice(1), termsText: TERMS[kind], priceSats: 2_000, payLink: `https://${artist}.lab.test/licence/rain/${kind}`,
       bindingId: '', validUntil: this.chain.tip.height + 52_560, coOwners: [], ...Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) };

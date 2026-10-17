@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Code2, Rocket, MoreVertical, Play, RotateCcw, FastForward, Link2, AlertTriangle, ArrowRight, Loader2, CheckCircle2, XCircle, ShieldAlert, KeyRound } from 'lucide-react';
+import { Rocket, MoreVertical, Play, RotateCcw, FastForward, Link2, AlertTriangle, ArrowRight, Loader2, CheckCircle2, XCircle, ShieldAlert, KeyRound } from 'lucide-react';
 import { session, setUpParty, resetParty, resetScenario, runNext, runAt, setInput, useVersion, ensureLab, go, doneSet, lastRun } from './store';
-import { Avatar, Bulb, Button, Card, CopyField, Pill, TierBadge, COMPLEXITY_STYLE, cx, Player } from './bits';
+import { Avatar, Bulb, Button, Card, CopyField, Pill, TierBadge, cx } from './bits';
 import { persona } from '../engine/cast';
 import { short } from '../engine/lab';
 import { asExpected, type StepRun } from '../engine/runner';
@@ -13,22 +13,17 @@ export function ScenarioPage({ id, autorun = 0 }: { id: string; autorun?: number
   useVersion(); const s = session(id); const sc = s.sc; const allReady = sc.cast.every(p => s.ready.has(p));
   const done = doneSet(s); const allDone = done.size === sc.steps.length; const nextIdx = sc.steps.findIndex(x => !done.has(x.id)); const [tab, setTab] = useState('log'); const tabsRef = useRef<HTMLDivElement>(null);
   useEffect(() => { ensureLab(s).then(() => { if (autorun && done.size < autorun) runNext(id, autorun); }); }, [id]);
-  const toCode = () => { setTab('code'); tabsRef.current?.scrollIntoView({ behavior: 'smooth' }); };
   const share = () => { const k = nextIdx < 0 ? sc.steps.length : nextIdx; const u = `${location.origin}${location.pathname}#/${id}?run=${k}`; navigator.clipboard?.writeText(u); alert('Link copied. It replays this scenario up to step ' + k + ' (with fresh test keys).'); };
   return <div className="mx-auto max-w-[1180px] px-5 py-5 md:px-8">
     <div className="flex flex-wrap items-center gap-2"><span className="text-2xl">{sc.emoji}</span><h1 className="text-[20px] font-semibold tracking-tight">{sc.title}</h1>
-      <Pill className={COMPLEXITY_STYLE[sc.complexity]}>{sc.complexity}</Pill><Pill className="bg-rain-50 text-rain-600 ring-1 ring-rain-100">S{sc.n} · {sc.status}</Pill></div>
+      <Pill className="bg-rain-50 text-rain-600 ring-1 ring-rain-100">S{sc.n} · {sc.status}</Pill></div>
     <p className="mt-1.5 flex flex-wrap items-center gap-2 text-[14px] text-neutral-600">{sc.summary}
       <Bulb><div className="mb-2 font-semibold text-neutral-900">How it works</div><p className="mb-3">{sc.education}</p><ul className="space-y-2">{sc.how.map(h => <li key={h.title}><b>{h.title}.</b> {h.description}</li>)}</ul><p className="mt-3 text-[12px] text-neutral-500">Situation: {sc.situation}</p></Bulb>
-      {sc.cast.includes('ava') && <Player />}
-      <button aria-label="Jump to code" onClick={toCode} className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 text-sky-600 hover:bg-sky-200"><Code2 size={13} /></button></p>
-    <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-[12px] text-neutral-600">
-      <span className="font-semibold text-neutral-800">⚡ Instant mode</span><span>Real signatures, invoices, timestamp proofs and verifyLicence run in your browser. Money, relays and Bitcoin blocks are simulated.</span>
-      <span className="ml-auto flex flex-wrap gap-1"><TierBadge b="real" /><TierBadge b="sim" /><TierBadge b="limit" /><TierBadge b="open" /></span></div>
+</p>
     {!allReady && <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-[13px] text-amber-800"><AlertTriangle size={15} />Set up all the parties to start this scenario<Button variant="outline" className="ml-auto h-8" onClick={() => setUpParty(id, 'all')}><Rocket size={14} />Set up all ({sc.cast.length})</Button></div>}
     <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{sc.cast.map(p => <PartyCard key={p} sid={id} party={p} />)}</div>
     {allReady && <>
-      <div className="mt-5 flex flex-wrap items-center gap-2"><h2 className="text-[15px] font-semibold">Steps</h2><span className="text-[12px] text-neutral-500">{done.size}/{sc.steps.length} done · free play: any party can act at any time</span>
+      <div className="mt-5 flex flex-wrap items-center gap-2"><h2 className="text-[15px] font-semibold">Steps</h2><span className="text-[12px] text-neutral-500">{done.size}/{sc.steps.length} done</span>
         <div className="ml-auto flex flex-wrap gap-2"><Button variant="outline" disabled={!s.lab || s.busy || allDone} onClick={() => runNext(id, sc.steps.length)}><FastForward size={14} />Run all steps</Button>
           <Button variant="outline" disabled={s.busy} onClick={() => resetScenario(id)}><RotateCcw size={14} />Reset scenario</Button><Button variant="ghost" disabled={!done.size} onClick={share}><Link2 size={14} />Share this run</Button></div></div>
       {!s.lab && <div className="mt-3 flex items-center gap-2 text-neutral-500"><Loader2 className="animate-spin" size={14} />Preparing the world (earlier scenarios run for real in the background)…</div>}
@@ -45,7 +40,6 @@ function PartyCard({ sid, party }: { sid: string; party: string }) {
   const infra = p.role === 'infra' || p.role === 'checker';
   return <Card className="relative p-4">
     <div className="flex items-center gap-2"><span className="text-xl">{p.emoji}</span><span className="font-semibold">{p.name}</span>
-      {party === 'ava' && <Player compact />}
       <span className={cx('ml-auto rounded-full px-2 py-0.5 text-[11px] font-medium', ready ? 'bg-emerald-500 text-white' : 'bg-neutral-100 text-neutral-500')}>{ready ? 'Ready' : 'Not set up'}</span>
       {ready && <button aria-label={`Options for ${p.name}`} onClick={() => setMenu(!menu)} className="rounded p-0.5 hover:bg-neutral-100"><MoreVertical size={15} /></button>}</div>
     {menu && <div className="absolute right-3 top-11 z-20 w-44 rounded-md border border-neutral-200 bg-white p-1 text-[13px] shadow-md"><button className="w-full rounded px-2 py-1.5 text-left hover:bg-neutral-50" onClick={() => { setMenu(false); resetParty(sid, party); }}>Remove party</button></div>}
@@ -54,7 +48,6 @@ function PartyCard({ sid, party }: { sid: string; party: string }) {
       <div className="flex items-center gap-1 text-[11px] text-neutral-500"><KeyRound size={11} />{infra ? 'Service' : 'Nostr key + test wallet'}
         <Bulb label="About this party"><b>{p.name}</b>: {p.blurb}<br /><br />Key: a real secp256k1 Nostr key, derived from the Lab seed so the same person has the same key in every scenario. Wallet: simulated test sats (no real money). {p.agentOf ? `Spends from ${persona(p.agentOf).name}'s wallet through an NWC connection.` : ''}</Bulb></div>
       {!infra && <div className="mt-1 text-[22px] font-bold tracking-tight">{bal === null ? '—' : bal.toLocaleString()} sats</div>}
-      {!infra && <div className="text-[11px] text-neutral-400" title="Test sats. The dollar figure uses a fixed Lab rate (1 BTC = $80,000), not a live price.">≈ ${bal === null ? '—' : (bal * 0.0008).toFixed(2)} · test sats, Lab rate</div>}
       {nwc && <div className="mt-2"><div className="flex justify-between text-[10px] text-neutral-500"><span>NWC daily budget</span><span>{nwc.spentTodaySat.toLocaleString()} / {nwc.dailyCapSat.toLocaleString()}</span></div><div className="mt-0.5 h-1.5 rounded bg-neutral-100"><div className="h-1.5 rounded bg-neutral-800" style={{ width: `${Math.min(100, nwc.spentTodaySat / nwc.dailyCapSat * 100)}%` }} /></div></div>}
       <div className="mt-1.5 truncate font-mono text-[11px] text-neutral-500" title={lab?.pub(party)}>🔑 {lab ? short(lab.pub(party), 8) : '…'} · {p.lud16}</div>
     </div> : <div className="mt-3"><div className="text-[22px] font-bold text-neutral-400">— sats</div><div className="mb-3 text-[12px] text-neutral-500">Set up {p.name} to try this scenario</div>

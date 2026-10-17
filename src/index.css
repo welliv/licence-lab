@@ -21,7 +21,7 @@ html.dark {
   --color-red-50: #2d1215; --color-red-100: #3d171b; --color-red-200: #6b232b; --color-red-400: #f87171; --color-red-500: #ef4444; --color-red-600: #f87171; --color-red-700: #fca5a5; --color-red-800: #fecaca;
   --color-amber-50: #2a210e; --color-amber-100: #3d2f11; --color-amber-200: #6b5016; --color-amber-400: #fbbf24; --color-amber-600: #fbbf24; --color-amber-700: #fcd34d; --color-amber-800: #fde68a;
   --color-orange-50: #2d1b0e; --color-orange-100: #3f2611; --color-orange-200: #6e3d14; --color-orange-500: #f97316; --color-orange-600: #fb923c; --color-orange-700: #fdba74; --color-orange-800: #fed7aa;
-  --color-sky-100: #0f2c3d; --color-sky-200: #164059; --color-sky-600: #38bdf8; --color-sky-700: #7dd3fc;
+  --color-sky-50: #0c2230; --color-sky-100: #0f2c3d; --color-sky-200: #164059; --color-sky-600: #38bdf8; --color-sky-700: #7dd3fc;
   --color-violet-700: #c4b5fd; --color-rain-50: #1f1835; --color-rain-100: #2d2350; --color-rain-600: #c4b5fd;
 }
 html.dark body { background: var(--page); }
