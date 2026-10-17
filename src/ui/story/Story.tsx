@@ -1,5 +1,5 @@
 // The main path: Home (one choice), three stops and one optional extra. Plain words only on the page;
-// the technical words live in each stop's code drawer and in the glossary under the hood.
+// the technical words live in each stop's code drawer.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Play, Pause, Loader2, CheckCircle2, XCircle, ChevronDown, ExternalLink, ArrowRight, Moon, Sun, Wrench, ShieldAlert, Code2, RotateCcw, Sparkles } from 'lucide-react';
 import { music, useMusic, type Track } from '../music';
@@ -32,7 +32,7 @@ export function BigButton({ children, onClick, disabled, variant = 'primary', ..
 }
 export const Busy = ({ label }: { label: string }) => <BigButton disabled><Loader2 size={18} className="animate-spin" />{label}</BigButton>;
 
-/** Slim top bar: the stops in the visitor's order, the extra, who you are (changeable), theme, under the hood. */
+/** Slim top bar: the stops in the visitor's order, the extra, who you are (changeable), theme. */
 export function StoryShell({ path, children }: { path: string; children: ReactNode }) {
   const st = useStory(); const order = st.order(); const items: [string, string][] = [...order.map(s => [s, STOPS[s]] as [string, string]), ['rights', 'Extra: rights']];
   return <div className="flex h-full flex-col">
@@ -44,10 +44,9 @@ export function StoryShell({ path, children }: { path: string; children: ReactNo
           <span className={cx(cur ? 'hidden sm:inline' : 'hidden lg:inline')}>{label}</span></button>; })}</nav>
       <label className="hidden items-center gap-1 text-[12px] text-neutral-500 md:flex">Seen as<select aria-label="Seen as" value={st.persona ?? ''} onChange={e => story.setPersona(e.target.value as Persona)} className="rounded-md border border-neutral-200 bg-white px-1.5 py-1 text-[12px] text-neutral-800"><option value="" disabled>choose</option>{PERSONAS.map(p => <option key={p.id} value={p.id}>{p.id === 'artist' ? 'an artist' : p.id === 'buyer' ? 'a buyer' : 'a builder'}</option>)}</select></label>
       <ThemeButton />
-      <button onClick={() => go('hood')} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-[13px] text-neutral-700 hover:bg-neutral-50"><Wrench size={13} /><span className="hidden sm:inline">Under the hood</span></button>
     </header>
     <main className="scroll-thin flex-1 overflow-y-auto">{children}
-      <footer className="px-6 py-6 text-center text-[12px] text-neutral-400">Test money and test keys only · demo names on owner-supplied recordings (see Credits)</footer></main>
+      <footer className="px-6 py-6 text-center text-[12px] text-neutral-400">Test money and test keys only · demo names on owner-supplied recordings (see Credits) · <a href="https://github.com/welliv/licence-lab" target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-neutral-600" data-testid="dev-link">For developers</a></footer></main>
   </div>;
 }
 function ThemeButton() { const [d, setD] = useState(() => document.documentElement.classList.contains('dark'));
@@ -64,8 +63,7 @@ export function VerdictCard({ v, title, line, compact, children, testid = 'verdi
     {open && <ol className="fade-in mt-3 space-y-1.5 text-[14px]">{v.checks.map(c => <li key={c.n} className="flex items-start gap-2"><span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold', c.status === 'pass' ? 'bg-emerald-500 text-white' : c.status === 'fail' ? 'bg-red-500 text-white' : 'bg-neutral-200 text-neutral-500')}>{c.status === 'pass' ? '✓' : c.status === 'fail' ? '✗' : c.n}</span>
       <span className="text-neutral-700">{c.label}{c.status === 'fail' && c.detail && <span className="block text-[12px] text-red-700">{c.detail}</span>}</span></li>)}
       {v.ownership && <li className="flex items-start gap-2" data-testid="check-10"><span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold', v.ownership.status === 'pass' ? 'bg-emerald-500 text-white' : v.ownership.status === 'fail' ? 'bg-red-500 text-white' : 'bg-amber-200 text-amber-900')}>{v.ownership.status === 'pass' ? '✓' : v.ownership.status === 'fail' ? '✗' : '?'}</span><span className="text-neutral-700">{v.ownership.label}<span className={cx('block text-[12px]', v.ownership.status === 'fail' ? 'text-red-700' : 'text-neutral-500')}>{v.ownership.detail}</span></span></li>}
-      {v.file && <li className="flex items-start gap-2"><span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px]', v.file.ok ? 'bg-emerald-500 text-white' : 'bg-neutral-200')}>♪</span><span className="text-neutral-700">The audio file is the one in the offer{v.file.ok ? ' (fingerprint matches)' : `: ${v.file.reason}`}</span></li>}
-      <li className="pt-1"><button onClick={() => go('hood')} className="text-[13px] text-neutral-500 underline underline-offset-4">What do these mean?</button></li></ol>}
+      {v.file && <li className="flex items-start gap-2"><span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px]', v.file.ok ? 'bg-emerald-500 text-white' : 'bg-neutral-200')}>♪</span><span className="text-neutral-700">The audio file is the one in the offer{v.file.ok ? ' (fingerprint matches)' : `: ${v.file.reason}`}</span></li>}</ol>}
   </div>;
 }
 /** "Proven on Bitcoin" with the real Mutinynet proof and the practice-chain note right next to it. */
@@ -256,10 +254,9 @@ export function RightsExtra() {
     {(stolen || st.busy === 'xstolen') && <section className="space-y-3"><h2 className="text-[20px] font-semibold">3. Alice's phone is stolen</h2><p className="text-[16px] text-neutral-600">She moves to a new account. The thief keeps the old one.</p>
       {!stolen ? <Busy label="Moving to a new account…" /> : <div className="grid gap-3 sm:grid-cols-2" data-testid="x-stolen"><VerdictCard compact noChecks v={stolen.thief} title="The thief sells with the old account" testid="verdict-thief" /><VerdictCard compact noChecks v={stolen.earlier} title="Your licence, from before the theft" testid="verdict-before-theft" /></div>}
     </section>}
-    <p className="rounded-xl bg-neutral-100 px-4 py-3 text-[14px] text-neutral-600">Honest limit: with no plan, the estate needs a court order. <a className="underline" href="#/s27">See the estate with no plan →</a></p>
-    <CodeDrawer><p>A <b>transfer record</b> (draft kind 3417) signed by the holder names the track's fingerprint and the new key; co-owners co-sign (kind 3419). A 36-byte <b>OP_RETURN</b> ("MLT1" and a digest of the record and its co-signatures) dates it. A <b>succession plan</b> (kind 3418) names keys and a threshold. A key rotation is a transfer to your own new key. Check 9 walks this chain of title from Alice's vouched key; the first dated transfer wins, so a double sale fails. Each verdict above passed or failed the same nine checks as every licence.</p>
-      <p>Under the hood: <a className="underline" href="#/s25">rights sale</a> · <a className="underline" href="#/s26">planned succession</a> · <a className="underline" href="#/s11">stolen key</a> · <a className="underline" href="#/redteam">rights attacks</a></p></CodeDrawer>
-    {sale && succ && stolen && <div className="pt-2 text-center" data-testid="rights-done"><div className="text-[19px] text-neutral-600">{SHORT}</div><div className="mt-5 flex justify-center"><BigButton onClick={() => go('hood')}>Explore under the hood <ArrowRight size={18} /></BigButton></div></div>}
+    <p className="rounded-xl bg-neutral-100 px-4 py-3 text-[14px] text-neutral-600">Honest limit: with no plan, the estate needs a court order.</p>
+    <CodeDrawer><p>A <b>transfer record</b> (draft kind 3417) signed by the holder names the track's fingerprint and the new key; co-owners co-sign (kind 3419). A 36-byte <b>OP_RETURN</b> ("MLT1" and a digest of the record and its co-signatures) dates it. A <b>succession plan</b> (kind 3418) names keys and a threshold. A key rotation is a transfer to your own new key. Check 9 walks this chain of title from Alice's vouched key; the first dated transfer wins, so a double sale fails. Each verdict above passed or failed the same nine checks as every licence.</p></CodeDrawer>
+    {sale && succ && stolen && <div className="pt-2 text-center" data-testid="rights-done"><div className="text-[19px] text-neutral-600">{SHORT}</div><p className="mt-5 text-[13px] text-neutral-500"><a href="https://github.com/welliv/licence-lab" target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-neutral-600" data-testid="dev-link">For developers</a></p></div>}
   </Stop>;
 }
 export { plainReason };

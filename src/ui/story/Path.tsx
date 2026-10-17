@@ -277,7 +277,7 @@ export function Stop3() {
 }
 function Stop3Builders() {
   const st = useStory(); const reg = st.r.s3reg; const fake = st.r.s3fake as Verdict | undefined;
-  if (st.persona !== 'builder') return <p className="text-[14px] text-neutral-600">Building on this? <button className="underline" onClick={() => go('verify')}>Check your own licence file</button> · <button className="underline" onClick={() => go('redteam')}>Try to break it</button></p>;
+  if (st.persona !== 'builder') return <p className="text-[14px] text-neutral-600">Building on this? <a className="underline" href="https://github.com/welliv/licence-lab" target="_blank" rel="noreferrer" data-testid="dev-link-stop3">For developers</a></p>;
   return <div className="space-y-4">
     <section className="rounded-2xl border border-neutral-200 p-4" data-testid="regulator"><h3 className="text-[16px] font-semibold">A regulator asks ModelCo: "Prove you had permission to train on this song."</h3>
       {!reg ? <div className="mt-3"><BigButton variant="quiet" disabled={!!st.busy} onClick={() => story.run('s3reg', S.regulatorCheck)}>Check ModelCo's proof</BigButton></div>
@@ -299,7 +299,7 @@ export function NextSteps() {
       <a className={cx(card, 'border-neutral-200')} href="https://github.com/welliv/licence-lab" target="_blank" rel="noreferrer" data-testid="step-github"><Github size={18} /><span className="text-[17px] font-semibold">Code on GitHub</span><span className="text-[13px] text-neutral-500">Open source: read it, run it, build on it</span></a>
     </div>
     {open === 'song' && <PutUpSong />}{open === 'agent' && <ConnectAgent />}
-    <p className="text-center text-[13px] text-neutral-500"><button className="underline underline-offset-4" onClick={() => go('rights')} data-testid="next">Extra: when rights change hands</button> · <button className="underline underline-offset-4" onClick={() => go('hood')}>Under the hood</button></p></div>;
+    <p className="text-center text-[13px] text-neutral-500"><button className="underline underline-offset-4" onClick={() => go('rights')} data-testid="next">Extra: when rights change hands</button></p></div>;
 }
 function ConnectAgent() {
   return <section className="fade-in space-y-3 rounded-2xl border border-neutral-200 p-4" data-testid="connect-agent"><p className="text-[15px] leading-7 text-neutral-700">Your agent asks for a licence, checks the bill matches what it asked for, pays from a wallet with a spending limit you set, and keeps the licence as proof. Anyone can check it later without asking you.</p>
@@ -313,7 +313,7 @@ clientCheck(bill, requestHash(httpBinding('POST', payLink, requestBytes(request)
 const { preimage } = await nwc.payInvoice(bill.extra.invoice) // the wallet enforces your budget
 const ok = (await verifyLicence({ offer, binding, consents, request, invoice: bill.extra.invoice, preimage }, chain)).ok
 if (ok) save({ offer, request, preimage })                    // your licence: keep it, show it, prove it`}</Code>
-    <p className="text-[13px] text-neutral-500">The full buyer agent, with budgets and retries, is in the repo. Its prompt is under the hood, in scenario 4.</p></section>;
+    <p className="text-[13px] text-neutral-500">The full buyer agent, with budgets and retries, is in the repo.</p></section>;
 }
 function PutUpSong() {
   const st = useStory(); const real = useRealMoney(); const [file, setFile] = useState<{ name: string; sha256: string; size: number } | null>(null); const [err, setErr] = useState('');
