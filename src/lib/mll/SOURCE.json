@@ -1,0 +1,15 @@
+{
+  "from": "/workspace/mll-audit/src",
+  "commit": "b268e79",
+  "files": [
+    "util.ts",
+    "events.ts",
+    "bolt11.ts",
+    "lnmsg.ts",
+    "x402.ts",
+    "chain.ts",
+    "ots.ts",
+    "verify.ts"
+  ],
+  "note": "Byte-for-byte copy. Do not edit here; edit the library and re-run npm run sync-lib."
+}

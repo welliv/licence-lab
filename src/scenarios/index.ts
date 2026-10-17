@@ -1,0 +1,9 @@
+import { S1, S2 } from './part1';
+import { PART2 } from './part2';
+import { PART3 } from './part3';
+import { PART4 } from './part4';
+import { PART5 } from './part5';
+import type { Scenario } from './types';
+export const SCENARIOS: Scenario[] = [S1, S2, ...PART2, ...PART3, ...PART4, ...PART5];
+export const byId = (id: string) => SCENARIOS.find(s => s.id === id);
+export * from './types';
