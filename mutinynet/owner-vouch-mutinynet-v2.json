@@ -1,0 +1,31 @@
+{
+ "kind": 1985,
+ "tags": [
+  [
+   "L",
+   "mll.owner"
+  ],
+  [
+   "l",
+   "owner",
+   "mll.owner"
+  ],
+  [
+   "p",
+   "149298fe3f01d943069ab8bb5da52b3b7c70efff5e51ad587148b88978e7913d"
+  ],
+  [
+   "x",
+   "54bdd6209af9d5aa84cdd71f904047fb7269cd0cf106f79c32356c20c4b65695"
+  ],
+  [
+   "ref",
+   "Harbour Music distributes \"Rain\" for Alice (test data)"
+  ]
+ ],
+ "content": "Rights holder of 54bdd6209af9… (Harbour Music distributes \"Rain\" for Alice (test data))",
+ "created_at": 1792250904,
+ "pubkey": "9c9ba75c4809480c50c0686724c5626e29149f3f0f9b4cc11a964f6c47707680",
+ "id": "76fcf840063d1b998d7c3b7fd186546737141316f888414db76713670175b65b",
+ "sig": "5d9504fa7667a240b94008b0ed45fdb3f32fc057de8d161e3aedd04e8932b19c2a8993db9905b7965652271d68fdd622ca546d3f5cd934602d94793ea28c14a3"
+}
