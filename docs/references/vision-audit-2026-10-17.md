@@ -1,4 +1,4 @@
-> Published copy for reference. This audit was run on the /next/ build of Licence Lab as it stood on 17 October 2026. Scripts, raw results and screenshots it mentions were kept by the auditor and are not included. Times are UTC+3.
+> Published copy for reference. This audit was run on the /next/ build of Licence Lab as it stood on 17 October 2026. That build is now the demo at https://welliv.github.io/licence-lab/, and /next/ links redirect there. Scripts, raw results and screenshots it mentions were kept by the auditor and are not included. Times are UTC+3.
 
 # Licence Lab /next/ — vision audit (17 Oct 2026, ~20:25–20:35 UTC+3)
 
