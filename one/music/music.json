@@ -1,0 +1,49 @@
+{
+  "tracks": {
+    "01-alice-rain.mp3": {
+      "title": "Untitled (no title in ID3 tags)",
+      "artist": "Supplied by the Licence Lab owner (no artist in ID3 tags)",
+      "licence": "Owner-supplied for this local demo; licence to be confirmed by the owner before any public use",
+      "source": "Owner upload 01M54C9RR8RVQ1183C30Z0J230.mp3",
+      "notes": "ID3 tags contain only encoder=Lavf58.12.100",
+      "cast": "alice",
+      "demoTitle": "Rain"
+    },
+    "02-dave.mp3": {
+      "title": "Untitled (no title in ID3 tags)",
+      "artist": "Supplied by the Licence Lab owner (no artist in ID3 tags)",
+      "licence": "Owner-supplied for this local demo; licence to be confirmed by the owner before any public use",
+      "source": "Owner upload 01M54C9RVCC1P930NTHV4233KY.mp3",
+      "notes": "ID3 tags contain only encoder=Lavf58.12.100",
+      "cast": "dave",
+      "demoTitle": "Northern Lights"
+    },
+    "03-carol.mp3": {
+      "title": "Untitled (no title in ID3 tags)",
+      "artist": "Supplied by the Licence Lab owner (no artist in ID3 tags)",
+      "licence": "Owner-supplied for this local demo; licence to be confirmed by the owner before any public use",
+      "source": "Owner upload 01M54C9RQCS988JVKJ88CFHRMZ.mp3",
+      "notes": "ID3 tags contain only encoder=Lavf58.12.100",
+      "cast": "carol",
+      "demoTitle": "Night Shift"
+    },
+    "04-erin.mp3": {
+      "title": "Untitled (no title in ID3 tags)",
+      "artist": "Supplied by the Licence Lab owner (no artist in ID3 tags)",
+      "licence": "Owner-supplied for this local demo; licence to be confirmed by the owner before any public use",
+      "source": "Owner upload 01M54C9RR28K70M7S5MFV48WHG.mp3",
+      "notes": "ID3 tags contain only encoder=Lavf58.12.100",
+      "cast": "erin",
+      "demoTitle": "Paper Boats"
+    },
+    "05-frank.mp3": {
+      "title": "Untitled (no title in ID3 tags)",
+      "artist": "Supplied by the Licence Lab owner (no artist in ID3 tags)",
+      "licence": "Owner-supplied for this local demo; licence to be confirmed by the owner before any public use",
+      "source": "Owner upload 01M54C9SV5NHGJ7ZQAD72C7CZB.mp3",
+      "notes": "ID3 tags contain only encoder=Lavf58.12.100",
+      "cast": "frank",
+      "demoTitle": "Rain (Frank remix)"
+    }
+  }
+}
