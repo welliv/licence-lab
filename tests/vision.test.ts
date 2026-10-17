@@ -43,7 +43,7 @@ describe('Stop 2: ClipAI inside a monthly budget', () => {
     expect(m1.verdict.result.ok).toBe(true); expect(m1.verdict.ownership?.status).toBe('pass'); expect(m1.bundle.offer.tags.find(t => t[0] === 'use')![3]).toBe('1m');
     expect(m1.split.map(s => s.sats * CENTS_PER_SAT)).toEqual([2970, 2475, 2475, 1980]); expect(m1.split.reduce((a, s) => a + s.sats, 0) * CENTS_PER_SAT).toBe(PLAN.priceCents);
     expect(m1.until - m1.from).toBe(30 * 86400); expect(m1.budgetLeftCents).toBe(300_000 - 9_900);
-    const m2 = await renew(lab, x, 300_000); expect(m2.ok).toBe(true); if (!m2.ok) return; expect(m2.month).toBe(2); expect(m2.verdict.result.ok).toBe(true); expect(m2.from).toBeLessThan(m1.until); expect(m2.budgetLeftCents).toBe(300_000 - 9_900);
+    const m2 = await renew(lab, x, 300_000); expect(m2.ok).toBe(true); if (!m2.ok) return; expect(m2.month).toBe(2); expect(m2.verdict.result.ok).toBe(true); expect(m2.paidAt).toBeLessThan(m1.until); expect(m2.from).toBe(m1.until); expect(m2.until - m1.until).toBe(30 * 86400); expect(m2.budgetLeftCents).toBe(300_000 - 9_900); // dates line up: month 2 starts the day month 1 ends
   });
   it('renewal is refused when the budget left is below $99, and goes through when a person raises it', async () => {
     const lab = new Lab('sub-low'); const x = catalogueHash(['a', 'b'].map(fakeSha));

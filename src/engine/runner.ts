@@ -1,7 +1,7 @@
 import { Lab } from './lab';
 import type { Out } from './actions';
 import type { Scenario, Step } from '../scenarios/types';
-export interface StepRun { step: Step; out: Out; ms: number; logFrom: number; flowFrom: number; error?: string; /** run out of order and refused by a guard: does not count as done */ guard?: boolean }
+export interface StepRun { step: Step; out: Out; ms: number; logFrom: number; flowFrom: number; error?: string; /** run out of order and refused by a guard: does not count as done */ guard?: boolean; /** balance change per party during this step, in sats (filled by the UI store) */ delta?: Record<string, number> }
 export const defaults = (s: Step) => Object.fromEntries((s.inputs ?? []).map(i => [i.key, i.default]));
 /** Did the step behave as the scenario says it should? (honest action ok, refusal refused, open issue shown) */
 export const asExpected = (s: Step, o: Out) => s.openIssue ? o.badge === 'open' : s.expectFail ? !o.ok : o.ok;

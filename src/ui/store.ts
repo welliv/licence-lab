@@ -26,9 +26,11 @@ export const lastRun = (s: Session, stepId: string) => [...s.runs].reverse().fin
 const looksInternal = (m: string) => /undefined|null|not a function|Cannot read|is not iterable|reading '/.test(m);
 async function exec(s: Session, i: number) {
   const st = s.sc.steps[i]; const done = doneSet(s); const missing = s.sc.steps.slice(0, i).filter(x => !done.has(x.id));
+  const before = { ...s.lab!.balances };
   const r = await runStep(s.lab!, st, { ...defaults(st), ...(s.inputs[st.id] ?? {}) }, { onError: e => {
     if (!missing.length) return undefined; const need = missing[missing.length - 1]; const k = s.sc.steps.indexOf(need) + 1;
     return looksInternal(e.message) ? `Not yet: this needs step ${k} ("${need.title}") first.` : `Refused: ${e.message}. Step ${k} ("${need.title}") has not happened yet.`; } });
+  const delta: Record<string, number> = {}; for (const k of new Set([...Object.keys(before), ...Object.keys(s.lab!.balances)])) { const d = (s.lab!.balances[k] ?? 0) - (before[k] ?? 0); if (d) delta[k] = d; } r.delta = delta;
   s.runs.push(r); if (r.out.verdict) s.lastVerdictStep = st.id;
   const v = r.out.verdict; if (v?.result.ok && v.passed === 9 && !r.guard) { const x = v.file?.offerHash; const t = music.bySha(x); if (t) music.unlock(t.id, { how: `verifyLicence 9/9 in scenario ${s.sc.n} (${s.sc.title})${v.file?.ok ? '; file hash matches the offer' : ''}`, fileOk: v.file?.ok, holder: r.step.actor }); }
   return r;

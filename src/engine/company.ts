@@ -69,9 +69,9 @@ export async function subscribe(lab: Lab, x: string, monthlyCents: number) {
   if (!p.ok) return { ok: false as const, month: months.length + 1, reason: p.error ?? 'refused', budgetLeftCents: budgetLeftCents(lab) };
   const b = lab.bundle(`bundle.plan.${months.length + 1}`, { offer, binding, consents, request, invoice: rec.bolt11, preimage: p.preimage! });
   lab.stamp(lab.lib.grantDigest(b), `catalogue month ${months.length + 1}`); lab.advance(1800); lab.anchorBatch(); lab.attachProof(b); const verdict = await lab.verify(b);
-  const pay = payout(lab, name, b, 'harbour'); const from = lab.now; const until = from + 30 * DAY; lab.a['plan.months'] = [...months, until];
+  const pay = payout(lab, name, b, 'harbour'); const paidAt = lab.now; const from = Math.max(paidAt, months[months.length - 1] ?? 0); const until = from + 30 * DAY; lab.a['plan.months'] = [...months, until]; // a renewal starts the day the old month ends, so the dates line up
   const split = PLAN.shares.map(s => ({ id: s.who, who: lab.name(s.who), sats: (lab.balances[s.who] ?? 0) - before[s.who] }));
-  return { ok: true as const, month: months.length + 1, verdict, bundle: b, split, statements: pay.statements.length, from, until, budgetLeftCents: budgetLeftCents(lab) };
+  return { ok: true as const, month: months.length + 1, verdict, bundle: b, split, statements: pay.statements.length, paidAt, from, until, budgetLeftCents: budgetLeftCents(lab) };
 }
 /** A month passes: the budget starts again, and the agent renews the catalogue before the old month runs out (DRAFT renewal rule). */
 export async function renew(lab: Lab, x: string, monthlyCents: number) {

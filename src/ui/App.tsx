@@ -12,6 +12,7 @@ import { RedTeamIndex, AttackPage } from './RedTeam';
 import { VerifyPage } from './VerifyPage';
 import { AboutPage } from './About';
 import { byId } from '../scenarios';
+import { GUIDE, guideOf } from './guide';
 import { exposeRepl } from './repl';
 import { LivePage } from './LivePage';
 import { MiniPlayer } from './MiniPlayer';
@@ -31,13 +32,14 @@ export function App() {
   else if (path === 'redteam') page = <RedTeamIndex />;
   else if (path.startsWith('attack/')) page = <AttackPage id={path.slice(7)} key={path} />;
   else if (path.startsWith('about/')) page = <AboutPage which={path.slice(6)} />;
+  else if (/^hood\/\d+$/.test(path) && GUIDE[Number(path.slice(5)) - 1]) page = <ScenarioPage id={GUIDE[Number(path.slice(5)) - 1].id} key={path} />;
   else if (byId(path)) page = <ScenarioPage id={path} key={path} autorun={Number(params.get('run') ?? 0)} />;
   else page = <UnderTheHood />;
   return <div className="flex h-full">
     <aside className={`fixed inset-y-0 left-0 z-40 w-[260px] border-r border-neutral-200 bg-white transition-transform md:static md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}><Sidebar path={path} onNavigate={() => setOpen(false)} /></aside>
     {open && <div className="fixed inset-0 z-30 bg-black/20 md:hidden" onClick={() => setOpen(false)} />}
     <div className="flex min-w-0 flex-1 flex-col">
-      <div className="flex items-center gap-2 border-b border-neutral-200 px-3 py-2 md:hidden"><button aria-label="Menu" onClick={() => setOpen(!open)}>{open ? <X size={18} /> : <Menu size={18} />}</button><span className="font-semibold">Licence Lab</span></div>
+      <div className="flex items-center gap-2 border-b border-neutral-200 px-3 py-2 md:hidden"><button aria-label="Scenarios menu" data-testid="menu" onClick={() => setOpen(!open)} className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 px-2.5 py-1 text-[14px] font-medium">{open ? <X size={16} /> : <Menu size={16} />}Scenarios</button><span className="ml-auto truncate text-[13px] text-neutral-500">{guideOf(path) ? `${guideOf(path)!.n} of ${GUIDE.length} · ${guideOf(path)!.title}` : 'Licence Lab'}</span></div>
       <main className="scroll-thin flex-1 overflow-y-auto">{page}
         <footer className="border-t border-neutral-100 px-6 py-4 text-center text-[11px] text-neutral-400">Test money and test keys only · demo names on owner-supplied recordings (see Credits)</footer></main>
       <MiniPlayer />

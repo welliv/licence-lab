@@ -1,10 +1,12 @@
 // "Under the hood": everything the story hides, skimmable. Nothing was deleted from the Lab; it moved here.
-import { SCENARIOS, byId } from '../../scenarios';
-import { GROUPS, S22_LINE, STOP_OF } from '../groups';
+import { useState } from 'react';
+import { byId } from '../../scenarios';
+import { S22_LINE } from '../groups';
+import { GUIDE, GUIDE_GROUPS, MORE } from '../guide';
+import { TOOLS } from '../Sidebar';
 import { ATTACKS } from '../../engine/attacks';
 import { go } from '../store';
-import { TierBadge } from '../bits';
-import { ShieldCheck, Swords, Globe, Radio, Library, FileText, HelpCircle, ArrowLeft } from 'lucide-react';
+import { Swords, ArrowLeft, ArrowRight, ChevronRight } from 'lucide-react';
 export const GLOSSARY: [string, string][] = [
   ['Nostr', 'An open network of relays that pass on signed notes. Anyone can read them; nobody owns it.'],
   ['Key and signature', 'A secret only Alice holds signs her notes; anyone can check the signature with her public key.'],
@@ -27,29 +29,22 @@ export const GLOSSARY: [string, string][] = [
   ['Key rotation', 'A transfer to your own new key, after a theft. The old key can no longer sell.'],
   ['Track fingerprint (x)', 'The SHA-256 of the audio file. The offer names it, so the licence is for that exact file.'],
 ];
-const Card = ({ icon, title, body, to, right }: { icon: React.ReactNode; title: string; body: string; to: string; right?: React.ReactNode }) =>
-  <button onClick={() => go(to)} className="flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 text-left hover:border-neutral-400"><span className="mt-0.5 text-neutral-500">{icon}</span><span className="flex-1"><span className="flex items-center gap-2 font-semibold">{title}{right}</span><span className="mt-0.5 block text-[13px] leading-5 text-neutral-500">{body}</span></span></button>;
 export function UnderTheHood() {
-  return <div className="mx-auto max-w-[1000px] px-5 py-8 md:px-8">
+  const [more, setMore] = useState(false); const first = GUIDE[0];
+  return <div className="mx-auto max-w-[860px] px-5 py-8 md:px-8" data-testid="hood-landing">
     <button onClick={() => go('')} className="mb-4 inline-flex items-center gap-1 text-[13px] text-neutral-500 hover:text-neutral-900"><ArrowLeft size={13} />Back to the story</button>
-    <h1 className="text-[28px] font-bold tracking-tight">Under the hood</h1>
-    <p className="mt-2 max-w-[680px] text-[15px] leading-6 text-neutral-600">Everything the story hides. Signatures, invoices, timestamps and checks are real, made by the protocol library in your browser. Money, relays and Bitcoin blocks are simulated unless a page says otherwise.</p>
-    <div className="mt-3 flex flex-wrap gap-1.5"><TierBadge b="real" /><TierBadge b="sim" /><TierBadge b="limit" /><TierBadge b="open" /><TierBadge b="recorded" /></div>
-    <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      <Card icon={<Swords size={18} />} title="Try to break it" body={`${ATTACKS.length} attacks against the real checks, with a score.`} to="redteam" />
-      <Card icon={<ShieldCheck size={18} />} title="Check a licence file" body="Paste or open a licence, or check an audio file's fingerprint." to="verify" />
-      <Card icon={<Globe size={18} />} title="Live test wallets" body="Real Lightning payments on a public test faucet." to="live" right={<TierBadge b="real" />} />
-      <Card icon={<Radio size={18} />} title="Real runs on Bitcoin's test network" body="Recorded Mutinynet proofs: a purchase, a revocation, a timestamp." to="hood/runs" right={<TierBadge b="recorded" />} />
-      <Card icon={<Library size={18} />} title="Protocol library" body="The audited library, byte for byte, plus the rights extension." to="about/library" />
-      <Card icon={<FileText size={18} />} title="White paper and spec" body="The nine checks and event kinds." to="about/paper" />
-    </div>
-    <h2 className="mt-10 text-[18px] font-semibold">Explore all scenarios ({SCENARIOS.length}), in {GROUPS.length} groups</h2>
-    <div className="mt-3 grid gap-6 md:grid-cols-2" data-testid="hood-groups">{GROUPS.map(g => <div key={g.id} data-group={g.id}><div className="text-[15px] font-semibold">{g.title}</div><div className="mb-1.5 text-[12px] text-neutral-500">{g.line}</div>
-      {g.to ? <button onClick={() => go(g.to!)} className="rounded-md border border-neutral-200 px-3 py-1.5 text-[14px] hover:bg-neutral-50">Open the game →</button> :
-      <ul className="space-y-0.5">{g.ids.map(id => byId(id)!).map(s => <li key={s.id}><button onClick={() => go(s.id)} className="flex w-full items-start gap-2 rounded-md px-2 py-1 text-left text-[14px] hover:bg-neutral-50"><span className="w-5 text-center">{s.emoji}</span><span className="flex-1"><span className="font-medium">{s.title}</span>{STOP_OF[s.id] && <span className="ml-2 rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-500">in {STOP_OF[s.id]}</span>}<span className="block text-[12px] text-neutral-500">{s.summary}</span></span></button></li>)}
-        {g.id === 'deals' && <li className="px-2 py-1 text-[13px] text-neutral-600" data-testid="s22-line">🌍 {S22_LINE} <button className="text-[12px] text-neutral-400 underline" onClick={() => go('s22')}>see it run</button></li>}</ul>}</div>)}</div>
-    <h2 id="glossary" className="mt-10 text-[18px] font-semibold">Words, in one line each</h2>
-    <dl className="mt-3 grid gap-x-8 gap-y-3 md:grid-cols-2">{GLOSSARY.map(([k, v]) => <div key={k}><dt className="text-[14px] font-semibold">{k}</dt><dd className="text-[13px] leading-5 text-neutral-600">{v}</dd></div>)}</dl>
-    <div className="mt-10 flex flex-wrap gap-4 text-[13px] text-neutral-500"><button className="inline-flex items-center gap-1 underline" onClick={() => go('about/help')}><HelpCircle size={13} />Help</button><span>Test keys only. Never paste a real key or wallet.</span></div>
+    <h1 className="text-[30px] font-bold tracking-tight">Under the hood</h1>
+    <p className="mt-2 text-[16px] leading-7 text-neutral-600">Fifteen short scenarios, simplest first. Each one shows who is involved, gives you one button per step, and logs who paid whom.</p>
+    <button onClick={() => go(first.id)} data-testid="start-here" className="mt-6 flex w-full items-center gap-4 rounded-2xl border-2 border-emerald-500/60 bg-emerald-50 p-5 text-left hover:border-emerald-500">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[17px] font-bold text-white">1</span>
+      <span className="min-w-0 flex-1"><span className="block text-[12px] font-semibold uppercase tracking-[0.12em] text-emerald-700">Start here</span><span className="block text-[19px] font-semibold">{first.title}</span><span className="block text-[14px] text-neutral-600">{first.line}</span></span><ArrowRight className="shrink-0 text-emerald-700" size={20} /></button>
+    <div className="mt-8 grid gap-6 sm:grid-cols-2" data-testid="hood-groups">{GUIDE_GROUPS.map(g => <section key={g.id} data-group={g.id}><h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-neutral-400">{g.title}</h2>
+      <ol className="mt-1.5 space-y-0.5">{GUIDE.filter(x => x.group === g.id).map(x => <li key={x.id}><button onClick={() => go(x.id)} data-testid={`hood-item-${x.n}`} className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-[15px] hover:bg-neutral-100"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-[12px] font-semibold tabular-nums text-neutral-500">{x.n}</span><span className="font-medium">{x.title}</span></button></li>)}
+        {g.id === 'safety' && <li><button onClick={() => go('redteam')} className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-[15px] hover:bg-neutral-100"><span className="flex h-6 w-6 items-center justify-center text-neutral-400"><Swords size={14} /></span><span className="font-medium">Try to break it</span><span className="text-[13px] text-neutral-500">a game, {ATTACKS.length} attacks</span></button></li>}</ol></section>)}</div>
+    <div className="mt-8 border-t border-neutral-200 pt-4"><button onClick={() => setMore(!more)} aria-expanded={more} className="inline-flex items-center gap-1 text-[14px] font-medium text-neutral-600 hover:text-neutral-900" data-testid="more-toggle"><ChevronRight size={14} className={more ? 'rotate-90 transition-transform' : 'transition-transform'} />More scenarios ({MORE.length}) and tools for builders</button>
+      {more && <div className="fade-in mt-3 space-y-5"><ul className="grid gap-x-6 gap-y-0.5 sm:grid-cols-2">{MORE.map(m => <li key={m.id}><button onClick={() => go(m.id)} className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[14px] hover:bg-neutral-100"><span className="w-5 text-center">{byId(m.id)?.emoji}</span>{m.title}</button></li>)}</ul>
+        <div className="flex flex-wrap gap-2">{TOOLS.map(t => <button key={t.to} onClick={() => go(t.to)} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1 text-[13px] hover:bg-neutral-100">{t.icon}{t.label}</button>)}</div>
+        <details id="glossary"><summary className="cursor-pointer text-[14px] font-medium">Words, in one line each</summary><dl className="mt-3 grid gap-x-8 gap-y-3 md:grid-cols-2">{GLOSSARY.map(([k, v]) => <div key={k}><dt className="text-[14px] font-semibold">{k}</dt><dd className="text-[13px] leading-5 text-neutral-600">{v}</dd></div>)}</dl></details>
+        <p className="text-[13px] text-neutral-500">{S22_LINE}</p></div>}</div>
   </div>;
 }

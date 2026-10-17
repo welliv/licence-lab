@@ -36,7 +36,7 @@ function useCount(from: number, to: number, delay: number, ms = 900) {
   return v;
 }
 /** A dollar amount that ticks to its new value and flashes green (up) or red (down). */
-function Ticker({ cents, testid }: { cents: number; testid?: string }) {
+export function Ticker({ cents, testid }: { cents: number; testid?: string }) {
   const prev = useRef(cents); const [from, setFrom] = useState(cents); const [dir, setDir] = useState<0 | 1 | -1>(0);
   useEffect(() => { if (cents !== prev.current) { setFrom(prev.current); setDir(cents > prev.current ? 1 : -1); prev.current = cents; const t = setTimeout(() => setDir(0), 1600); return () => clearTimeout(t); } }, [cents]);
   const v = useCount(from, cents, 0, 900);
@@ -243,7 +243,7 @@ export function Stop2() {
         : <div className="mt-4 space-y-3" data-testid="sub-done"><div className="flex items-center gap-2 text-[20px] font-bold text-emerald-700"><CheckCircle2 size={22} />Subscribed</div>
           <p className="text-[14px] leading-6 text-neutral-600" data-testid="sub-log">ClipAI's agent paid Harbour Music {usd(PLAN.priceCents)} · Harbour passed on {sub.split.filter((s: any) => s.id !== 'harbour').map((s: any) => `${s.who} ${usd(s.sats * 5)}`).join(', ')} · Catalogue licence until {dateGB(sub.until)}</p>
           {!ren ? (st.busy === 's2renew' ? <Busy label="A month passes…" /> : <BigButton variant="quiet" onClick={runRenew} data-testid="renew-go">Skip to next month</BigButton>)
-            : ren.ok ? <p className="text-[15px] font-semibold text-emerald-700" data-testid="renew-done">Renewed by the agent on {dateGB(ren.from)}, inside the new month's budget. Licence until {dateGB(ren.until)}.</p>
+            : ren.ok ? <p className="text-[15px] font-semibold text-emerald-700" data-testid="renew-done">Renewed by the agent on {dateGB(ren.paidAt)}, a day before month 1 ended, inside the new month's budget. Month 2 runs {dateGB(ren.from)} to {dateGB(ren.until)}.</p>
             : <p className="text-[15px] text-amber-700" data-testid="renew-refused">Not renewed: {usd(ren.budgetLeftCents)} left in the budget. The licence ends on {dateGB(sub.until)}.</p>}</div>}
     </section>}
     {sub?.ok && <div className="fade-in space-y-4 pt-2 text-center"><p className="mx-auto max-w-[560px] text-[19px] leading-8 text-neutral-700" data-testid="sleep-line">Your agent can do this thousands of times while you sleep. You set the price and the rules.</p><div className="flex justify-center"><Next from="stop2" /></div></div>}
