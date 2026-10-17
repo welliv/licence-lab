@@ -1,0 +1,223 @@
+{
+ "version": 1,
+ "offer": {
+  "kind": 30402,
+  "tags": [
+   [
+    "d",
+    "rain:online-video"
+   ],
+   [
+    "title",
+    "Rain"
+   ],
+   [
+    "x",
+    "54bdd6209af9d5aa84cdd71f904047fb7269cd0cf106f79c32356c20c4b65695"
+   ],
+   [
+    "use",
+    "online-video",
+    "worldwide",
+    "1y",
+    "non-exclusive",
+    "max-seconds=60"
+   ],
+   [
+    "terms",
+    "23a98cb3fc4e6add519e0020e2443496adb509af2fc2e5b434707641917d6d98"
+   ],
+   [
+    "terms-text",
+    "Non-exclusive licence for the recording \"Rain\" by Alice (producer Carol, mix Dave): use in one online video, worldwide, for 1 year, up to 60 seconds. I grant this licence to the holder of the key that signed any request naming this offer, when an invoice signed by the node in binding B, whose description hash commits to that request, is paid. The preimage of that invoice is the proof of acceptance."
+   ],
+   [
+    "price",
+    "100",
+    "SATS"
+   ],
+   [
+    "pay-link",
+    "http://127.0.0.1:8612/licence/rain",
+    "x402:exact:lnbtc",
+    "http:1"
+   ],
+   [
+    "binding",
+    "a3c620a5de5812935a9f296b4a8c1c0103ce48dea7b0c382c69226f926c9da7f"
+   ],
+   [
+    "valid-until",
+    "3613265"
+   ],
+   [
+    "p",
+    "fd5e45c3986f225967c0b1b91d985e43df591f0345a3d38e9f8d8163b1212227",
+    "producer",
+    "2000"
+   ],
+   [
+    "p",
+    "af6ddb79e5c7dc6367c8d44e13d50e145b06b9b2296f5f57203c093df63be96f",
+    "mix",
+    "1500"
+   ]
+  ],
+  "content": "",
+  "created_at": 1792250904,
+  "pubkey": "149298fe3f01d943069ab8bb5da52b3b7c70efff5e51ad587148b88978e7913d",
+  "id": "194fa5ad25991337731cadd2b994cc3617223ee06e906f3aa3c7cf67abcfafb3",
+  "sig": "45b955ca1a5b96712cfda7317836e9fa86ad4555482aa232dab055ef570f3a3a72af4646ca4096b3224674efd95469289da2e39ff80d8b0cf3b94165e0db7326"
+ },
+ "binding": {
+  "kind": 3411,
+  "tags": [
+   [
+    "node",
+    "02c619f9de5ade8d537521724253b04b75541c5206981053ad64447f362d6e9b5d"
+   ],
+   [
+    "scope",
+    "*"
+   ],
+   [
+    "node-sig",
+    "ry6ucrddc1gngdwbouf13sfre3kz14yu6gtyb3ceq5ehqr53ey8ee3wik84zg1g3ro4xe98pab37wt9wifzzm6bqmgrswhe5ker64ocp",
+    "lnd-signmessage"
+   ],
+   [
+    "revoke-via",
+    "opreturn"
+   ],
+   [
+    "not-before",
+    "00000330d2bf001732818dc061aa995ee68043aac871a03b78c7c93e788906be"
+   ],
+   [
+    "next",
+    "90cf9dbebf651b41b9245e8e85a931562370f46dec72073760d3959a58c209e1"
+   ]
+  ],
+  "content": "",
+  "created_at": 1792250904,
+  "pubkey": "149298fe3f01d943069ab8bb5da52b3b7c70efff5e51ad587148b88978e7913d",
+  "id": "a3c620a5de5812935a9f296b4a8c1c0103ce48dea7b0c382c69226f926c9da7f",
+  "sig": "a12a68b5522087a64be26aaeeb04f401703c5ed2b01f02f93a686b4b2e1d6bb33bee0735fb5d973fb00016f2230a0ab80bf987fcadb75e299fc1b91fc9c74c43"
+ },
+ "consents": [
+  {
+   "kind": 3413,
+   "tags": [
+    [
+     "e",
+     "194fa5ad25991337731cadd2b994cc3617223ee06e906f3aa3c7cf67abcfafb3"
+    ],
+    [
+     "terms",
+     "23a98cb3fc4e6add519e0020e2443496adb509af2fc2e5b434707641917d6d98"
+    ],
+    [
+     "share",
+     "2000"
+    ],
+    [
+     "payout",
+     "keysend:0235bdb82585ca81dd3c74c5458a83d801143cb67e21e31e44c1dc9cd77529cbb0"
+    ]
+   ],
+   "content": "",
+   "created_at": 1792250904,
+   "pubkey": "fd5e45c3986f225967c0b1b91d985e43df591f0345a3d38e9f8d8163b1212227",
+   "id": "1502e11afe4e58dab509168d8ad0dab7244e4b0f4ab186ec55c5cbae1a1d3622",
+   "sig": "7fb25d7ce22994c38dea5c15e4634653158686c0c017b35fe0d7e6d9397cee425b6263c5eb529cf37123fb6ad271c97a8e5b82510b22a7057a8b3aa3dcd2ed73"
+  },
+  {
+   "kind": 3413,
+   "tags": [
+    [
+     "e",
+     "194fa5ad25991337731cadd2b994cc3617223ee06e906f3aa3c7cf67abcfafb3"
+    ],
+    [
+     "terms",
+     "23a98cb3fc4e6add519e0020e2443496adb509af2fc2e5b434707641917d6d98"
+    ],
+    [
+     "share",
+     "1500"
+    ],
+    [
+     "payout",
+     "keysend:0228992016c346c5e47001875fdaccb345134103031c46c1c833f1d26db174a9ac"
+    ]
+   ],
+   "content": "",
+   "created_at": 1792250904,
+   "pubkey": "af6ddb79e5c7dc6367c8d44e13d50e145b06b9b2296f5f57203c093df63be96f",
+   "id": "929cecfcd49d5c00fe05936fec0e30560f48e8e219d89fde60f29f3775fbaaf0",
+   "sig": "11b961b95bdb96ccedd955c7e792ff54fe1fc82954731437e9a8d8a0000a979f3b102ffc30b6e63fa170083a91e0d68dfbeb2c512ff31311482756b18f87a9fc"
+  }
+ ],
+ "request": {
+  "kind": 3410,
+  "tags": [
+   [
+    "e",
+    "194fa5ad25991337731cadd2b994cc3617223ee06e906f3aa3c7cf67abcfafb3"
+   ],
+   [
+    "terms",
+    "23a98cb3fc4e6add519e0020e2443496adb509af2fc2e5b434707641917d6d98"
+   ],
+   [
+    "x",
+    "54bdd6209af9d5aa84cdd71f904047fb7269cd0cf106f79c32356c20c4b65695"
+   ],
+   [
+    "use",
+    "online-video",
+    "worldwide",
+    "1y",
+    "non-exclusive",
+    "seconds=30"
+   ],
+   [
+    "licensor",
+    "149298fe3f01d943069ab8bb5da52b3b7c70efff5e51ad587148b88978e7913d"
+   ],
+   [
+    "node",
+    "02c619f9de5ade8d537521724253b04b75541c5206981053ad64447f362d6e9b5d"
+   ],
+   [
+    "amount",
+    "100000"
+   ],
+   [
+    "network",
+    "lnbtc:00000008819873e925422c1ff0f99f7c"
+   ],
+   [
+    "nonce",
+    "e4bd1feb645094163cc4346109d582509ae4d14108f7ea86748561384548dc06"
+   ],
+   [
+    "not-before",
+    "0000029772b57cd44c52b0de92df73329b240dc3bf5b2777ec40a812081abaa5"
+   ]
+  ],
+  "content": "",
+  "created_at": 1792250920,
+  "pubkey": "2a115c536c9c587566db0907d68f3f63db01990036a191476acc8fe9d4810c4c",
+  "id": "2574e6855e5db1f5d40e1886a4426395c7cd43f04b0c9442c6c95caf47dbc7d5",
+  "sig": "c438afd98c283797c57fa28508f119570be9479b1f6a6b39d6fdc1c7b6c016ffb30ac42e192b8041055f51439548a0a060e4a6d82a075bbc7f8163e0bd2ca602"
+ },
+ "invoice": "lntbs1u1p4d89pgpp5j35dryvuh060syerrn4pffyutzm4h3vs0fk55gjlg8a7w0rexlyqhp52pa23zvwy7wzk8p32nt34l7uy6gc6aezkd8gxw6w4f4jmeusx2cqcqzzsxqzfvsp5rnc7sv5rytxl5q8c3zt8w3twgdgkh0zmmqr9hdzvy6p22d3fjrns9qxpqysgqgpnr37fauyyckh2r6c7k0hm47lphk5pyxm9gnagv0ufgkut4dakqqufn227kg2qdtv3x5g9g3xhppr2mrt9hjxdhdfgkcwe2tu7avvspt3wkq0",
+ "preimage": "e7fcf208b8bdb1150fcdf061efe624b17eb84d580baca38410c53d3e107266ef",
+ "anchor": {
+  "type": "opreturn",
+  "txid": "9d7ed8bbb8d8c2d4ff58d9acab928676eae5606b2d89b1b229f5fd7ab99f53bd",
+  "blockhash": "000001e0e27470610bcd48b81ab60cf4733147e6de1e35c51cb4174734ffd839",
+  "height": 3513267
+ }
+}
