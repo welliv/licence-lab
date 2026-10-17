@@ -50,12 +50,12 @@ export class LiveWorld {
   async topUp(p: LiveParty, sat: number) { if (!this.lud16[p]) throw new Error('Create the wallet first.'); await faucetTopUp(this.lud16[p]!, sat); await this.refresh(p); this.log({ from: 'faucet', to: p, text: `Faucet topped up ${p} by ${sat} sats (faucet-only sats)`, badge: 'real' }); }
   need(p: LiveParty, why: string) { if (!this.wallets[p]) throw new Error(`${cap(p)} has no test wallet yet. ${why}`); return this.wallets[p]!; }
   // ---------- 1. Alice publishes (binding + offer + co-owner consents) ----------
-  publish(priceSat = this.priceSat, song?: { title: string; sha256: string; termsText: string }) {
+  publish(priceSat = this.priceSat, song?: { title: string; sha256: string; termsText: string; use?: string[] }) {
     this.need('alice', 'The binding names the node behind her wallet.'); this.priceSat = priceSat;
     // The faucet refuses sign_message (RESTRICTED), so the node cannot sign Alice's key. The binding is real but has no node signature.
     this.binding = makeBinding(this.keys.alice, this.faucetNode, '', ['*']);
     const shares = song ? {} : SHARES; // your own song: you own all of it, no co-owners
-    this.offer = makeOffer(this.keys.alice, { track: song ? 'own' : 'rain', title: song?.title ?? 'Rain', masterSha256: song?.sha256 ?? trackFile('rain')?.sha256 ?? bytesToHex(sha256(new TextEncoder().encode('Rain (Licence Lab demo master)'))), use: USES.creator.slice(1), termsText: song?.termsText ?? TERMS.creator, priceSats: priceSat,
+    this.offer = makeOffer(this.keys.alice, { track: song ? 'own' : 'rain', title: song?.title ?? 'Rain', masterSha256: song?.sha256 ?? trackFile('rain')?.sha256 ?? bytesToHex(sha256(new TextEncoder().encode('Rain (Licence Lab demo master)'))), use: (song?.use ?? USES.creator).slice(1), termsText: song?.termsText ?? TERMS.creator, priceSats: priceSat,
       payLink: `https://alice.lab.test/licence/${song ? 'own' : 'rain'}/creator`, bindingId: this.binding.id, validUntil: 999_999_999, coOwners: Object.entries(shares).map(([p, bps]) => ({ pubkey: this.pub(p), role: p, bps })) });
     this.consents = Object.entries(shares).map(([p, bps]) => makeConsent(this.keys[p], this.offer!, bps, this.lud16[p as LiveParty] ?? `${p}@lab.test`));
     this.request = this.link = this.reqs = this.invoice = this.preimage = undefined;
@@ -64,7 +64,7 @@ export class LiveWorld {
   // ---------- 2. Buyer signs a request with a fresh per-licence key ----------
   requestLicence(buyer: LiveParty = 'bob', seconds = 60) {
     if (!this.offer || !this.binding) throw new Error('Alice has not published an offer yet.');
-    const { request, link } = makePrivateRequest(this.keys[buyer], { offer: this.offer, binding: this.binding, network: this.network, notBefore: this.tipHash || '00'.repeat(32), use: [...USES.creator.slice(1).filter(u => !u.startsWith('max-seconds')), `seconds=${seconds}`] });
+    const { request, link } = makePrivateRequest(this.keys[buyer], { offer: this.offer, binding: this.binding, network: this.network, notBefore: this.tipHash || '00'.repeat(32), use: (() => { const u = (this.offer!.tags.find(t => t[0] === 'use') ?? USES.creator).slice(1); return [...u.filter(x => !x.startsWith('max-seconds')), ...(u.some(x => x.startsWith('max-seconds')) ? [`seconds=${seconds}`] : [])]; })() });
     this.request = request; this.link = link; this.buyer = buyer; this.reqs = this.invoice = this.preimage = undefined;
     this.log({ from: buyer, to: 'alice', text: `Signed a licence request with a fresh key ${request.pubkey.slice(0, 10)}… (network: mainnet-format, as the faucet needs)`, badge: 'real', data: request });
   }

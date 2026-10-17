@@ -14,6 +14,7 @@ export const CAST: Record<string, Persona> = Object.fromEntries([
   P('streamco', 'StreamCo', '📺', 'platform', 'Music and video platform with many users.', '#2563eb', 2_000_000),
   P('clipai', 'ClipAI', '🎞️', 'platform', 'AI video tool. Holds the wallet Bob\'s agent spends from.', '#0891b2', 200_000),
   P('bobagent', 'Bob\'s agent', '🛰️', 'agent', "Bob's AI agent, on ClipAI's wallet. Spends only inside its NWC budget.", '#06b6d4', 0, 'clipai'),
+  P('clipagent', "ClipAI's agent", '🤖', 'agent', "ClipAI's buying agent. Licenses songs for its users' videos inside a monthly budget a person set.", '#22d3ee', 0, 'clipai'),
   P('frank', 'Frank', '🎚️', 'artist', 'A producer who remixes "Rain".', '#f97316', 5_000),
   P('modelco', 'ModelCo', '🧠', 'buyer', 'AI music company. Licenses tracks for training.', '#4f46e5', 500_000),
   P('distributor', 'Distributor', '📦', 'platform', "Alice's distributor. Vouches that her key is really her.", '#64748b'),

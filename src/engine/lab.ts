@@ -21,6 +21,8 @@ export { KIND, tagv, verifyEvent, decodeInvoice, grantDigest, checkLink, sha256h
 
 export const NET = NETWORKS.signet; // signet-style test network ("lntbs" invoices), the same family as Mutinynet
 export const TERMS: Record<string, string> = {
+  personal: 'Personal licence for "Rain" (DRAFT licence type): play and use the recording privately and in your own non-commercial videos, worldwide, perpetual; no money may be made from it. I grant this licence to the holder of the key that signed any request naming this offer, when an invoice signed by the node in my binding, whose description hash commits to that request, is paid. The preimage of that invoice is the proof of acceptance.',
+  catalogue: 'Catalogue licence (DRAFT subscription): use any recording in the catalogue in online creator videos, worldwide, for one month from payment, non-exclusive. Renewed by paying again for the next month. I grant this licence to the holder of the key that signed any request naming this offer, when an invoice signed by the node in my binding, whose description hash commits to that request, is paid. The preimage of that invoice is the proof of acceptance.',
   creator: 'Standard creator licence for "Rain": non-exclusive use of the recording in online video, worldwide, perpetual. I grant this licence to the holder of the key that signed any request naming this offer, when an invoice signed by the node in my binding, whose description hash commits to that request, is paid. The preimage of that invoice is the proof of acceptance.',
   advert: 'Advert licence for "Rain": non-exclusive use of the recording in adverts, worldwide, 1 year. I grant this licence to the holder of the key that signed any request naming this offer, when an invoice signed by the node in my binding, whose description hash commits to that request, is paid. The preimage of that invoice is the proof of acceptance.',
   training: 'AI training licence for "Rain": non-exclusive use of the recording as training data, worldwide, perpetual, no output that reproduces the recording. I grant this licence to the holder of the key that signed any request naming this offer, when an invoice signed by the node in my binding, whose description hash commits to that request, is paid. The preimage of that invoice is the proof of acceptance.',
@@ -29,6 +31,8 @@ export const TERMS: Record<string, string> = {
   remix: 'Remix licence for "Rain": release one remix, worldwide, perpetual, 30% of remix income to the original owners. I grant this licence to the holder of the key that signed any request naming this offer, when an invoice signed by the node in my binding, whose description hash commits to that request, is paid. The preimage of that invoice is the proof of acceptance.',
 };
 export const USES: Record<string, string[]> = {
+  personal: ['use', 'personal', 'worldwide', 'perpetual', 'non-exclusive'], // DRAFT: not a spec licence type yet
+  catalogue: ['use', 'catalogue-video', 'worldwide', '1m', 'non-exclusive', 'max-seconds=240'], // DRAFT: one-month catalogue licence, renewed monthly
   creator: ['use', 'creator-video', 'worldwide', 'perpetual', 'non-exclusive', 'max-seconds=240'],
   advert: ['use', 'advert', 'worldwide', '1y', 'non-exclusive', 'max-seconds=60'],
   training: ['use', 'ai-training', 'worldwide', 'perpetual', 'non-exclusive'],

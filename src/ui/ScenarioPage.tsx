@@ -69,7 +69,7 @@ function StepCard({ sid, step, index, run, state, busy }: { sid: string; step: S
 export function MiniChecks({ v }: { v: NonNullable<StepRun['out']['verdict']> }) {
   return <div className="flex items-center gap-1" title={v.checks.map(c => `${c.n}. ${c.label}: ${c.status}${c.detail ? ' (' + c.detail + ')' : ''}`).join('\n')}>
     {v.checks.map(c => <span key={c.n} className={cx('flex h-5 w-5 items-center justify-center rounded text-[10px] font-semibold', c.status === 'pass' ? 'bg-emerald-500 text-white' : c.status === 'fail' ? 'bg-red-500 text-white' : c.status === 'skip' ? 'bg-neutral-200 text-neutral-500' : 'bg-neutral-100 text-neutral-400')}>{c.n}</span>)}
-    <span className="ml-1 text-[11px] text-neutral-500">{v.passed}/9 checks</span></div>;
+    <span className="ml-1 text-[11px] text-neutral-500">{v.passed}/{v.checks.length} checks</span></div>;
 }
 function Outcome({ sid }: { sid: string }) {
   const sc = session(sid).sc;

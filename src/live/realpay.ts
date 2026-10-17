@@ -9,9 +9,9 @@ export async function faucetReachable(ms = 3000): Promise<boolean> {
 }
 export interface RealResult { strict: Verdict; facts: { label: string; ok: boolean; how: string }[]; paymentHash: string; preimage: string; invoice: string; aliceWallet?: string; bobWallet?: string; ms: number; aliceGot: number; offerSha256?: string }
 /** One real purchase: Alice and Bob (or Bob's agent) get fresh faucet wallets, Alice signs the offer, the buyer pays the real invoice, and we verify. */
-export async function realLicence(o: { priceSat?: number; buyer?: 'bob' | 'bobagent'; song?: { title: string; sha256: string; termsText: string }; onStep?: (s: string) => void } = {}): Promise<RealResult> {
-  const step = o.onStep ?? (() => {}); const w = new LiveWorld(memoryStore()); const buyer = o.buyer ?? 'bob'; const t0 = performance.now();
-  step('Making test wallets…'); await Promise.all([w.connect('alice', 50), w.connect(buyer, 300)]); const before = w.balances.alice ?? 0;
+export async function realLicence(o: { priceSat?: number; buyer?: 'bob' | 'bobagent'; song?: { title: string; sha256: string; termsText: string; use?: string[] }; budget?: { maxPerPaymentSat: number; dailyCapSat: number }; onStep?: (s: string) => void } = {}): Promise<RealResult> {
+  const step = o.onStep ?? (() => {}); const w = new LiveWorld(memoryStore()); const buyer = o.buyer ?? 'bob'; const t0 = performance.now(); if (o.budget) w.budget = { ...o.budget, spentSat: 0 };
+  step('Making test wallets…'); await Promise.all([w.connect('alice', 50), w.connect(buyer, Math.min(5000, (o.priceSat ?? 100) + 300))]); const before = w.balances.alice ?? 0; // faucet test wallets hold up to 5,000 test sats
   w.publish(o.priceSat ?? 100, o.song); w.requestLicence(buyer); step('Asking for the invoice…'); await w.issueInvoice();
   step(`Paying ${o.priceSat ?? 100} test sats…`); const preimage = await w.pay(buyer); step('Checking the licence…'); const { strict, facts } = await w.verify(); await w.refresh('alice');
   const inv = w.reqs!.extra.invoice as string; const { decodeInvoice } = await import('../lib/mll/bolt11');

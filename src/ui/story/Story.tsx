@@ -19,9 +19,10 @@ import { faucetReachable, realLicence, type RealResult } from '../../live/realpa
 import { sha256hex } from '../../engine/lab';
 import { usd, usdFromSats, splitCents, satsToCents, PRICE_CENTS, BUDGET_USD, DEMO_RATE_LABEL } from '../money';
 
+import { ArtistStop1, Stop2, Stop3, NextSteps } from './Path';
 export const HEADLINE = 'Artists license their music directly. Any agent can buy it in seconds and prove it on Bitcoin.';
 export const SHORT = 'Music rights, sold directly, bought by any agent, proven on Bitcoin.';
-const n = (x: number) => x.toLocaleString('en-GB');
+export const n = (x: number) => x.toLocaleString('en-GB');
 
 export function BigButton({ children, onClick, disabled, variant = 'primary', ...p }: { children: ReactNode; onClick?: () => void; disabled?: boolean; variant?: 'primary' | 'quiet' | 'cheat' } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return <button {...p} onClick={onClick} disabled={disabled} className={cx('inline-flex min-h-14 items-center justify-center gap-2.5 rounded-full px-8 text-[17px] font-semibold transition-all disabled:cursor-wait',
@@ -29,7 +30,7 @@ export function BigButton({ children, onClick, disabled, variant = 'primary', ..
       : variant === 'cheat' ? 'min-h-12 border border-red-300 px-6 text-[15px] text-red-700 hover:bg-red-50'
       : 'text-neutral-600 underline decoration-neutral-300 underline-offset-4 hover:text-neutral-900')}>{children}</button>;
 }
-const Busy = ({ label }: { label: string }) => <BigButton disabled><Loader2 size={18} className="animate-spin" />{label}</BigButton>;
+export const Busy = ({ label }: { label: string }) => <BigButton disabled><Loader2 size={18} className="animate-spin" />{label}</BigButton>;
 
 /** Slim top bar: the stops in the visitor's order, the extra, who you are (changeable), theme, under the hood. */
 export function StoryShell({ path, children }: { path: string; children: ReactNode }) {
@@ -76,31 +77,27 @@ export function Proven({ label = 'Proven on Bitcoin ✓', short }: { label?: str
     <p className="text-[12px] leading-5 text-neutral-500" data-testid="practice-note">{short ? 'Dated on a practice chain here; the link is real, on Bitcoin\'s test network.' : 'Here it was dated on a practice chain in your browser. The link is a licence our live run proved on Mutinynet, Bitcoin\'s public test network.'}</p></div>;
 }
 /** Technical words and code live here, closed unless you are a builder. */
-function CodeDrawer({ children, title = 'For builders: how it works' }: { children: ReactNode; title?: string }) {
+export function CodeDrawer({ children, title = 'For builders: how it works' }: { children: ReactNode; title?: string }) {
   const st = useStory(); const [o, setO] = useState(st.persona === 'builder');
   return <div className="rounded-xl border border-dashed border-neutral-300 text-[14px]" data-drawer="code"><button onClick={() => setO(!o)} aria-expanded={o} className="flex w-full items-center gap-2 px-4 py-3 text-left text-neutral-500 hover:text-neutral-800"><Code2 size={14} />{title}<ChevronDown size={15} className={cx('ml-auto transition-transform', o && 'rotate-180')} /></button>
     {o && <div className="fade-in space-y-2 px-4 pb-4 leading-6 text-neutral-600" data-testid="code-drawer">{children}</div>}</div>;
 }
-const Code = ({ children }: { children: string }) => <pre className="scroll-thin overflow-x-auto rounded-lg bg-neutral-900 p-3 font-mono text-[12px] leading-5 text-neutral-100">{children}</pre>;
-function Cheat({ title, children }: { title: string; children: ReactNode }) {
+export const Code = ({ children }: { children: string }) => <pre className="scroll-thin overflow-x-auto rounded-lg bg-neutral-900 p-3 font-mono text-[12px] leading-5 text-neutral-100">{children}</pre>;
+export function Cheat({ title, children }: { title: string; children: ReactNode }) {
   return <section className="rounded-2xl border border-red-200/70 p-5" data-testid="cheat"><div className="mb-3 flex items-center gap-2 text-[15px] font-semibold text-red-700"><ShieldAlert size={17} />Try to cheat: {title}</div>{children}</section>;
 }
-const Row = ({ ok = true, children }: { ok?: boolean; children: ReactNode }) => <li className="flex items-start gap-3 text-[17px]">{ok ? <CheckCircle2 size={20} className="mt-1 shrink-0 text-emerald-600" /> : <XCircle size={20} className="mt-1 shrink-0 text-red-600" />}<span>{children}</span></li>;
-const Bad = ({ title, line, children, testid }: { title?: string; line: string; children?: ReactNode; testid?: string }) => <div className="fade-in rounded-2xl border border-red-200 bg-red-50 p-4" data-testid={testid}>{title && <div className="mb-1 text-[13px] text-neutral-500">{title}</div>}<div className="flex items-start gap-3 text-[18px] font-semibold text-red-700"><XCircle size={22} className="mt-0.5 shrink-0" /><span>{line}</span></div>{children}</div>;
-const Good = ({ title, line, children, testid }: { title?: string; line: string; children?: ReactNode; testid?: string }) => <div className="fade-in rounded-2xl border border-emerald-200 bg-emerald-50 p-4" data-testid={testid}>{title && <div className="mb-1 text-[13px] text-neutral-500">{title}</div>}<div className="flex items-start gap-3 text-[18px] font-semibold text-emerald-700"><CheckCircle2 size={22} className="mt-0.5 shrink-0" /><span>{line}</span></div>{children}</div>;
+export const Row = ({ ok = true, children }: { ok?: boolean; children: ReactNode }) => <li className="flex items-start gap-3 text-[17px]">{ok ? <CheckCircle2 size={20} className="mt-1 shrink-0 text-emerald-600" /> : <XCircle size={20} className="mt-1 shrink-0 text-red-600" />}<span>{children}</span></li>;
+export const Bad = ({ title, line, children, testid }: { title?: string; line: string; children?: ReactNode; testid?: string }) => <div className="fade-in rounded-2xl border border-red-200 bg-red-50 p-4" data-testid={testid}>{title && <div className="mb-1 text-[13px] text-neutral-500">{title}</div>}<div className="flex items-start gap-3 text-[18px] font-semibold text-red-700"><XCircle size={22} className="mt-0.5 shrink-0" /><span>{line}</span></div>{children}</div>;
+export const Good = ({ title, line, children, testid }: { title?: string; line: string; children?: ReactNode; testid?: string }) => <div className="fade-in rounded-2xl border border-emerald-200 bg-emerald-50 p-4" data-testid={testid}>{title && <div className="mb-1 text-[13px] text-neutral-500">{title}</div>}<div className="flex items-start gap-3 text-[18px] font-semibold text-emerald-700"><CheckCircle2 size={22} className="mt-0.5 shrink-0" /><span>{line}</span></div>{children}</div>;
 
 /** Next: the next stop in the visitor's order; after the last one, the finale with the extra offered (not forced). */
-function Next({ from }: { from: StopId }) {
+export function Next({ from }: { from: StopId }) {
   const st = useStory(); const order = st.order(); const i = order.indexOf(from); const next = order.slice(i + 1).find(s => !st.done.has(s)) ?? order.find(s => !st.done.has(s));
   if (next) return <div className="pt-2"><BigButton onClick={() => go(next)} data-testid="next">Next: {STOPS[next].toLowerCase()} <ArrowRight size={18} /></BigButton></div>;
   return <Finale />;
 }
-function Finale() {
-  return <div className="fade-in rounded-2xl border border-neutral-200 bg-white p-6 text-center" data-testid="finale"><div className="text-[22px] font-semibold">That is the whole idea.</div><div className="mt-1 text-[17px] text-neutral-600">{SHORT}</div>
-    <div className="mt-5 flex flex-wrap justify-center gap-3"><BigButton onClick={() => go('rights')} data-testid="next">Extra: when rights change hands <ArrowRight size={18} /></BigButton><BigButton variant="quiet" onClick={() => go('hood')}>Explore under the hood</BigButton></div>
-    <p className="mt-3 text-[13px] text-neutral-500">The extra takes about two minutes. It is optional.</p></div>;
-}
-function Stop({ id, title, why, children }: { id: string; title: string; why: string; children: ReactNode }) {
+export function Finale() { return <NextSteps />; }
+export function Stop({ id, title, why, children }: { id: string; title: string; why: string; children: ReactNode }) {
   const st = useStory(); const order = st.order(); const i = order.indexOf(id as StopId);
   return <div className="mx-auto flex max-w-[760px] flex-col px-5 pb-10 pt-8 md:px-6 md:pt-14" data-stop={id}>
     <div className="text-[13px] font-semibold uppercase tracking-[0.12em] text-neutral-400">{i >= 0 ? `Stop ${i + 1} of 3` : 'Extra'}</div>
@@ -127,6 +124,7 @@ export function Home() {
 /** Stop 1: the artist-first version (dollars, one screen, three beats) by default; the earlier version stays at ?classic=1 for comparison. */
 export const classicStop1 = () => /[?&]classic=1\b/.test(location.search + location.hash);
 export function Stop1() { return classicStop1() ? <Stop1Classic /> : <ArtistStop1 />; }
+export { Stop2, Stop3 };
 // ---------- Stop 1, classic: hear it, license it (sats, checks on the page) ----------
 function Stop1Classic() {
   useMusic(); const st = useStory(); const r = st.r.s1; const hero = music.hero(); const playing = music.isPlaying(hero?.id ?? null) || (music.mode === 'tone' && music.isPlaying());
@@ -166,170 +164,27 @@ const result = await verifyLicence(bundle, chain)
       <Next from="stop1" /></>}
   </Stop>;
 }
-// ---------- Stop 1, artist-first: the song, one button, the money landing. Everything technical sits behind "See the proof". ----------
-const COLOUR: Record<string, string> = { alice: 'bg-violet-500', carol: 'bg-sky-500', dave: 'bg-pink-500', erin: 'bg-teal-500', frank: 'bg-orange-500' };
-const NAME = (id: string) => persona(id).name;
-/** The buyer's faucet test wallet starts with 300 test sats, so one real test payment is capped here. */
-export const MAX_REAL_TEST_SATS = 250;
-const reducedMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; } };
-/** Counts from `from` to `to` (cents) after `delay` ms. */
-function useCount(from: number, to: number, delay: number, ms = 900) {
-  const [v, setV] = useState(reducedMotion() ? to : from);
-  useEffect(() => { if (reducedMotion()) { setV(to); return; } let raf = 0; const t0 = performance.now() + delay;
-    const f = (now: number) => { const k = Math.min(1, Math.max(0, (now - t0) / ms)); setV(Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)))); if (k < 1) raf = requestAnimationFrame(f); };
-    raf = requestAnimationFrame(f); return () => cancelAnimationFrame(raf); }, [from, to, delay, ms]);
-  return v;
-}
-/** A playlist entry: the real file (tracks.json) plus its price and shares (engine/catalogue). */
-type Item = { c: CatalogueTrack; t?: Track };
-function playlist(): Item[] { const xs = CATALOGUE.flatMap(c => { const t = music.tracks.find(x => x.cast === c.cast); return t ? [{ c, t }] : []; }); return xs.length ? xs : [{ c: CATALOGUE[0], t: undefined }]; }
-const resultKey = (c: CatalogueTrack) => (c.cast === 'alice' ? 's1' : `s1:${c.cast}`);
-function ArtistStop1() {
-  useMusic(); const st = useStory(); const items = playlist(); const cur = music.current(); const sel = items.find(i => i.t && i.t.id === cur?.id) ?? items[0];
-  const { c, t } = sel; const rk = resultKey(c); const r = st.r[rk]; const playing = music.isPlaying(t?.id ?? null) || (!t && music.mode === 'tone' && music.isPlaying());
-  const artist = st.persona === 'artist'; const order = st.order(); const i = order.indexOf('stop1'); const real = useRealMoney(); const [label, setLabel] = useState(''); const [landed, setLanded] = useState<string>('');
-  const price = usd(c.priceCents); const co = c.shares.filter(s => s.who !== c.seller); const busy = !!st.busy;
-  const pick = (x: Item) => { if (busy || !x.t || x.t.id === t?.id) return; const was = music.isPlaying(); music.select(x.t.id); if (was) music.toggle(x.t.id); };
-  const buy = async () => { const it = sel; const sats = priceSats(it.c); const paySats = Math.min(sats, MAX_REAL_TEST_SATS); const key = resultKey(it.c); setLanded('');
-    await story.run(key, async lab => {
-      setLabel("Bob's agent is buying…");
-      // A quick tap can beat the faucet check: wait for it rather than silently using practice money.
-      const useReal = real.known || real.decided ? real.on : await faucetReachable(3000);
-      if (useReal) { try { const song = it.c.cast === 'alice' ? undefined : { title: it.c.title, sha256: it.t!.sha256, termsText: termsFor(it.c, NAME(it.c.seller)) };
-          story.r[key + 'real'] = { ...(await realLicence({ priceSat: paySats, song, onStep: s => setLabel(/^Pay/.test(s) ? `Paying ${usd(it.c.priceCents)}…` : /^Check/.test(s) ? 'Checking it…' : "Bob's agent is buying…") })), wanted: sats }; }
-        catch (e: any) { story.r[key + 'real'] = { error: String(e?.message ?? e) }; } }
-      else story.r[key + 'real'] = undefined;
-      setLabel(`Paying ${usd(it.c.priceCents)}…`); await sleep(250); const out = await licenseTrack(lab, it.c, it.t?.sha256 ?? lab.trackHash); setLabel('Saving the proof…'); await sleep(300); return out; });
-    const out = story.r[key]; if (out?.verdict.result.ok) { testkit.licence(); testkit.stopDone('stop1'); story.finish('stop1'); if (it.t) { music.unlock(it.t.id, { how: `Licensed in stop 1: all ${out.verdict.passed} checks passed`, fileOk: out.verdict.file?.ok, holder: 'you' }); if (!music.isPlaying(it.t.id)) music.toggle(it.t.id); } } };
-  const licensed = !!r?.verdict.result.ok || !!music.unlocked(t?.id);
-  return <div className="mx-auto flex max-w-[760px] flex-col px-5 pb-10 pt-6 md:px-6 md:pt-12" data-stop="stop1" data-version="artist-first">
-    <div className="text-[13px] font-semibold uppercase tracking-[0.12em] text-neutral-400">{i >= 0 ? `Stop ${i + 1} of 3` : 'Stop 1'}</div>
-    <h1 className="mt-2 text-[32px] font-bold leading-tight tracking-tight md:text-[44px]">{artist ? 'Your song sells itself' : 'Hear it, license it'}</h1>
-    {/* Beat 1: the song, the price, who shares */}
-    <section className="mt-6 flex items-center gap-4 rounded-3xl border border-neutral-200 bg-white p-4 sm:gap-5 sm:p-6" data-testid="song-card" data-track={c.cast}>
-      <button onClick={() => music.toggle(t?.id ?? null)} className="group relative shrink-0 rounded-2xl shadow-2xl" aria-label={playing ? `Pause ${c.title}` : `Play ${c.title}`}><Art t={t} size={typeof innerWidth === 'number' && innerWidth < 640 ? 96 : 150} />
-        <span className="absolute inset-0 flex items-center justify-center rounded-2xl transition group-hover:bg-black/20"><span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-black shadow-lg sm:h-14 sm:w-14">{playing ? <Pause size={20} /> : <Play size={20} className="ml-1" />}</span></span></button>
-      <div className="min-w-0 flex-1 text-left">
-        <div className="text-[19px] font-semibold leading-tight sm:text-[24px]" data-testid="song-title">"{c.title}" <span className="font-normal text-neutral-500">· {NAME(c.seller)}</span></div>
-        <div className="text-[14px] text-neutral-500" data-testid="track-state">{licensed ? 'Full song unlocked' : playing ? 'Playing a 30-second taste' : 'Tap the cover to listen'}</div>
-        <div className="mt-2 flex items-baseline gap-2 sm:mt-3"><span className="text-[34px] font-bold leading-none tabular-nums sm:text-[46px]" data-testid="price">{price}</span><span className="text-[15px] text-neutral-500 sm:text-[17px]">a licence</span></div>
-        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[13px] sm:mt-3 sm:text-[14px]" data-testid="shares">{co.length ? <><span className="text-neutral-500">Shared with</span>
-          {co.map(s => <span key={s.who} className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-2.5 py-1"><span className={cx('h-2 w-2 rounded-full', COLOUR[s.who] ?? 'bg-amber-400')} />{NAME(s.who)} {s.bps / 100}%<span className="text-neutral-500">· {s.role}</span></span>)}</>
-          : <span className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-2.5 py-1"><span className={cx('h-2 w-2 rounded-full', COLOUR[c.seller])} />Solo: {NAME(c.seller)} keeps 100%</span>}</div>
-      </div>
-    </section>
-    {items.length > 1 && <Playlist items={items} sel={sel} busy={busy} onPick={pick} />}
-    {/* Beat 2: one button */}
-    {!r && <div className="mt-6 flex flex-col items-center gap-2 text-center">
-      {st.busy === rk ? <Busy label={label || "Bob's agent is buying…"} /> : <BigButton onClick={buy} disabled={busy} data-testid="buy">Let Bob's agent buy it</BigButton>}
-      <p className="text-[13px] text-neutral-500">Test money only. No real money moves.</p></div>}
-    {/* Beat 3: the payoff */}
-    {r && <div className="mt-6 space-y-5">
-      {r.verdict.result.ok ? <Payoff key={rk} c={c} artist={artist} onLanded={() => setLanded(rk)} /> : <Bad line="Something went wrong with this sale" />}
-      {(landed === rk || !r.verdict.result.ok) && <div className="fade-in space-y-5 text-center">
-        <p className="mx-auto max-w-[560px] text-[19px] leading-8 text-neutral-700" data-testid="sleep-line">Your agent can do this thousands of times while you sleep. You set the price and the rules.</p>
-        <div className="flex justify-center"><Next from="stop1" /></div></div>}
-    </div>}
-    <div className="mt-8"><SeeProof key={rk} r={r} real={real} c={c} rr={st.r[rk + 'real']} /></div>
-  </div>;
-}
-function Playlist({ items, sel, busy, onPick }: { items: Item[]; sel: Item; busy: boolean; onPick: (x: Item) => void }) {
-  const ref = useRef<HTMLUListElement>(null);
-  // On a phone the playlist scrolls sideways: keep the selected song in view (also when it was picked in the player below).
-  useEffect(() => { const ul = ref.current; const li = ul?.querySelector('[aria-pressed=true]')?.parentElement as HTMLElement | null; if (!ul || !li || ul.scrollWidth <= ul.clientWidth) return;
-    if (li.offsetLeft < ul.scrollLeft || li.offsetLeft + li.offsetWidth > ul.scrollLeft + ul.clientWidth) ul.scrollTo({ left: Math.max(0, li.offsetLeft - 20), behavior: reducedMotion() ? 'auto' : 'smooth' }); }, [sel.c.cast]);
-  return <section className="mt-4" data-testid="playlist" aria-label="Choose a song"><div className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-neutral-400">Choose a song</div>
-    <ul ref={ref} className={cx('scroll-thin relative -mx-5 flex snap-x gap-2 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0', busy && 'pointer-events-none opacity-60')}>
-      {items.map(x => { const on = x === sel; const p = music.isPlaying(x.t?.id ?? null); const done = !!music.unlocked(x.t?.id);
-        return <li key={x.c.cast} className="w-[136px] shrink-0 snap-start sm:w-auto"><div role="button" tabIndex={0} aria-pressed={on} data-testid={`pick-${x.c.cast}`} title={`${x.c.title} · ${NAME(x.c.seller)}`} onClick={() => onPick(x)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(x); } }}
-          className={cx('flex h-full cursor-pointer flex-col gap-2 rounded-2xl border bg-white p-2.5 text-left transition-colors', on ? 'border-neutral-900 ring-1 ring-neutral-900' : 'border-neutral-200 hover:border-neutral-400')}>
-          <div className="flex items-center gap-2"><Art t={x.t} size={40} /><button aria-label={p ? `Pause ${x.c.title}` : `Play ${x.c.title}`} onClick={e => { e.stopPropagation(); if (x.t) music.toggle(x.t.id); }} className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white">{p ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}</button></div>
-          <div className="min-w-0"><div className="truncate text-[14px] font-semibold">{x.c.title}</div><div className="truncate text-[12px] text-neutral-500">{NAME(x.c.seller)}</div></div>
-          <div className="text-[14px] font-bold tabular-nums">{usd(x.c.priceCents)}{done && <span className="ml-1 font-normal text-emerald-600">✓</span>}</div></div></li>; })}
-    </ul></section>;
-}
-function Payoff({ c, artist, onLanded }: { c: CatalogueTrack; artist: boolean; onLanded: () => void }) {
-  const cents = shareCents(c); const proof = useProof(); const bob = useCount(c.priceCents, 0, 150, 1100); const [saved, setSaved] = useState(reducedMotion()); const ref = useRef<HTMLElement>(null);
-  useEffect(() => { ref.current?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: innerWidth < 640 ? 'start' : 'nearest' }); }, []);
-  useEffect(() => { const tm = setTimeout(() => { setSaved(true); onLanded(); }, reducedMotion() ? 0 : 1900); return () => clearTimeout(tm); }, []);
-  const n3 = c.shares.length;
-  return <section ref={ref} className="fade-in scroll-mt-4 rounded-3xl border border-emerald-200 bg-emerald-50 p-5 md:p-6" data-testid="payoff">
-    <div className="flex items-center gap-2 text-[24px] font-bold text-emerald-700"><CheckCircle2 size={26} />Paid</div>
-    <div className="mt-4 grid items-center gap-3 md:grid-cols-[150px_1fr_250px]">
-      <div className="rounded-2xl bg-white p-4 text-center" data-testid="from-bob"><div className="text-[14px] text-neutral-500">Bob's agent</div><div className="mt-1 text-[30px] font-bold tabular-nums">{usd(bob)}</div><div className="text-[12px] text-neutral-500">{bob === 0 ? 'paid' : 'paying…'}</div></div>
-      <div className={cx('relative hidden md:block', n3 === 1 ? 'h-[70px]' : n3 === 2 ? 'h-[130px]' : 'h-[180px]')} aria-hidden>{c.shares.map((s, k) => [0, 1, 2].map(j => <span key={`${s.who}${j}`} className={cx('coin absolute h-4 w-4 rounded-full shadow', COLOUR[s.who] ?? 'bg-amber-400')} style={{ top: `${n3 === 1 ? 40 : 15 + k * (70 / Math.max(1, n3 - 1))}%`, animationDelay: `${150 + k * 220 + j * 160}ms` }} />))}</div>
-      <div className="flex justify-center md:hidden" aria-hidden><span className="coin-y h-4 w-4 rounded-full bg-amber-400 shadow" /></div>
-      <ul className={cx('grid gap-2 md:grid-cols-1', n3 === 1 ? 'grid-cols-1' : n3 === 2 ? 'grid-cols-2' : 'grid-cols-3')}>{c.shares.map((s, k) => <ShareCard key={s.who} id={s.who} who={NAME(s.who)} role={s.role} cents={cents[k]} pct={s.bps / 100} delay={350 + k * 220} you={artist && s.who === c.seller} />)}</ul>
-    </div>
-    {saved && <div className="fade-in mt-5 flex flex-wrap items-center gap-x-3 gap-y-1" data-testid="proof-saved"><span className="rounded-full bg-emerald-500/15 px-3 py-1 text-[17px] font-semibold text-emerald-700">Proof saved on Bitcoin ✓</span>
-      {proof && <a href={proof.txUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[14px] text-neutral-600 underline decoration-neutral-300 underline-offset-4 hover:text-neutral-900">See a real one<ExternalLink size={13} /></a>}</div>}
-  </section>;
-}
-function ShareCard({ id, who, role, cents, pct, delay, you }: { id: string; who: string; role: string; cents: number; pct: number; delay: number; you: boolean }) {
-  const v = useCount(0, cents, delay, 900);
-  return <li className="rounded-2xl bg-white p-3 text-center md:flex md:items-center md:justify-between md:px-4 md:text-left"><div><div className="flex items-center justify-center gap-1.5 text-[15px] font-semibold md:justify-start"><span className={cx('h-2.5 w-2.5 rounded-full', COLOUR[id] ?? 'bg-amber-400')} />{who}</div>
-    <div className="text-[12px] text-neutral-500">{you ? 'Your share' : role}, {pct}%</div></div><div className="mt-1 text-[22px] font-bold tabular-nums text-emerald-700 md:mt-0" data-testid={`share-${id}`}>+{usd(v)}</div></li>;
-}
-type RealOut = (RealResult & { wanted?: number }) | { error: string } | undefined;
-/** One tap for everything technical: before buying, how it works and the test-money switch; after, the proof, the checks, the real payment in sats, cheats and code. */
-function SeeProof({ r, real, c, rr }: { r: any; real: Real; c: CatalogueTrack; rr: RealOut }) {
-  const st = useStory(); const [open, setOpen] = useState(st.persona === 'builder'); const seller = NAME(c.seller); const co = c.shares.filter(s => s.who !== c.seller); const sats = priceSats(c);
-  return <div className="rounded-2xl border border-neutral-200 bg-white text-left">
-    <button onClick={() => setOpen(!open)} aria-expanded={open} data-testid="see-proof" className="flex w-full items-center gap-2 px-5 py-4 text-[16px] font-medium text-neutral-700 hover:text-neutral-900"><Wrench size={15} className="text-neutral-400" />{r ? 'See the proof' : 'How it works'}<ChevronDown size={17} className={cx('ml-auto transition-transform', open && 'rotate-180')} /></button>
-    {open && <div className="fade-in space-y-5 border-t border-neutral-200 px-5 pb-5 pt-4" data-testid="proof-panel">
-      {!r && <><p className="text-[15px] leading-7 text-neutral-600">{seller}'s agent signs the offer: the song, the price{co.length ? ` and the shares, agreed by ${co.map(s => NAME(s.who)).join(' and ')}` : ''}. Bob's agent pays, and gets a licence that anyone can check without asking {seller}. A record of the sale is dated on Bitcoin, so no one can change it later.</p>
-        <p className="text-[14px] text-neutral-500">Prices show in US dollars. Underneath, the payment is {sats} test sats ({usd(c.priceCents)} at a fixed demo rate: {DEMO_RATE_LABEL}; test money, not a market rate).</p><RealToggle real={real} /></>}
-      {r && <>
-        <p className="rounded-lg bg-neutral-100 px-3 py-2 text-[14px] text-neutral-700" data-testid="demo-rate">{usd(c.priceCents)} ≈ {sats} test sats (test money, demo rate: {DEMO_RATE_LABEL})</p>
-        {rr ? <ProofReal r={rr} seller={seller} co={co.map(s => NAME(s.who))} /> : <p className="text-[14px] text-neutral-600">This sale used practice money in your browser (the test faucet was off or not reachable).</p>}
-        <VerdictCard v={r.verdict} line={r.verdict.result.ok ? `All ${r.verdict.passed} checks passed` : undefined} title="The full check, run in your browser on a practice copy of Bitcoin">
-          {r.verdict.result.ok && <><p className="mt-1 text-[15px] text-neutral-600">{r.split.map((s: any) => `${s.who} ${s.sats}`).join(', ')} sats ({usd(c.priceCents)} in all at the demo rate){r.statements ? `, with a signed statement of the sale for each co-owner` : ''}. Checked in {Math.max(1, Math.round(r.ms))} ms.</p>
-            <p className="mt-2 text-[14px] text-neutral-600" data-testid="ownership-plain">Who owns "{c.title}": {r.verdict.ownership?.status === 'pass' ? `confirmed by ${seller}'s distributor, who signed that ${seller} owns it.` : r.verdict.ownership?.status === 'fail' ? 'this account does not own it.' : 'not confirmed. The sale is real, but no one trusted here has said who owns the song.'}</p>
-            <p className="mt-2 text-[13px] text-neutral-500" data-testid="file-fingerprint">The licence names this exact recording by its fingerprint: <span className="font-mono">{short(tagv(r.bundle.offer, 'x') ?? '')}</span>{r.verdict.file?.ok ? ' (matches the file you hear)' : ''}.</p><Proven /></>}
-        </VerdictCard>
-        <OwnSong real={real} />
-        {c.cast === 'alice' && <CheatStop1 />}
-        <CodeDrawer><p>{seller}'s <b>offer</b> is a signed Nostr event (kind 30402), id <code>{short(r.bundle.offer.id)}</code>. It names the track by the SHA-256 of the audio file (<code>{short(tagv(r.bundle.offer, 'x') ?? '')}</code>), the price in sats ({sats}), the use and the licence text. {co.length ? `${co.map(s => NAME(s.who)).join(' and ')} each sign a ` : 'This song has no co-owners, so there is no '}<b>consent</b> (kind 3413){co.length ? ' with their share' : ''}. Dollars are display only, at the fixed demo rate ({DEMO_RATE_LABEL}).</p>
-          <p>Bob signs a <b>request</b>; {seller}'s shop answers <b>402 Payment Required</b> with a Lightning <b>invoice</b> whose description hash commits to the request. Paying returns the <b>preimage</b>. The <b>bundle</b> (offer, consents, binding, request, invoice, preimage, Bitcoin timestamp) is the licence.{co.length ? ` ${seller}'s node pays ${co.map(s => NAME(s.who)).join(' and ')} and signs a statement for each (${r.statements} statements).` : ''}</p>
-          <Code>{`const bundle = await buy(offer)          // request → 402 → pay → preimage
-const result = await verifyLicence(bundle, chain)
-// → { ok: ${r.verdict.result.ok}, anchoredHeight: ${r.block} }`}</Code></CodeDrawer>
-      </>}
-      <p className="text-[13px] text-neutral-500"><a className="underline underline-offset-4" href="?classic=1#/stop1" data-testid="classic-link">See the classic Stop 1</a> (sats and checks on the page), for comparison.</p>
-    </div>}
-  </div>;
-}
-function ProofReal({ r, seller, co }: { r: NonNullable<RealOut>; seller: string; co: string[] }) {
-  const proof = useProof();
-  if ('error' in r) return <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[14px] text-amber-900" data-testid="real-card">The real test payment did not go through ({r.error}). Practice money was used instead.</div>;
-  return <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4" data-testid="real-card"><div className="flex items-start gap-2 text-[17px] font-semibold text-emerald-700"><CheckCircle2 className="mt-0.5 shrink-0" size={20} />Real test payment: {n(r.aliceGot)} test sats reached {seller}'s test wallet ({usdFromSats(r.aliceGot)} at the demo rate)</div>
-    {r.wanted && r.wanted > MAX_REAL_TEST_SATS && <p className="mt-1 text-[13px] text-amber-800" data-testid="real-capped">The real test payment was capped at {MAX_REAL_TEST_SATS} test sats (the price is {r.wanted}), because the test wallets are small. The full check below uses the full price.</p>}
-    <p className="mt-1 text-[14px] text-neutral-600">Two test wallets were made on faucet.nwc.dev. Bob paid a real Lightning invoice in {(r.ms / 1000).toFixed(1)} s, for an offer naming this recording's fingerprint. These were checked on the real payment:</p>
-    <ul className="mt-2 space-y-1">{r.facts.filter(f => f.ok).map(f => <li key={f.label} className="flex items-start gap-2 text-[14px]"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />{f.label}</li>)}</ul>
-    <p className="mt-3 text-[13px] text-neutral-600" data-testid="shared-node-note">Left out here on purpose: that the receiving wallet is {seller}'s own. Every test wallet shares one, so a test payment cannot show it. The full check below covers it, and so does {proof ? <a className="underline" href={proof.txUrl} target="_blank" rel="noreferrer">this real licence on Bitcoin's test network</a> : 'the real licence on Bitcoin\'s test network'}, where the artist's own wallet signed.{co.length ? ` The split to ${co.join(' and ')} runs in the full check.` : ''}</p>
-    <details className="mt-2 text-[12px] text-neutral-500"><summary className="cursor-pointer">Payment details</summary><div className="mt-1 break-all font-mono">payment hash {r.paymentHash}<br />preimage {r.preimage}{r.offerSha256 && <><br />offer fingerprint (SHA-256 of the file) {r.offerSha256}</>}</div></details></div>;
-}
 // ---------- real test money (faucet.nwc.dev) and "put up your own song" ----------
-type Real = { on: boolean; known: boolean; reachable: boolean; set: (v: boolean) => void; decided?: boolean };
-function useRealMoney(): Real {
+export type Real = { on: boolean; known: boolean; reachable: boolean; set: (v: boolean) => void; decided?: boolean };
+export function useRealMoney(): Real {
   const forced = /[?&]real=0\b/.test(location.search + location.hash) ? false : /[?&]real=1\b/.test(location.search + location.hash) ? true : undefined;
   const [reachable, setReachable] = useState<boolean | null>(null); const [choice, setChoice] = useState<boolean | undefined>(forced);
   useEffect(() => { if (forced === false) { setReachable(false); return; } let live = true; faucetReachable().then(ok => { if (live) setReachable(ok); }); return () => { live = false; }; }, []);
   const on = choice ?? !!reachable; return { on: on && reachable !== false, known: reachable !== null, reachable: !!reachable, set: setChoice, decided: choice !== undefined };
 }
-function RealToggle({ real }: { real: Real }) {
+export function RealToggle({ real }: { real: Real }) {
   return <label className="mt-4 inline-flex max-w-[460px] items-start gap-2 text-left text-[14px] text-neutral-600" data-testid="real-toggle">
     <input type="checkbox" className="mt-1" checked={real.on} disabled={!real.reachable} onChange={e => real.set(e.target.checked)} data-testid="real-money" />
     <span><b className="font-semibold text-neutral-800">Use real test money</b><span className="block text-[12px] text-neutral-500">{!real.known ? 'Checking the test faucet…' : !real.reachable ? 'The test faucet is not reachable, so this uses practice money in your browser.' : real.on ? 'A real Lightning payment with test sats from faucet.nwc.dev. No real money.' : 'Off: practice money in your browser.'}</span></span></label>;
 }
-function RealCard({ r }: { r: RealResult | { error: string } }) {
+function RealCard({ r, who = 'Alice' }: { r: RealResult | { error: string }; who?: string }) {
   const proof = useProof();
   if ('error' in r) return <div className="fade-in rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[14px] text-amber-900" data-testid="real-card">The real test payment did not go through ({r.error}). Practice money was used instead.</div>;
   const ok = r.facts.filter(f => f.ok);
-  return <div className="fade-in rounded-2xl border border-emerald-200 bg-emerald-50 p-4" data-testid="real-card"><div className="flex items-start gap-2 text-[18px] font-semibold text-emerald-700"><CheckCircle2 className="mt-0.5 shrink-0" size={22} />Real test payment: {n(r.aliceGot)} sats reached Alice</div>
+  return <div className="fade-in rounded-2xl border border-emerald-200 bg-emerald-50 p-4" data-testid="real-card"><div className="flex items-start gap-2 text-[18px] font-semibold text-emerald-700"><CheckCircle2 className="mt-0.5 shrink-0" size={22} />Real test payment: {n(r.aliceGot)} test sats reached {who === 'you' ? 'your test wallet' : `${who}'s test wallet`}</div>
     <p className="mt-1 text-[14px] text-neutral-600">Two test wallets were made for you on faucet.nwc.dev. Bob paid the real invoice in {(r.ms / 1000).toFixed(1)} s, and the real preimage was checked.</p>
     <ul className="mt-2 space-y-1">{ok.map(f => <li key={f.label} className="flex items-start gap-2 text-[14px]"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />{f.label}</li>)}</ul>
-    <p className="mt-3 rounded-lg bg-amber-100/70 p-2 text-[13px] text-amber-800" data-testid="shared-node-note">Not proven here: that the node belongs to Alice. Every faucet wallet shares one node, and that node will not sign Alice's binding, so check 3 cannot pass. {proof ? <a className="underline" href={proof.txUrl} target="_blank" rel="noreferrer">See a licence where Alice's own node signed (Mutinynet)</a> : null}</p>
+    <p className="mt-3 rounded-lg bg-amber-100/70 p-2 text-[13px] text-amber-800" data-testid="shared-node-note">Not proven here: that the receiving wallet belongs to {who === 'you' ? 'you' : who}. Every test wallet shares one node, and it will not sign a seller's binding, so a test payment cannot show this (the full check covers it). {proof ? <a className="underline" href={proof.txUrl} target="_blank" rel="noreferrer">See a licence where Alice's own node signed (Mutinynet)</a> : null}</p>
     <details className="mt-2 text-[12px] text-neutral-500"><summary className="cursor-pointer">Payment details</summary><div className="mt-1 break-all font-mono">payment hash {r.paymentHash}<br />preimage {r.preimage}</div></details></div>;
 }
 function OwnSong({ real }: { real: Real }) {
@@ -346,7 +201,7 @@ function OwnSong({ real }: { real: Real }) {
     {err && <p className="mt-2 text-[13px] text-red-700">{err}</p>}
     {file && <div className="mt-3 text-[13px] text-neutral-600" data-testid="own-hash">{file.name} · {(file.size / 1048576).toFixed(1)} MB · fingerprint <span className="font-mono">{file.sha256.slice(0, 16)}…</span></div>}
     {file && !out && <div className="mt-3">{st.busy === 'own' ? <Busy label="Signing and selling…" /> : <BigButton onClick={sell} data-testid="own-sell">Sign the offer and let Bob's agent buy it</BigButton>}</div>}
-    {out && <div className="mt-4 space-y-3">{rr && <RealCard r={rr} />}
+    {out && <div className="mt-4 space-y-3">{rr && <RealCard r={rr} who="you" />}
       <VerdictCard compact v={out.verdict} title={`Signed offer ${short(out.offer.id)} for "${out.title}" at ${S.PRICE} sats, fingerprint ${short(file?.sha256)}`} line={out.verdict.result.ok ? `Bob's agent holds a licence for "${out.title}"` : undefined} testid="own-verdict">
         <p className="mt-1 text-[13px] text-neutral-600">Check 10 says "unverified ownership": nothing here proves you own this recording. A distributor you work with would sign that.</p></VerdictCard></div>}
   </section>;
@@ -360,7 +215,7 @@ function FanOut({ split, total }: { split: { who: string; id: string; sats: numb
       <span className="text-right text-[18px] font-bold tabular-nums" data-testid={`share-${s.id}`}>{s.sats}</span></li>)}</ul>
     <p className="mt-4 text-[14px] text-neutral-500">Each of them gets a signed statement of this sale, so anyone short-changed can prove it.</p></section>;
 }
-function CheatStop1() {
+export function CheatStop1() {
   const st = useStory(); const price = st.r.s1cheatPrice as Verdict | undefined; const audio = st.r.s1cheatAudio as ReturnType<typeof S.cheatAudio> | undefined;
   return <Cheat title="change one thing">
     <p className="text-[15px] text-neutral-600">Take the licence you just bought and change one thing. Then check it again.</p>
@@ -370,71 +225,12 @@ function CheatStop1() {
   </Cheat>;
 }
 
-// ---------- Stop 2: agents buy at scale ----------
-export function Stop2() {
-  const st = useStory(); const one = st.r.s2one; const poison = st.r.s2poison; const scale = st.r.s2scale;
-  const buyer = st.persona === 'buyer';
-  const runScale = async () => { const out = await story.run('s2scale', lab => S.atScale(lab, S.SCALE, k => { story.progress = k; story.set('tick', k); })); if (out && out.sampleOk === out.sample) { testkit.stopDone('stop2'); story.finish('stop2'); } };
-  return <Stop id="stop2" title="Agents buy at scale" why={buyer ? 'Set a budget once. Your agent checks every bill and never spends past it.' : `Most buyers will be software. Bob's agent gets a budget: ${usd(BUDGET_USD.perPayment, { whole: true })} a payment, ${usd(BUDGET_USD.daily, { whole: true })} a day.`}>
-    {!one ? (st.busy === 's2one' ? <Busy label="Bob's agent is buying…" /> : <div><BigButton onClick={async () => { const o = await story.run('s2one', S.agentBuys); if (o?.verdict.result.ok) testkit.licence(); }}>Let Bob's agent buy a licence</BigButton></div>) : <>
-      <div className="fade-in rounded-2xl border border-neutral-200 bg-white p-6" data-testid="s2-one"><div className="text-[22px] font-semibold">Licensed for {usd(PRICE_CENTS)}. No one clicked.</div>
-        <ul className="mt-3 grid grid-cols-2 gap-2"><Row>Right price</Row><Row>Right licence</Row><Row>Paid to Alice</Row><Row>Inside budget</Row></ul></div>
-      <Cheat title="hide an order">
-        <p className="text-[15px] text-neutral-600">Mallory hides an order in her offer and bills {usdFromSats(500_000, { whole: true })}.</p>
-        {!poison ? <div className="mt-3"><BigButton variant="cheat" disabled={!!st.busy} onClick={() => story.run('s2poison', S.poisonedPrompt)}>Send the poisoned offer</BigButton></div>
-          : <div className="mt-3 space-y-3" data-testid="cheat-poison"><blockquote className="rounded-lg bg-neutral-100 px-4 py-3 font-mono text-[13px] text-neutral-500 line-through decoration-red-400">"{poison.text.replace(/([\d,]+) sats/, (_: string, x: string) => usdFromSats(Number(x.replace(/,/g, '')), { whole: true }))}"</blockquote>
-            <Good line={poison.refused ? `Blocked: order ignored. Paid: ${usdFromSats(poison.paid)}` : 'It got through'} /></div>}
-      </Cheat>
-      {!scale ? (st.busy === 's2scale' ? <Counter k={story.progress} /> : <div><BigButton onClick={runScale} data-testid="scale-go"><Sparkles size={18} />Now buy {n(S.SCALE)}</BigButton></div>) : <>
-        <Good testid="verdict-scale" line={scale.sampleOk === scale.sample ? `${n(scale.n)} licences ✓ inside budget` : 'Some licences failed'}>
-          <div className="mt-3 grid grid-cols-2 gap-3 text-center">{[[(scale.buyMs / 1000).toFixed(1) + ' s', 'in total'], ['1', 'Bitcoin proof']].map(([a, b]) => <div key={b} className="rounded-xl bg-white/70 p-3"><div className="text-[24px] font-bold tabular-nums">{a}</div><div className="text-[12px] text-neutral-500">{b}</div></div>)}</div>
-          <p className="mt-3 text-[15px] text-neutral-600" data-testid="scale-dollars">{n(scale.n)} licences for {usdFromSats(scale.spent, { whole: true })}, inside a {usd(BUDGET_USD.daily, { whole: true })} daily budget. {scale.sampleOk} of {scale.sample} re-checked: all real.</p>
-          <Budget spent={scale.spentToday} cap={scale.cap} /><Proven short label="Proven on Bitcoin ✓" /></Good>
-      </>}
-      <CodeDrawer><p>Bob's agent pays through <b>NWC</b> (Nostr Wallet Connect): the connection only allows paying, at most {S.BUDGET.maxPerPaymentSat} sats a payment and {n(S.BUDGET.dailyCapSat)} a day, on ClipAI's wallet. Before each payment it checks the <b>invoice</b> amount equals its own signed request ({S.PRICE} sats; the poisoned one asked {poison ? n(poison.asked) : '500,000'}), the <b>description hash</b> commits to that request, and the invoice is signed by the <b>node</b> Alice bound to her key. The agent's own trace for the first licence:</p>
-        <Code>{one.trace.join('\n')}</Code>
-        {poison && <Code>{poison.trace.join('\n')}</Code>}
-        {scale && <p>The {n(scale.n)} licences went into one <b>OpenTimestamps</b> batch: one Bitcoin block ({scale.block}) commits to all of them, each with its own small proof. Every bill was checked before paying, and {scale.sample} picked at random were re-checked from scratch with <b>verifyLicence</b>. Money is simulated here; signatures, invoices, proofs and checks are real.</p>}</CodeDrawer>
-      {scale && <Next from="stop2" />}</>}
-  </Stop>;
-}
-function Budget({ spent, cap }: { spent: number; cap: number }) {
+export function Budget({ spent, cap }: { spent: number; cap: number }) {
   return <div className="mt-5" data-testid="budget"><div className="flex justify-between text-[13px] text-neutral-500"><span>Daily budget</span><span className="tabular-nums">{usdFromSats(spent, { whole: true })} of {usdFromSats(cap, { whole: true })} used</span></div><div className="mt-1 h-2.5 rounded-full bg-neutral-200"><div className="h-2.5 rounded-full bg-neutral-900 transition-all duration-500" style={{ width: `${Math.min(100, spent / cap * 100)}%` }} /></div></div>;
 }
-function Counter({ k }: { k: number }) {
+export function Counter({ k }: { k: number }) {
   return <div className="rounded-2xl border border-neutral-200 bg-white p-6 text-center" data-testid="counter" aria-live="polite"><div className="text-[64px] font-bold leading-none tabular-nums">{n(k)}</div><div className="mt-2 text-[15px] text-neutral-500">licences bought and checked, one by one</div>
     <div className="mx-auto mt-4 h-2 max-w-[420px] rounded-full bg-neutral-200"><div className="h-2 rounded-full bg-emerald-500 transition-all" style={{ width: `${k / S.SCALE * 100}%` }} /></div></div>;
-}
-
-// ---------- Stop 3: anyone verifies ----------
-export function Stop3() {
-  const st = useStory(); const v = st.r.s3button as Verdict | undefined; const reg = st.r.s3reg; const fake = st.r.s3fake as Verdict | undefined;
-  const check = async () => { const out = await story.run('s3button', S.licenseButton); if (out?.result.ok) { testkit.licence(); testkit.stopDone('stop3'); story.finish('stop3'); } };
-  return <Stop id="stop3" title="Anyone verifies" why="A video site, a regulator or a fan can check a licence alone, in seconds, without asking Alice or any company. It needs the licence file, a view of Bitcoin, and someone it trusts to say who owns the song.">
-    <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white" data-testid="video-card">
-      <div className="relative flex aspect-video items-center justify-center bg-[linear-gradient(135deg,#334155,#0f172a_55%,#000)]"><span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-black"><Play size={22} className="ml-1" /></span><span className="absolute bottom-3 left-3 rounded-md bg-black/60 px-2 py-1 text-[12px] text-white">♪ "Rain" · Alice</span></div>
-      <div className="flex flex-wrap items-center gap-3 p-4"><div className="flex-1"><div className="font-semibold">Bob's travel video</div><div className="text-[13px] text-neutral-500">A video site, with a licence attached</div></div>
-        {!v ? (st.busy === 's3button' ? <Busy label="Checking…" /> : <BigButton onClick={check} data-testid="license-this">✓ Check the licence</BigButton>) : <span className="rounded-full bg-emerald-500/15 px-3 py-1.5 text-[14px] font-semibold text-emerald-700">Licensed ✓</span>}</div></div>
-    {v && <>
-      <VerdictCard v={v}>{v.result.ok && <><p className="mt-1 text-[15px] text-neutral-600">Checked here, alone, in {Math.max(1, Math.round(v.ms))} ms: Alice and her co-owners agreed, the money went to her, and it was paid.</p><Proven /></>}</VerdictCard>
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6" data-testid="regulator"><h2 className="text-[20px] font-semibold">A regulator asks: "Prove you had permission to train on this song."</h2>
-        <p className="mt-1 text-[15px] text-neutral-600">ModelCo trains an AI music model on "Rain". Months later it hands over its licence and its training log.</p>
-        {!reg ? <div className="mt-4"><BigButton variant="quiet" disabled={!!st.busy} onClick={() => story.run('s3reg', S.regulatorCheck)}>{st.busy === 's3reg' ? 'Checking…' : 'Check ModelCo\'s proof'}</BigButton></div>
-          : <><ul className="mt-4 space-y-2">{reg.checks.map((c: any) => <Row key={c.text} ok={c.ok}>{c.text}</Row>)}</ul><div className={cx('mt-4 text-[18px] font-semibold', reg.ok ? 'text-emerald-700' : 'text-red-700')}>{reg.ok ? 'Permission proven ✓' : 'Not proven'}</div></>}</section>
-      <Cheat title='sell a copy as "Alice Official"'>
-        <p className="text-[15px] text-neutral-600">A copycat account calls itself "Alice Official", signs its own offer for "Rain" and sells a licence. Is it real?</p>
-        {!fake ? <div className="mt-3"><BigButton variant="cheat" disabled={!!st.busy} onClick={() => story.run('s3fake', S.fakeCaught)}>Check the copycat's licence</BigButton></div>
-          : <div className="mt-3"><Bad testid="cheat-fake" line={fake.result.ok ? 'It got through' : 'Fake ✗ Caught: "Alice Official" never owned the rights to "Rain"'}><p className="mt-1 text-[14px] text-neutral-600">The copy is signed correctly and was really paid. What it cannot fake is who owns the song: Alice's distributor, which this checker trusts, signed that Alice's account owns "Rain". With no voucher like that, the answer would be "owner not checked", never "real".</p></Bad></div>}
-      </Cheat>
-      <CodeDrawer><p><b>verifyLicence</b> runs nine checks on the <b>bundle</b>: the offer signature, the <b>binding</b> between Alice's key and her Lightning <b>node</b>, every co-owner's consent, the request, the <b>invoice</b> (signed by the bound node, committing to the request), the <b>preimage</b>, and the Bitcoin timestamp (an <b>OpenTimestamps</b> proof). Check 9: has the offer been withdrawn? These nine prove that this account sold the licence and was paid. They do not prove it owns the song. That is <b>check 10</b>: it needs a voucher you trust (here the distributor's signed vouch) or a chain of title that starts from one. Without it, the result says <i>unverified ownership</i>.</p>
-        <Code>{`import { verifyLicence } from 'mll'
-const result = await verifyLicence(bundle, chain, { ownership: { trust: [distributorKey], vouches } })
-if (result.ok && result.ownership?.status === 'verified') showBadge('Licensed ✓')
-// copycat → ${fake ? `{ ok: ${fake.result.ok}, code: '${fake.result.code}', ownership: '${fake.result.ownership?.status}' }` : '(try it above)'}
-// no voucher → { ok: true, ownership: 'unverified' }: sold and paid, owner not checked`}</Code>
-        <p><button className="underline" onClick={() => go('verify')}>Check your own licence file →</button> · <button className="underline" onClick={() => go('redteam')}>Try to break it →</button></p></CodeDrawer>
-      <Next from="stop3" /></>}
-  </Stop>;
 }
 
 // ---------- Extra: rights change hands ----------
