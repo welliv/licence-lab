@@ -20,6 +20,7 @@ export const music = {
     if (hero) { try { const b = new Uint8Array(await (await fetch(base + hero.file)).arrayBuffer()); registerTrackFile({ role: 'rain', sha256: hero.sha256, label: `${hero.file} (${(hero.bytes / 1e6).toFixed(1)} MB)`, bytes: b }, sha256hex); heroStatus = 'hash checked'; }
       catch (e: any) { heroStatus = `not used: ${e.message}`; } }
     for (const [cast, role] of [['frank', 'remix'], ['dave', 'dave']] as const) { const t = tracks.find(x => x.cast === cast); if (t) registerTrackFile({ role, sha256: t.sha256, label: t.file }); }
+    for (const t of tracks) if (t.id !== heroId) registerTrackFile({ role: `track:${t.cast}`, sha256: t.sha256, label: t.file }); // so the file check knows every playlist track
     loaded = true; bump();
   },
   get loaded() { return loaded; }, get tracks() { return tracks; }, get heroStatus() { return heroStatus; },

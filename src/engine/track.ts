@@ -28,4 +28,5 @@ export function registerTrackFile(f: TrackFile, hash?: (b: Uint8Array) => string
   FILES[f.role] = f;
 }
 export const trackFile = (role: string): TrackFile | undefined => FILES[role];
+export const allTrackFiles = (): TrackFile[] => Object.values(FILES);
 export const clearTrackFiles = () => { for (const k of Object.keys(FILES)) delete FILES[k]; };

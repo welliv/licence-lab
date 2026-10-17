@@ -15,7 +15,7 @@ import { writeOts, verifyOts, type Op } from '../lib/mll/ots';
 import { makeTransfer, makeSuccessionPlan, makeCosign, makeCourtVouch, titlePayload, titleDigest, checkTitle, type Anchored, type TitleRecords, type Title, type TransferInput, type PlanInput } from '../lib/mll/rights';
 import { sha256hex, sha256, bytesToHex, hexToBytes, utf8ToBytes, concatBytes, randomBytes } from '../lib/mll/util';
 import { CAST, persona } from './cast';
-import { rainWav, trackFile, type TrackFile } from './track';
+import { rainWav, trackFile, allTrackFiles, type TrackFile } from './track';
 export type { Event, LicenceBundle, Result, Requirements, Invoice };
 export { KIND, tagv, verifyEvent, decodeInvoice, grantDigest, checkLink, sha256hex };
 
@@ -136,7 +136,7 @@ export class Lab {
   title: Required<TitleRecords> = { transfers: [], plans: [], cosigns: [], vouches: [], bindings: [] }; titleOrigin?: string; titleTrust: string[] = [];
   /** Check 10: owner vouches (NIP-32 label, kind 1985) and the keys this verifier trusts to make them (e.g. the distributor). */
   ownerVouches: Event[] = []; ownerTrust: string[] = [];
-  ownerVouch(voucher: string, owner: string, ref = 'distributor record') { const v = makeOwnerVouch(this.key(voucher), this.pub(owner), this.trackHash, ref); this.ownerVouches.push(v); if (!this.ownerTrust.includes(this.pub(voucher))) this.ownerTrust.push(this.pub(voucher)); this.publish(v, voucher, 'owner vouch ✍'); return v; }
+  ownerVouch(voucher: string, owner: string, ref = 'distributor record', x = this.trackHash) { const v = makeOwnerVouch(this.key(voucher), this.pub(owner), x, ref); this.ownerVouches.push(v); if (!this.ownerTrust.includes(this.pub(voucher))) this.ownerTrust.push(this.pub(voucher)); this.publish(v, voucher, 'owner vouch ✍'); return v; }
   /** Timestamp a title record on the (simulated) chain with an "MLT1" OP_RETURN that commits to the record and the co-signatures collected so far. A record can be timestamped again (new entry) after more co-signatures. */
   anchorTitle(r: Anchored, note: string) { const co = this.title.cosigns.filter(c => tagv(c, 'e') === r.event.id).map(c => c.id); const b = this.chain.mine({ time: this.now, opReturns: [titlePayload(titleDigest(r.event.id, co))], note }); const o = b.ors[0];
     if (r.anchor) { r = { event: r.event }; this.title.transfers.push(r); } r.anchor = { type: 'opreturn', txid: o.txid, blockhash: b.hash, height: b.height }; r.cosigns = co; this.flow('bitcoin', 'bitcoin', `⛓ title record in block ${b.height}`, 'anchor'); return r; }
@@ -157,7 +157,7 @@ export class Lab {
   daveHash() { return trackFile('dave')?.sha256 ?? sha256hex('Dawn master v1'); }
   /** Extra check (not one of the nine): do the audio bytes we hold hash to the offer's "x" tag? */
   fileCheck(offer: Event): FileCheck { const x = tagv(offer, 'x') ?? '';
-    const known: TrackFile[] = [{ role: 'rain', sha256: this.trackHash, label: this.trackLabel, bytes: this.track }, ...(['remix', 'dave'].map(r => trackFile(r)).filter(Boolean) as TrackFile[])];
+    const known: TrackFile[] = [{ role: 'rain', sha256: this.trackHash, label: this.trackLabel, bytes: this.track }, ...allTrackFiles().filter(f => f.role !== 'rain')];
     const f = known.find(k => k.sha256 === x); if (!f) return { ok: false, offerHash: x, reason: 'no audio file here hashes to the offer\'s track hash' };
     const fileHash = f.bytes ? hashBytes(f.bytes) : f.sha256; return { ok: fileHash === x, offerHash: x, fileHash, label: f.label, recomputed: !!f.bytes, reason: fileHash === x ? undefined : 'file bytes changed' }; }
   constructor(seed = 'rain') {
