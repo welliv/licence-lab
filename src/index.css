@@ -27,3 +27,5 @@ html.dark {
 html.dark body { background: var(--page); }
 html.dark .scroll-thin::-webkit-scrollbar-thumb { background: #3a3c44; }
 html.dark .shadow-sm, html.dark .shadow-md, html.dark .shadow-lg { box-shadow: 0 1px 0 rgba(255,255,255,.03), 0 8px 24px rgba(0,0,0,.45); }
+.coin { left: 0; opacity: 0; animation: coin .9s ease-in-out both; } @keyframes coin { 0% { left: 0; opacity: 0 } 15% { opacity: 1 } 85% { opacity: 1 } 100% { left: calc(100% - 16px); opacity: 0 } }
+.coin-y { animation: coiny .8s ease-in-out 3 both; } @keyframes coiny { 0% { transform: translateY(-10px); opacity: 0 } 30% { opacity: 1 } 100% { transform: translateY(14px); opacity: 0 } }
