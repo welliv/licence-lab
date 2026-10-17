@@ -1,0 +1,124 @@
+{
+  "startedAt": "2026-10-17T07:15:06.888Z",
+  "steps": [
+    {
+      "name": "wallets",
+      "faucetNode": "03b6b08ea1f2b70f2260886c9b28fed115b833f18c227abdbf0e8d0629d42b430c",
+      "lud16": {
+        "ava": "nwc1792221307180@getalby.com",
+        "mia": "nwc1792221308534@getalby.com",
+        "jay": "nwc1792221309975@getalby.com",
+        "nova": "nwc1792221311258@getalby.com",
+        "lena": "nwc1792221312447@getalby.com",
+        "scout": "nwc1792221313784@getalby.com"
+      },
+      "balances": {
+        "ava": 200,
+        "mia": 2000,
+        "jay": 200,
+        "nova": 200,
+        "lena": 200,
+        "scout": 2000
+      }
+    },
+    {
+      "name": "faucet get_budget (scout)",
+      "budget": {}
+    },
+    {
+      "name": "top-up mia +300",
+      "mia": 2300
+    },
+    {
+      "name": "publish",
+      "binding": "c1ec249e953c669f829f2464601967d704902332a39a0d14da898b2a7787b4ef",
+      "offer": "3d84c85e583937f90f3ff00746e405f02f08ba1e89eb839e9765243d397bfd87",
+      "consents": 3
+    },
+    {
+      "name": "request",
+      "request": "f9d7da0935e7bf74f6f9446aa23ff533cb3e8c6a68e0f93483b5b50702094174",
+      "pubkey": "a9d3c74e178356a4c9c16468bdc1b18918b57d01f38bbae0a05c7d276bdc929f",
+      "mainPub": "dff27aa3858246136ad01e443886911bb51978f530c8cab58e66116e149a8677"
+    },
+    {
+      "name": "invoice",
+      "invoice": "lnbc1u1p4dxgyyhp5mnv83lv62w8fyrwhhlyqejp793mj739qz9htdkepj6lf7pecnj6qnp4qwmtpr4p72ms7gnq3pkfk2876y2msvl33s3840dlp6xsv2w59dpscpp5g2cw9vesqpnzulnaevs2znsl28uec48638pmnhsuhms5yn64pvdssp5urenea730w0hfzcxevhnydrndv3uuz026ms359nl0d9mxmlk7emq9qyysgqcqzp2xqzjcgguynppefrmdzzjzchfx0zqz0cp5pph0p2z4gffj8kr8vnzmgyykqgedmdkj0dmmtcxm564ayaw7qaeqxylsr7vvk4u76jc2wvpec0cpahj7ku",
+      "prefix": "lnbc1u",
+      "payee": "03b6b08ea1f2b70f2260886c9b28fed115b833f18c227abdbf0e8d0629d42b430c",
+      "descriptionHash": "dcd878fd9a538e920dd7bfc80cc83e2c772f44a0116eb6db2196be9f07389cb4",
+      "requestHash": "dcd878fd9a538e920dd7bfc80cc83e2c772f44a0116eb6db2196be9f07389cb4",
+      "amountMsat": "100000"
+    },
+    {
+      "name": "pay",
+      "preimage": "df05497330a6a713768b5019a0970dd959e7fa563fae70938215c54d8e7d68d9",
+      "paymentHash": "42b0e2b33000662e7e7dcb20a14e1f51f99c54fa89c3b9de1cbee1424f550b1b",
+      "before": {
+        "mia": 2300,
+        "ava": 200
+      },
+      "after": {
+        "mia": 2200,
+        "ava": 300
+      }
+    },
+    {
+      "name": "pay again",
+      "refused": true,
+      "reason": "Already paid: the payment record has the preimage, so it will not pay twice."
+    },
+    {
+      "name": "verifyLicence",
+      "ok": false,
+      "code": "binding_node_sig",
+      "reason": "node-sig was not made by the bound node",
+      "checks": [
+        "1:pass",
+        "2:fail",
+        "3:pass",
+        "4:todo",
+        "5:todo",
+        "6:todo",
+        "7:todo",
+        "8:todo",
+        "9:todo"
+      ],
+      "facts": [
+        "✓ Invoice comes from the node named in the binding",
+        "✓ Invoice description_hash = hash of the exact request",
+        "✓ Amount = the amount the buyer signed",
+        "✓ Preimage matches the payment hash (it was paid)",
+        "✓ Buyer-side pre-pay check (clientCheck) passes",
+        "✗ Node co-signed the binding (check 2)"
+      ]
+    },
+    {
+      "name": "payout",
+      "lines": [
+        "Jay 20 sats",
+        "Nova 15 sats",
+        "Lena 15 sats"
+      ],
+      "balances": {
+        "ava": 250,
+        "mia": 2200,
+        "jay": 220,
+        "nova": 215,
+        "lena": 215,
+        "scout": 2000
+      }
+    },
+    {
+      "name": "scout pays within Lab budget",
+      "spent": 100,
+      "scout": 1900
+    },
+    {
+      "name": "scout second buy",
+      "refused": true,
+      "reason": "Refused by the Lab-enforced budget: daily cap 150 sats would be passed."
+    }
+  ],
+  "finishedAt": "2026-10-17T07:15:32.650Z"
+}

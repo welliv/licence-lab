@@ -1,5 +1,6 @@
 import { chromium } from 'playwright'; import { readFileSync } from 'fs';
-const pairs = [['1-getting-started', 'alby/01-getting-started.png', '../../screenshots/01-getting-started.png'], ['2-gating-and-parties', 'alby/03-x402.png', '../../screenshots/02-s3-set-up-parties.png'],
+const pairs = [['1-getting-started', 'alby/gs-slide-1.png', '../../screenshots/01-getting-started.png'], ['1b-getting-started-last-slide', 'alby/gs-after-slides.png', '../../screenshots/01c-getting-started-slide-3.png'],
+  ['8-live-wallets-real-payment', 'alby/fc-3-paid.png', '../../screenshots/16-live-paid-balances.png'], ['9-free-play-guards', 'alby/fc-2-garbage-pay.png', '../../screenshots/02b-s3-free-play-guard.png'], ['2-gating-and-parties', 'alby/03-x402.png', '../../screenshots/02-s3-set-up-parties.png'],
   ['3-steps-after-run', 'alby/04-after-payment-log.png', '../../screenshots/03-s3-steps-done.png'], ['4-flow-diagram', 'alby/05-flow-diagram.png', '../../screenshots/04-s3-flow-diagram.png'],
   ['5-balance-chart', 'alby/06-balance-chart.png', '../../screenshots/12-s5-balance-chart.png'], ['6-code-tab', 'alby/04-tab-code.png', '../../screenshots/08-s11-code-tab.png'], ['7-production-tab', 'alby/04-tab-production.png', '../../screenshots/09-production-tab.png']];
 const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }); const p = await b.newPage({ viewport: { width: 2000, height: 760 } });

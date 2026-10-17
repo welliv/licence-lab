@@ -9,6 +9,7 @@ import { VerifyPage } from './VerifyPage';
 import { AboutPage } from './About';
 import { byId } from '../scenarios';
 import { exposeRepl } from './repl';
+import { LivePage } from './LivePage';
 export function App() {
   const { path, params } = useRoute(); const [open, setOpen] = useState(false);
   useEffect(() => { exposeRepl(); }, []);
@@ -16,6 +17,7 @@ export function App() {
   let page: React.ReactNode;
   if (path === 'start') page = <GettingStarted />;
   else if (path === 'verify') page = <VerifyPage />;
+  else if (path === 'live') page = <LivePage />;
   else if (path === 'redteam') page = <RedTeamIndex />;
   else if (path.startsWith('attack/')) page = <AttackPage id={path.slice(7)} key={path} />;
   else if (path.startsWith('about/')) page = <AboutPage which={path.slice(6)} />;

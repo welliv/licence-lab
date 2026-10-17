@@ -1,0 +1,9 @@
+// Writes public/mutinynet-status.json for the Live page. Reads local state only; never fakes a record.
+import { existsSync, readFileSync, writeFileSync } from 'fs'; import { execSync } from 'child_process'; import { homedir } from 'os';
+const running = name => { try { return execSync(`pgrep -f '${name}'`, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() ? 'running' : 'not running'; } catch { return 'not running'; } };
+const token = existsSync(`${homedir()}/.mutinynet/token`) && readFileSync(`${homedir()}/.mutinynet/token`, 'utf8').trim().length > 0;
+const resultsFile = '/workspace/mll-audit/docs/mutinynet-results.json'; let recorded = [];
+if (existsSync(resultsFile)) { try { const r = JSON.parse(readFileSync(resultsFile, 'utf8')); recorded = (r.chainTxs ?? []).map(t => ({ kind: t.kind ?? t.label, txid: t.txid, height: t.height, note: t.note })); } catch {} }
+const status = { checkedAt: new Date().toISOString(), faucetLogin: token ? 'ok' : 'needs login', token, localNode: running('[b]itcoind'), otsd: running('[o]tsd'), opReturnBot: running('[O]P-RETURN-Bot|[o]preturnbot'), recorded,
+  howTo: token ? ['Start the stack: bash /workspace/mutinynet/autopilot.sh', 'Then: npx tsx scripts/mutinynet-anchor.mts'] : ['On the box: cd /workspace/mll-audit/ref/mutinynet-cli && cargo build --release && ./target/release/mutinynet-cli login and approve the GitHub device code it prints, at github.com/login/device.', 'The token is saved to ~/.mutinynet/token (valid 31 days). /workspace/mutinynet/autopilot.sh then funds the node, opens channels and starts otsd and OP-RETURN-Bot.', 'Run: npx tsx scripts/mutinynet-anchor.mts (stamps and revokes on Mutinynet and records txids here).'] };
+writeFileSync('public/mutinynet-status.json', JSON.stringify(status, null, 2)); console.log(JSON.stringify(status, null, 2));

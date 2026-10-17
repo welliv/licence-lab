@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-17T07:17:36.902Z",
+  "faucetLogin": "needs login",
+  "token": false,
+  "localNode": "not running",
+  "otsd": "not running",
+  "opReturnBot": "not running",
+  "recorded": [],
+  "howTo": [
+    "On the box: cd /workspace/mll-audit/ref/mutinynet-cli && cargo build --release && ./target/release/mutinynet-cli login and approve the GitHub device code it prints, at github.com/login/device.",
+    "The token is saved to ~/.mutinynet/token (valid 31 days). /workspace/mutinynet/autopilot.sh then funds the node, opens channels and starts otsd and OP-RETURN-Bot.",
+    "Run: npx tsx scripts/mutinynet-anchor.mts (stamps and revokes on Mutinynet and records txids here)."
+  ]
+}

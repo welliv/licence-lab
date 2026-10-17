@@ -1,0 +1,16 @@
+import WebSocket from 'ws'; (globalThis as any).WebSocket = WebSocket;
+import { Nwc, faucetWallet, faucetTopUp } from '../src/live/nwc';
+import { decodeInvoice } from '../src/lib/mll/bolt11';
+import { sha256 } from '@noble/hashes/sha256'; import { bytesToHex } from '@noble/hashes/utils';
+const a = new Nwc(await faucetWallet(2000)), b = new Nwc(await faucetWallet(5000));
+const info = await a.getInfo(); console.log('info', JSON.stringify(info));
+console.log('bal a,b', await a.balanceSat(), await b.balanceSat());
+await faucetTopUp(a.p.lud16!, 500).then(() => console.log('topup ok')).catch(e => console.log('topup', e.message)); console.log('bal a after topup', await a.balanceSat());
+const dh = bytesToHex(sha256(new TextEncoder().encode('hello lab')));
+const inv = await a.makeInvoice(21, { descriptionHash: dh }); const d = decodeInvoice(inv.invoice); console.log('inv', inv.invoice.slice(0, 20), 'node', d.payee ?? (d as any).nodeId, 'dh', d.descriptionHash === dh, d.descriptionHash);
+const t0 = Date.now(); const pr = await b.payInvoice(inv.invoice); console.log('paid', pr, Date.now() - t0, 'ms', 'preimage ok', bytesToHex(sha256(Buffer.from(pr.preimage, 'hex'))) === d.paymentHash);
+console.log('bal a,b', await a.balanceSat(), await b.balanceSat());
+console.log('lookup', JSON.stringify(await a.lookupInvoice(d.paymentHash)).slice(0, 200));
+await a.signMessage('MLB1 test').then(r => console.log('sign', JSON.stringify(r))).catch(e => console.log('sign err', e.code, e.message));
+const info2 = await b.getInfo(); console.log('b pubkey same?', info2.pubkey === info.pubkey);
+a.close(); b.close(); process.exit(0);

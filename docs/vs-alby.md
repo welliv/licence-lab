@@ -1,66 +1,158 @@
 # Licence Lab compared with Alby Sandbox
 
-Date: 17 Oct 2026. Compared: Licence Lab (local build, commit below) and the public Alby Sandbox (sandbox.albylabs.com).
-Method: both apps opened in headless Chrome at 1440×900. Alby screenshots are read-only: we only navigated and opened tabs, and created no wallets. Shots showing Alby with connected wallets come from an earlier research session (`/workspace/sandbox-research/screenshots`). No Alby source code was copied. Their repository has no licence, so we matched the look and behaviour only.
+Updated 17 Oct 2026 (second pass: live test wallets, free play, new Getting Started, dark theme).
+Compared: Licence Lab (local build) and the public Alby Sandbox (sandbox.albylabs.com), both opened in headless Chrome at 1440×900.
 
-Side-by-side images are in `docs/compare/side-by-side/` (Alby on the left, Licence Lab on the right):
+**How Alby was observed:** read-only, except that one fact-check created the two faucet wallets Alby's "Simple Invoice Payment" needs (Alice and Bob). No Alby source code was copied; their repository has no licence.
+
+**Theme:** Licence Lab is now **dark by default**, with a light toggle in the sidebar. Alby is shown in its default light theme.
+
+## Side-by-side images
+
+All are in `docs/compare/side-by-side/`, with Alby on the left and Licence Lab on the right.
 
 | # | View | File |
 |---|---|---|
-| 1 | Getting started | `side-by-side/1-getting-started.png` |
-| 2 | Gating banner and party cards | `side-by-side/2-gating-and-parties.png` |
-| 3 | Step cards after a run | `side-by-side/3-steps-after-run.png` |
-| 4 | Flow diagram | `side-by-side/4-flow-diagram.png` |
-| 5 | Balance chart | `side-by-side/5-balance-chart.png` |
-| 6 | Code tab | `side-by-side/6-code-tab.png` |
-| 7 | Production tab | `side-by-side/7-production-tab.png` |
+| 1 | Getting started, first slide | `1-getting-started.png` |
+| 1b | Getting started, last slide | `1b-getting-started-last-slide.png` |
+| 2 | Gating banner and party cards | `2-gating-and-parties.png` |
+| 3 | Step cards after a run | `3-steps-after-run.png` |
+| 4 | Flow diagram | `4-flow-diagram.png` |
+| 5 | Balance chart | `5-balance-chart.png` |
+| 6 | Code tab | `6-code-tab.png` |
+| 7 | Production tab | `7-production-tab.png` |
+| 8 | Real faucet wallets after a real payment | `8-live-wallets-real-payment.png` |
+| 9 | Acting out of order: Alby's wallet error vs our guard | `9-free-play-guards.png` |
+
+## Fact-check of the two earlier claims
+
+### (a) "Alby's free play is looser than our in-order steps": TRUE
+
+Observed in `scripts/alby-factcheck.mjs`, with shots `docs/compare/alby/fc-*.png`:
+
+- **Before wallets:** each party card offers only "Create Test Wallet" and a "Connect" button, which stays disabled until a connection string is pasted.
+- **After both wallets exist:** both parties' panels are live at the same time: Alice's "Create Invoice" and Bob's "Pay Invoice". Nothing enforces the story's order.
+- **What gates an action:** only its own input field. "Pay Invoice" is disabled while the invoice field is empty. Typing any text, even `lnbc1garbage`, enables it. Pressing it sends the request to the wallet, which answers: "failed: Failed to decode bolt11 invoice…".
+- **Passing data between panels:** when Alice creates an invoice, it is filled into Bob's field automatically ("→ Invoice sent to Bob"). After paying, the field clears and "Pay Invoice" is disabled again.
+- **Other scenarios:** Lightning Address and Hold Invoice behave the same way.
+
+**Patch.** Licence Lab steps are no longer locked:
+
+- Every step card can be pressed at any time once the parties are set up.
+- If something it needs is missing, the card shows a guard message, for example "Not yet: this needs step 4 ("Mia pays") first." When the library itself refuses, it shows "Refused: <the library's own reason>".
+- Done steps have a "Do it again" link, so you can pay twice and see the payment record stop you.
+- "Run all steps" still plays the story in order.
+- On the Live page, every party's actions are available all the time, as in Alby.
+
+**Tested.** `scripts/ui-check.mjs` presses S3 step 5 first and expects a guard message rather than an error.
+
+### (b) "Alby's Getting Started slides are cleaner": TRUE
+
+Shots: `docs/compare/alby/gs-slide-1.png` and `gs-after-slides.png`.
+
+- **Alby:** three centred slides, one idea each. A large heading, large emoji characters, one or two short lines, a black "Next →" button and three small dots. The last slide reads "Try the first scenario →". Nothing else is on the page.
+- **Ours before:** a card with art and text side by side, plus the whole cast and all 24 scenarios on the same page. Busier.
+
+**Redesign:** three centred slides in the same structure:
+
+1. "Meet Ava and "Rain"": cover, Ava, and a row of the buyers who join later, plus a demo player.
+2. "One licence, six signed parts": six tiles.
+3. "Explore real-world scenarios": 🚀, then "Try the first scenario →".
 
 ## Feature by feature (scores out of 10)
 
 | Area | Alby Sandbox | Licence Lab | Alby | Lab |
 |---|---|---|---|---|
-| Layout and navigation | Left sidebar with emoji items, grouped (402, Bitcoin Connect), links out | Same pattern. Five scenario groups, a red-team group, library, paper and help. Hash routes; works offline | 9 | 9 |
-| Scenario breadth | 18 scenarios: payments, invoices, LNURL, 402 protocols, UI kits | 24 scenarios across 5 parts, plus 19 attacks | 8 | 9 |
-| Header | Title, black complexity pill, 💡 popover, `<>` link to code | Same, plus a scenario and status pill and a "how it works" popover | 9 | 9 |
-| Gating banner | Yellow "Connect all required wallets" | Yellow "Set up all the parties", with a one-click "Set up all (n)" | 9 | 9 |
-| Party cards | Real NWC test wallet from a faucet, live balance, ≈ $ (live), lud16, ⋮ menu, "or paste connection secret" | Real Nostr key per party, simulated sats balance, ≈ $ at a fixed Lab rate (labelled), lud16, ⋮ menu, NWC budget bar for agents | 9 | 7 |
-| Per-party action panels | Free-form inputs (amount, description, paste an invoice), separate panel per party | Guided step cards (2-column grid) with inputs where they matter, mono copy fields, traces, a mini 9-check strip and "sent to …" lines | 8 | 8 |
-| Free play | Any order; paste any invoice | Steps run in order; inputs change outcomes (for example seconds > 240 fails check 5). The attack editor is the free-form part | 8 | 6 |
-| Transaction log | Time, parties, amount, text, Clear | Same, plus a real/simulated badge per row and an expandable "code and data" per entry | 8 | 9 |
-| Flow diagram | Lifelines with labelled arrows | Lifelines, coloured arrows by type (event, invoice, payment, preimage, anchor), failed arrows dashed red, balances under the avatars | 8 | 8 |
-| Balance chart | Lines per wallet | Lines per party; "change since setup" or absolute; hover values | 8 | 8 |
-| Code tab | Sub-nav (This Scenario, Getting Started, REPL, Basics, Payments …), snippet cards with Copy, syntax colours | Sub-nav with icons; "This scenario" shows the exact code that ran, with this run's values; 15 library snippets; Copy; syntax colours | 9 | 8 |
-| REPL | In-app REPL | In-page REPL with `w` (the scenario world), `verify` and `events`, plus `window.lab` in the console | 8 | 8 |
-| Example prompts | Prompts per scenario | Prompts per scenario, each ending with a test and screenshot instruction | 8 | 7 |
-| Production tab | Test vs production wallets, recommended wallets | Real-vs-simulated table, empty Mutinynet recorded-proof slots, known open issues (A18, A12b, fiat lock), wallets to try | 8 | 8 |
-| Getting started | 3 clean slides ("Meet Alice & Bob") | 3 slides with cover art and a playable demo of "Rain", the cast and a list of all scenarios | 9 | 8 |
-| Real network | Real Lightning payments between faucet wallets | Real cryptography (signatures, BOLT11, OTS, verifyLicence); money, relays and blocks simulated, and labelled on every row | 10 | 5 |
-| Verification and attacks | None | 9-check panel on every verification, a "Verify a bundle" page, and 19 attacks with a tamper editor, "re-sign as Mallory" and a score | — | 9 |
-| Replay and sharing | None seen | Timeline scrubber and replay over log, flow, balance and inspect; share link that replays to step N | — | 8 |
-| Inspect | None | JSON of every artefact, bundle tray with 7 slots, download bundle | — | 8 |
-| Honesty labels | Test vs production explained | Every step and log row badged REAL CRYPTO / SIMULATED / HONEST LIMIT / OPEN ISSUE | 7 | 9 |
-| Links out (skill, faucet, source, feedback) | Builder skill, NWC faucet, source, feedback, help | Library, paper and help (local). Skill planned | 9 | 5 |
-| Mobile | Responsive | Hamburger sidebar, single-column cards (`screenshots/13-mobile-s3.png`) | 8 | 8 |
-| Tests | Not visible | 53 unit and headless tests, plus a browser check that runs all 24 scenarios to the end | — | 9 |
+| Layout and navigation | Sidebar with emoji items, groups, links out | Same pattern; adds Live test wallets, red team, library, paper and help | 9 | 9 |
+| Scenario breadth | 18 scenarios | 24 scenarios, 19 attacks and a live tier | 8 | 9 |
+| Header | Title, complexity pill, 💡, `<>` | Same, plus status pill and "how it works" | 9 | 9 |
+| Gating banner | "Connect all required wallets" | "Set up all the parties" / "Create all (n)" | 9 | 9 |
+| Party cards | Real faucet NWC wallet, live balance, ≈ $, lud16, ⋮, paste a connection secret | **Live tier: real faucet NWC wallets, real balances, lud16, top-up, ⋮ forget.** Instant tier: simulated sats with a labelled Lab ≈ $ rate. No pasting of your own wallet (see gaps) | 9 | 8 |
+| Action panels | Free-form inputs; invoice handed across | Step cards with inputs, copy fields, traces and a mini 9-check strip; Live page panels per party | 8 | 8 |
+| Free play | Any panel any time, gated only by its own field | Any step any time with guard messages and "Do it again"; Live page fully free | 8 | 8 |
+| Transaction log | Time, parties, amount, text | Same, plus a real/simulated badge and expandable code and data | 8 | 9 |
+| Flow diagram | Lifelines and arrows | Lifelines, coloured by type, failures dashed, balances under the avatars | 8 | 8 |
+| Balance chart | Lines per wallet | Lines per party, "change since setup" or absolute | 8 | 8 |
+| Code tab | Sub-nav, snippet cards, syntax colours | Sub-nav with icons, code that ran with this run's values, 15 snippets, colours | 9 | 8 |
+| REPL | In-app | In-page REPL (`w`, `verify`, `events`) plus `window.lab` | 8 | 8 |
+| Example prompts | Per scenario | Per scenario | 8 | 7 |
+| Production tab | Test vs production, recommended wallets | Real-vs-simulated table (now includes the Live tier and Mutinynet reads), recorded-proof slots, open issues, wallets | 8 | 9 |
+| Getting started | 3 clean slides | 3 clean slides in the same structure | 9 | 9 |
+| Real network | Real NWC payments between faucet wallets. **The faucet says its "balances are not real and exist only inside the NWC Faucet".** | Same faucet, with real payments and preimages. Invoices commit description_hash to the request, and verifyLicence runs on the real preimage. Mutinynet is read for real; writing needs a login | 9 | 8 |
+| Verification and attacks | None | 9-check panel, Verify page, 19 attacks, tamper editor, score | — | 9 |
+| Replay and sharing | None seen | Timeline replay and share link | — | 8 |
+| Inspect | None | JSON, bundle tray, download | — | 8 |
+| Honesty labels | Test vs production | Every row badged; the faucet's catches shown at the top of the Live page | 7 | 9 |
+| Links out | Skill, faucet, source, feedback, help | Library, paper and help (local); skill planned | 9 | 5 |
+| Mobile | Responsive | Responsive (`screenshots/13-mobile-s3.png`) | 8 | 8 |
+| Theme and contrast | Light (no theme toggle seen) | Dark by default plus a light toggle; all main text pairs pass WCAG AA (table below) | 8 | 9 |
+| Tests | Not visible | 55 tests (+1 live test with `LIVE=1`), plus a browser check of all 24 scenarios, free play, Getting Started and the Live page | — | 9 |
 
-Average over the shared areas (the rows where both have a score): Alby 8.5, Licence Lab 7.8. The lower Lab scores come from the deliberate Instant-mode choice (simulated money), guided steps, and no outside links yet. Licence Lab adds four areas Alby does not have: verification and attacks, replay, inspect, and tests.
+**Average over the 20 shared rows:** Alby 8.35, Licence Lab 8.25. Last pass it was Alby 8.5 and Lab 7.8.
 
-## Gaps found and fixed in this pass
+- **Alby moves from 10 to 9 on "Real network".** The fact-check found that its money is the same faucet-only dummy sats.
+- **The Lab rises on:** party cards (+1), free play (+2), real network (+3), Getting Started (+1) and Production (+1), plus the new theme row.
+- **Rows only the Lab has:** attacks, replay, inspect and tests.
 
-1. No ≈ $ line on party cards. Added, at a fixed Lab rate (1 BTC = $80,000), with a label saying it is not live.
-2. Code had no syntax colours. Added a small highlighter with no dependencies.
-3. No in-page REPL (console only). Added a REPL panel in Code → REPL.
-4. Code sub-nav had no icons. Added icons.
-5. The balance chart was unreadable when a large party (StreamCo, 2M sats) sat next to a small one. Added a "change since setup" mode, now the default.
-6. Flow diagram showed "•" for the timestamp calendar. Added an "OTS calendar" party.
-7. "Try A1 →" links wrapped in narrow columns. Fixed.
+### Dark theme contrast (WCAG, `scripts/contrast.mjs`)
+
+| Pair | Ratio | Level |
+|---|---|---|
+| Body text on card | 16.3:1 | AA |
+| Secondary text on card | 9.7:1 | AA |
+| Muted text on card | 7.4:1 | AA |
+| Faint text on card / page | 5.5:1 / 5.9:1 | AA |
+| Primary button text | 16.3:1 | AA |
+| Green / red / amber / orange text on their tints | 10.0 / 9.2 / 12.8 / 12.2 :1 | AA |
+| Links on page | 11.6:1 | AA |
+
+## Live test wallets: what is real
+
+Evidence: `docs/live-evidence.json`, run at 10:15 EAT on 17 Oct 2026 (`npx tsx scripts/live-run.mts`), and the browser run in `screenshots/14-17`.
+
+- **Wallets:** six faucet wallets (Ava, Mia, Jay, Nova, Lena, Scout), all on node `03b6b08e…2b430c`, network "mainnet".
+- **Top-up:** Mia +300 sats through the faucet top-up API.
+- **Invoice:** Ava's wallet made `lnbc1u1p4dxgyy…`. Its description_hash `dcd878fd…` equals the hash of Mia's exact HTTP request.
+- **Payment:** Mia paid it with a real NWC `pay_invoice`. Preimage `df054973…68d9` hashes to payment hash `42b0e2b3…0b1b`. Balances moved from Mia 2,300 → 2,200 and Ava 200 → 300.
+- **Paying twice:** refused by the payment record.
+- **verifyLicence on the real preimage:** checks 1 and 3 pass, then it stops at check 2 (`binding_node_sig`), as expected on the faucet. Five payment facts are proven separately with the library's own functions: invoice node = binding node, description_hash commits to the request, amount, preimage, and clientCheck.
+- **Payouts:** Ava paid Jay 20, Nova 15 and Lena 15 sats, for real.
+- **Scout:** paid 100 sats inside a Lab-enforced budget. Its second buy was refused by the Lab daily cap (150).
+
+**The faucet's catches, all shown in the UI:**
+
+1. **One shared node.** It is the same for every faucet wallet, so check 2 can't tell artists apart. This is A18 for real.
+2. **`sign_message` is RESTRICTED.** The node cannot co-sign the binding, so check 2 can't pass at all.
+3. **Mainnet-format invoices** (`lnbc`). The request uses the mainnet network id to match. The sats are faucet-only.
+4. **No NWC budgets.** `get_budget` returns `{}`, so budgets are enforced by the Lab.
+
+**Safety:** the Lab only pays invoices whose payee is the faucet node, and never more than 5,000 sats at once. It never pays an outside invoice.
+
+## Mutinynet
+
+- **Reading: real, no login.** `MutinynetChain` implements the library's ChainOracle over mutinynet.com's public Esplora API: tip, block lookup, merkle roots, block times, OP_RETURN lookup, and a bounded OP_RETURN scan (it refuses more than 300 blocks rather than pretend). The Live page shows the live tip.
+- **Writing: needs login.** OP_RETURN and OpenTimestamps need Mutinynet coins, and the Mutinynet faucet needs a GitHub device login. Its other route is a mainnet L402 payment, which the Lab never makes. Public OpenTimestamps calendars only stamp Bitcoin mainnet, so the path uses mll-audit's own otsd and the real OP-RETURN-Bot.
+- **The path is built:** `scripts/mutinynet-anchor.mts` stops with "NEEDS LOGIN" until `~/.mutinynet/token` exists. Then it runs mll-audit's Mutinynet suite and checks each txid on public Mutinynet before listing it.
+- **Status file:** `scripts/mutinynet-status.mjs` writes `public/mutinynet-status.json`. Today it reads: login needed, the local node, otsd and OP-RETURN-Bot are not running, and nothing is recorded.
+- **What still needs the user:** build `mutinynet-cli` (its binary is no longer on the box), log in, and approve the GitHub device code.
+
+## Gaps fixed
+
+- **First pass (7):** ≈ $ line, syntax colours, in-page REPL, code nav icons, balance "change since setup", OTS calendar party, link wrapping.
+- **This pass:**
+  - Live faucet tier
+  - free play with guards
+  - "Do it again"
+  - Getting Started redesign
+  - dark theme by default with a light toggle
+  - real Mutinynet reads
+  - Mutinynet write path with a clear "needs login" state
 
 ## Gaps still open
 
-1. **Real money (Tier 1).** Alby runs real Lightning payments between faucet wallets. The Lab simulates money. Next: a Mutinynet tier with recorded runs filling the empty slots on the Production tab.
-2. **Bring your own wallet or key.** Alby lets you paste an NWC secret. The Lab does not, on purpose (test keys only). It could take a test NWC string later, when Tier 1 exists.
-3. **Free play between cards.** Alby lets you paste any invoice into any panel. Lab steps run in order; the free-form part is the attack editor and the Verify page.
-4. **Outside links.** There is no agent skill, faucet, feedback link or public source yet. These come when the repo is pushed, which the user has not approved.
-5. **Getting-started polish.** Alby's slides are cleaner and more centred. Ours are denser.
-6. **Bundle size.** The build is about 660 kB (217 kB gzipped) in one chunk. It could be split per part.
-7. **Protocol open issues found by the Lab** (not UI gaps): A18 shared hosted node; A12b new binding with a stolen key after a revocation; S21 fiat price lock.
+1. **Check 2 on the faucet** cannot pass (no `sign_message`, shared node). It needs a wallet or node the artist controls; Mutinynet LND is ready once logged in.
+2. **Bring your own wallet** (paste an NWC string) is left out on purpose. A real mainnet wallet could pay faucet invoices with real sats.
+3. **Mutinynet writes** need the user's GitHub login.
+4. **Outside links** (skill, feedback, public source) wait until the user approves a push.
+5. **Bundle size:** about 705 kB (231 kB gzipped) in one chunk.
+6. **Protocol open issues:** A18, A12b, S21 fiat lock.

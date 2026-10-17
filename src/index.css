@@ -10,3 +10,20 @@ body { font-size: 14px; }
 .fade-in { animation: fade .25s ease-out; } @keyframes fade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 .bounce-x { animation: bx .5s ease-in-out; } @keyframes bx { 0%,100% { transform: none } 30% { transform: translateX(-4px) } 60% { transform: translateX(4px) } }
 .scroll-thin::-webkit-scrollbar { width: 6px; height: 6px } .scroll-thin::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 3px }
+/* ---------- Dark theme (default). Tailwind 4 colours are CSS variables, so we remap the palette once and every page,
+   card, tab, code block, diagram and chart follows. Light mode = remove the "dark" class. ---------- */
+html.dark {
+  color-scheme: dark;
+  --color-white: #16171b; --page: #0d0e11;
+  --color-neutral-50: #1b1c21; --color-neutral-100: #23252b; --color-neutral-200: #2f3138; --color-neutral-300: #43464f;
+  --color-neutral-400: #8b8e98; --color-neutral-500: #a3a6af; --color-neutral-600: #bcbec6; --color-neutral-700: #d3d5db; --color-neutral-800: #e4e5e9; --color-neutral-900: #f3f4f6;
+  --color-emerald-50: #0f2a20; --color-emerald-100: #12372a; --color-emerald-200: #1d5a42; --color-emerald-500: #10b981; --color-emerald-600: #34d399; --color-emerald-700: #6ee7b7; --color-emerald-800: #a7f3d0;
+  --color-red-50: #2d1215; --color-red-100: #3d171b; --color-red-200: #6b232b; --color-red-400: #f87171; --color-red-500: #ef4444; --color-red-600: #f87171; --color-red-700: #fca5a5; --color-red-800: #fecaca;
+  --color-amber-50: #2a210e; --color-amber-100: #3d2f11; --color-amber-200: #6b5016; --color-amber-400: #fbbf24; --color-amber-600: #fbbf24; --color-amber-700: #fcd34d; --color-amber-800: #fde68a;
+  --color-orange-50: #2d1b0e; --color-orange-100: #3f2611; --color-orange-200: #6e3d14; --color-orange-500: #f97316; --color-orange-600: #fb923c; --color-orange-700: #fdba74; --color-orange-800: #fed7aa;
+  --color-sky-100: #0f2c3d; --color-sky-200: #164059; --color-sky-600: #38bdf8; --color-sky-700: #7dd3fc;
+  --color-violet-700: #c4b5fd; --color-rain-50: #1f1835; --color-rain-100: #2d2350; --color-rain-600: #c4b5fd;
+}
+html.dark body { background: var(--page); }
+html.dark .scroll-thin::-webkit-scrollbar-thumb { background: #3a3c44; }
+html.dark .shadow-sm, html.dark .shadow-md, html.dark .shadow-lg { box-shadow: 0 1px 0 rgba(255,255,255,.03), 0 8px 24px rgba(0,0,0,.45); }

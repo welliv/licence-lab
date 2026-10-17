@@ -1,27 +1,30 @@
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
-import { Button, Card, Cover, Player, cx } from './bits';
+import { Button, Cover, Player, cx } from './bits';
 import { CAST } from '../engine/cast';
-import { SCENARIOS, PARTS } from '../scenarios';
 import { go } from './store';
-const MAIN = ['ava', 'echo', 'jay', 'nova', 'lena', 'mia', 'sam', 'streamco', 'clipai', 'scout', 'kai', 'modelco', 'mallory'];
+const Who = ({ id, big }: { id: string; big?: boolean }) => <div className="flex flex-col items-center"><span className={big ? 'text-[56px] leading-none' : 'text-[26px] leading-none'}>{CAST[id].emoji}</span><span className={cx('mt-1.5 text-neutral-700', big ? 'text-[14px] font-medium' : 'text-[12px]')}>{CAST[id].name}</span></div>;
+const PARTS = [['📜', 'Offer'], ['🤝', 'Consents'], ['🔗', 'Binding'], ['✍️', 'Request'], ['🧾', 'Invoice'], ['🔑', 'Preimage']];
 const SLIDES = [
-  { t: 'Meet Ava and "Rain"', body: <><p>Ava is an independent artist. She made a song called "Rain" with Jay (producer), Nova (featured singer) and Lena (songwriter).</p><p className="mt-2">She wants anyone, or any AI agent, to be able to license it in seconds, pay with Bitcoin over Lightning, and get proof that cannot be faked.</p></>, art: true },
-  { t: 'Six signed parts make a licence', body: <><p>An <b>offer</b> signed by Ava, <b>consents</b> from each co-owner, a <b>binding</b> that ties Ava's key to her Lightning node, the buyer's <b>request</b>, a Lightning <b>invoice</b> that commits to that request, and the <b>preimage</b> you get when you pay.</p><p className="mt-2">Anyone can check the bundle with nine checks. No company has to be trusted, and no one has to be online.</p></> },
-  { t: 'How to use this Lab', body: <><p>Pick a scenario on the left. Set up the parties, then press each step's button. Every step shows its log, the flow between people, the code that ran and the checks.</p><p className="mt-2">Signatures, invoices and checks are <b>real</b>. Money, relays and Bitcoin blocks are <b>simulated</b>. Try to break it in the <b>Red team</b> section.</p></> },
+  { title: 'Meet Ava and "Rain"', body: <>
+      <div className="flex items-end justify-center gap-8"><Cover size={96} /><Who id="ava" big /></div>
+      <p className="mt-6 text-[16px] text-neutral-600">Ava made a song with Jay, Nova and Lena. She wants anyone to license it in seconds.</p>
+      <p className="mt-8 text-[13px] text-neutral-500">…and soon some buyers will join too.</p>
+      <div className="mt-3 flex justify-center gap-6"><Who id="mia" /><Who id="sam" /><Who id="streamco" /><Who id="scout" /></div>
+      <div className="mt-6 flex justify-center"><Player /></div></> },
+  { title: 'One licence, six signed parts', body: <>
+      <div className="flex flex-wrap justify-center gap-3">{PARTS.map(([e, t]) => <div key={t} className="flex w-[92px] flex-col items-center rounded-xl border border-neutral-200 bg-white py-3"><span className="text-[30px] leading-none">{e}</span><span className="mt-2 text-[12px] text-neutral-700">{t}</span></div>)}</div>
+      <p className="mt-6 text-[16px] text-neutral-600">Anyone can check a licence with nine checks. No company has to be trusted, and no one has to be online.</p></> },
+  { title: 'Explore real-world scenarios', body: <>
+      <div className="text-[64px] leading-none">🚀</div>
+      <p className="mt-6 text-[16px] text-neutral-600">24 scenarios, from Ava's first offer to agents buying at scale, plus 19 attacks to try.</p>
+      <p className="mt-3 text-[16px] text-neutral-600">Signatures and checks are real. Try live test wallets for real Lightning payments.</p></> },
 ];
 export function GettingStarted() {
-  const [i, setI] = useState(0); const s = SLIDES[i];
-  return <div className="mx-auto max-w-[920px] px-5 py-8 md:px-8">
-    <h1 className="text-[22px] font-semibold tracking-tight">👋 Getting Started</h1><p className="mt-1 text-[14px] text-neutral-600">An interactive sandbox for the open music-licence protocol on Nostr, Lightning and Bitcoin.</p>
-    <Card className="mt-5 p-6"><div className="flex flex-col gap-6 md:flex-row md:items-center">{s.art && <div className="flex shrink-0 flex-col items-center gap-3"><Cover size={150} /><Player /></div>}
-      <div className="flex-1"><div className="text-[18px] font-semibold">{s.t}</div><div className="mt-2 text-[14px] leading-6 text-neutral-700">{s.body}</div></div></div>
-      <div className="mt-6 flex items-center justify-between"><Button variant="outline" disabled={i === 0} onClick={() => setI(i - 1)}><ArrowLeft size={14} />Back</Button>
-        <div className="flex gap-1.5">{SLIDES.map((_, k) => <button key={k} aria-label={`Slide ${k + 1}`} onClick={() => setI(k)} className={cx('h-2 w-2 rounded-full', k === i ? 'bg-neutral-900' : 'bg-neutral-300')} />)}</div>
-        {i < SLIDES.length - 1 ? <Button onClick={() => setI(i + 1)}>Next<ArrowRight size={14} /></Button> : <Button onClick={() => go('s1')}>Start with scenario 1<ArrowRight size={14} /></Button>}</div></Card>
-    <h2 className="mb-3 mt-8 text-[15px] font-semibold">The cast</h2>
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{MAIN.map(id => { const p = CAST[id]; return <Card key={id} className="p-3"><div className="flex items-center gap-2"><span className="text-xl">{p.emoji}</span><b>{p.name}</b></div><div className="mt-1 text-[12px] text-neutral-500">{p.blurb}</div></Card>; })}</div>
-    <h2 className="mb-3 mt-8 text-[15px] font-semibold">All 24 scenarios</h2>
-    <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4, 5].map(part => <div key={part}><div className="mb-1 text-[12px] font-medium text-neutral-400">{part}. {PARTS[part]}</div>{SCENARIOS.filter(x => x.part === part).map(x => <button key={x.id} onClick={() => go(x.id)} className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] hover:bg-neutral-100"><span>{x.emoji}</span><span className="flex-1">{x.n}. {x.title}</span><span className="text-[11px] text-neutral-400">{x.complexity}</span></button>)}</div>)}</div>
-  </div>;
+  const [i, setI] = useState(0); const s = SLIDES[i]; const last = i === SLIDES.length - 1;
+  return <div className="flex min-h-[calc(100vh-60px)] items-center justify-center px-6 py-10">
+    <div key={i} className="fade-in w-full max-w-[640px] text-center">
+      <h1 className="mb-8 text-[30px] font-bold tracking-tight">{s.title}</h1>{s.body}
+      <div className="mt-10 flex justify-center">{last ? <Button onClick={() => go('s1')}>Try the first scenario →</Button> : <Button onClick={() => setI(i + 1)}>Next →</Button>}</div>
+      <div className="mt-5 flex justify-center gap-1.5">{SLIDES.map((_, k) => <button key={k} aria-label={`Slide ${k + 1}`} onClick={() => setI(k)} className={cx('h-1.5 w-1.5 rounded-full', k === i ? 'bg-neutral-900' : 'bg-neutral-300')} />)}</div>
+    </div></div>;
 }

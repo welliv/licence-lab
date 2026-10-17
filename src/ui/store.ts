@@ -18,8 +18,23 @@ export async function setUpParty(id: string, party: string | 'all') { const s = 
 export async function ensureLab(s: Session) { if (s.lab || !s.sc.cast.every(p => s.ready.has(p))) return; s.busy = true; bump(); s.lab = await prepare(s.sc); s.busy = false; bump(); }
 export function resetParty(id: string, party: string) { const s = session(id); s.ready.delete(party); s.lab = null; s.runs = []; try { localStorage.setItem('ll.parties', JSON.stringify(persisted().filter(p => p !== party))); } catch {} bump(); }
 export async function resetScenario(id: string) { const s = session(id); s.lab = null; s.runs = []; s.lastVerdictStep = undefined; bump(); await ensureLab(s); }
+/** Steps that have a real (non-guard) run. Free play: any step can run at any time; out-of-order runs get a guard message. */
+export const doneSet = (s: Session) => new Set(s.runs.filter(r => !r.guard).map(r => r.step.id));
+export const lastRun = (s: Session, stepId: string) => [...s.runs].reverse().find(r => r.step.id === stepId);
+const looksInternal = (m: string) => /undefined|null|not a function|Cannot read|is not iterable|reading '/.test(m);
+async function exec(s: Session, i: number) {
+  const st = s.sc.steps[i]; const done = doneSet(s); const missing = s.sc.steps.slice(0, i).filter(x => !done.has(x.id));
+  const r = await runStep(s.lab!, st, { ...defaults(st), ...(s.inputs[st.id] ?? {}) }, { onError: e => {
+    if (!missing.length) return undefined; const need = missing[missing.length - 1]; const k = s.sc.steps.indexOf(need) + 1;
+    return looksInternal(e.message) ? `Not yet: this needs step ${k} ("${need.title}") first.` : `Refused: ${e.message}. Step ${k} ("${need.title}") has not happened yet.`; } });
+  s.runs.push(r); if (r.out.verdict) s.lastVerdictStep = st.id; return r;
+}
+/** Run step i now, whatever has happened before (free play). */
+export async function runAt(id: string, i: number) { const s = session(id); if (!s.lab || s.busy) return; s.busy = true; bump(); try { await exec(s, i); } finally { s.busy = false; bump(); } }
+/** Run every step not yet done, in story order, up to step `upto` (1-based). */
 export async function runNext(id: string, upto?: number) { const s = session(id); if (!s.lab || s.busy) return; s.busy = true; bump();
-  try { const target = upto ?? s.runs.length + 1; while (s.runs.length < Math.min(target, s.sc.steps.length)) { const st = s.sc.steps[s.runs.length]; const r = await runStep(s.lab, st, { ...defaults(st), ...(s.inputs[st.id] ?? {}) }); s.runs.push(r); if (r.out.verdict) s.lastVerdictStep = st.id; bump(); await new Promise(r => setTimeout(r, 0)); } }
+  try { const lim = Math.min(upto ?? (s.sc.steps.findIndex(x => !doneSet(s).has(x.id)) + 1 || s.sc.steps.length), s.sc.steps.length);
+    for (let i = 0; i < lim; i++) { if (doneSet(s).has(s.sc.steps[i].id)) continue; await exec(s, i); bump(); await new Promise(r => setTimeout(r, 0)); } }
   finally { s.busy = false; bump(); } }
 export function setInput(id: string, step: string, key: string, v: any) { const s = session(id); (s.inputs[step] ??= {})[key] = v; bump(); }
 // ---------- routing (hash routes, so it works on any static host) ----------

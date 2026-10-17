@@ -2,7 +2,8 @@ import { SCENARIOS, PARTS } from '../scenarios';
 import { ATTACKS } from '../engine/attacks';
 import { cx, Cover } from './bits';
 import { go, score, useVersion } from './store';
-import { ShieldCheck, Swords, BookOpen, HelpCircle, Library, FileText, RotateCcw } from 'lucide-react';
+import { ShieldCheck, Swords, BookOpen, HelpCircle, Library, FileText, RotateCcw, Moon, Sun, Globe } from 'lucide-react';
+import { useState } from 'react';
 import { forgetParties } from './store';
 export function Sidebar({ path, onNavigate }: { path: string; onNavigate?: () => void }) {
   useVersion(); const sc = score.get();
@@ -12,7 +13,7 @@ export function Sidebar({ path, onNavigate }: { path: string; onNavigate?: () =>
   return <nav className="flex h-full flex-col bg-neutral-50/60" aria-label="Scenarios">
     <div className="flex items-center gap-2.5 border-b border-neutral-200 px-3 py-3"><Cover size={34} /><div><div className="text-[14px] font-bold leading-4">Licence Lab</div><div className="text-[11px] text-neutral-500">Explore music licensing scenarios</div></div></div>
     <div className="scroll-thin flex-1 space-y-3 overflow-y-auto px-2 py-2">
-      <div><Item to="start" icon="👋" label="Getting Started" /><Item to="verify" icon={<ShieldCheck size={14} className="mx-auto" />} label="Verify a bundle" /></div>
+      <div><Item to="start" icon="👋" label="Getting Started" /><Item to="live" icon={<Globe size={14} className="mx-auto text-emerald-600" />} label="Live test wallets" right={<span className="rounded bg-emerald-50 px-1 text-[9px] font-semibold text-emerald-700">REAL</span>} /><Item to="verify" icon={<ShieldCheck size={14} className="mx-auto" />} label="Verify a bundle" /></div>
       {[1, 2, 3, 4, 5].map(part => <div key={part}><div className="px-2 pb-1 text-[11px] font-medium text-neutral-400">{part}. {PARTS[part]}</div>
         {SCENARIOS.filter(s => s.part === part).map(s => <Item key={s.id} to={s.id} icon={s.emoji} label={`${s.n}. ${s.title}`} />)}</div>)}
       <div><div className="flex items-center gap-1 px-2 pb-1 text-[11px] font-medium text-neutral-400"><Swords size={11} /> Red team</div>
@@ -23,7 +24,14 @@ export function Sidebar({ path, onNavigate }: { path: string; onNavigate?: () =>
       <Item to="about/library" icon={<Library size={14} className="mx-auto" />} label="Protocol library (local)" />
       <Item to="about/paper" icon={<FileText size={14} className="mx-auto" />} label="White paper and spec" />
       <Item to="about/help" icon={<HelpCircle size={14} className="mx-auto" />} label="Help" />
+      <ThemeToggle />
       <button onClick={() => { if (confirm('Remove all test parties and start again?')) forgetParties(); }} className="flex w-full items-center gap-2 rounded-md px-2 py-[5px] text-left text-[13px] text-neutral-500 hover:bg-neutral-50"><span className="w-5 text-center"><RotateCcw size={13} className="mx-auto" /></span>Reset everything</button>
       <div className="px-2 pt-1 text-[10px] text-neutral-400"><BookOpen size={10} className="mr-1 inline" />Test keys only. Never paste a real key or wallet.</div>
     </div></nav>;
+}
+
+function ThemeToggle() {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const flip = () => { const d = !dark; document.documentElement.classList.toggle('dark', d); try { localStorage.setItem('ll.theme', d ? 'dark' : 'light'); } catch {} setDark(d); };
+  return <button onClick={flip} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} className="flex w-full items-center gap-2 rounded-md px-2 py-[5px] text-left text-[13px] text-neutral-500 hover:bg-neutral-50"><span className="w-5 text-center">{dark ? <Sun size={13} className="mx-auto" /> : <Moon size={13} className="mx-auto" />}</span>{dark ? 'Light mode' : 'Dark mode'}</button>;
 }

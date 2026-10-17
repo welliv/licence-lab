@@ -7,7 +7,11 @@ const runAll = async id => { await p.goto(`${base}#/${id}`); await p.waitForTime
 const tab = async name => { await p.getByRole('tab', { name }).click(); await p.waitForTimeout(250); };
 const shot = async (name, full = false) => { await p.waitForTimeout(300); await p.screenshot({ path: `${out}/${name}.png`, fullPage: full }); console.log(`${out}/${name}.png`); };
 await p.goto(`${base}#/start`); await p.evaluate(() => localStorage.clear()); await p.reload(); await shot('01-getting-started');
+await p.getByRole('button', { name: 'Next →' }).click(); await shot('01b-getting-started-slide-2'); await p.getByRole('button', { name: 'Next →' }).click(); await shot('01c-getting-started-slide-3');
 await p.goto(`${base}#/s3`); await p.waitForTimeout(300); await shot('02-s3-set-up-parties');
+await p.getByRole('button', { name: /Set up all/ }).click(); await p.getByRole('button', { name: 'Run all steps' }).waitFor(); await p.waitForTimeout(400);
+await p.locator('[data-testid^=step-]').nth(4).getByRole('button').first().click(); await p.waitForTimeout(500); await p.locator('[data-testid^=step-]').nth(4).scrollIntoViewIfNeeded(); await shot('02b-s3-free-play-guard');
+await p.getByRole('button', { name: 'Reset scenario' }).click(); await p.waitForTimeout(400);
 await runAll('s3'); await p.evaluate(() => document.querySelector('main').scrollTo(0, 0)); await shot('03-s3-steps-done');
 await tab('Flow Diagram'); await p.getByRole('tablist').scrollIntoViewIfNeeded(); await p.evaluate(() => document.querySelector('main').scrollBy(0, -60)); await shot('04-s3-flow-diagram');
 await tab('Log'); await p.locator('text=Show code and data').first().click(); await p.getByRole('tablist').scrollIntoViewIfNeeded(); await shot('05-s3-log-with-code');
@@ -19,5 +23,11 @@ await p.getByRole('button', { name: 'REPL', exact: true }).click(); await p.getB
 await p.goto(`${base}#/attack/A1`); await p.waitForTimeout(900); await p.getByRole('button', { name: /Present to the verifier/ }).click(); await p.waitForTimeout(1200); await shot('10-attack-A1-tamper');
 await p.goto(`${base}#/attack/A18`); await p.waitForTimeout(900); await p.getByRole('button', { name: /Run the attack/ }).click(); await p.waitForTimeout(1500); await shot('11-attack-A18-open-issue');
 await runAll('s5'); await tab('Balance Chart'); await p.getByRole('tablist').scrollIntoViewIfNeeded(); await shot('12-s5-balance-chart');
+if (process.env.LIVE) { await p.goto(`${base}#/live`); await p.waitForTimeout(600); await shot('14-live-wallets-before');
+  await p.getByRole('button', { name: /Create all/ }).click(); await p.waitForFunction(() => !document.body.innerText.includes('missing)'), null, { timeout: 90000 }); await p.waitForTimeout(800); await shot('15-live-wallets-connected');
+  for (const name of [/Publish offer/, /Sign a licence request/, /Make invoice/, /Check and pay/, /Verify the licence/, /Pay the co-owners/]) { await p.getByRole('button', { name }).click(); await p.waitForFunction(() => !document.querySelector('.animate-spin'), null, { timeout: 60000 }); await p.waitForTimeout(300); }
+  await p.getByRole('button', { name: 'Refresh balances' }).click(); await p.waitForTimeout(1500); await p.evaluate(() => document.querySelector('main').scrollTo(0, 0)); await shot('16-live-paid-balances');
+  await p.getByText('verifyLicence on the real preimage', { exact: true }).scrollIntoViewIfNeeded(); await p.evaluate(() => document.querySelector('main').scrollBy(0, 200)); await shot('17-live-actions-verify'); await p.getByText('Timestamps and revocations on Mutinynet').scrollIntoViewIfNeeded(); await shot('18-live-mutinynet-needs-login'); }
+await p.goto(`${base}#/s3`); await p.evaluate(() => { document.documentElement.classList.remove('dark'); }); await p.waitForTimeout(200); await p.evaluate(() => document.querySelector('main').scrollTo(0, 0)); await shot('19-light-mode-s3'); await p.evaluate(() => document.documentElement.classList.add('dark'));
 const m = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 }); const mp = await m.newPage(); await mp.goto(`${base}#/s3`); await mp.waitForTimeout(400); await mp.screenshot({ path: `${out}/13-mobile-s3.png` }); console.log(`${out}/13-mobile-s3.png`);
 await b.close();
