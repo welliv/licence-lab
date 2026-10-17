@@ -1,0 +1,160 @@
+{
+  "mode": "old",
+  "url": "http://localhost:4190/",
+  "at": "2026-10-17T14:28:06.426Z",
+  "ttfl": {
+    "home": {
+      "ms": 1837,
+      "taps": 2
+    }
+  },
+  "pages": {
+    "Home": {
+      "words": 95,
+      "jargon": 1,
+      "jargonInDrawer": 0,
+      "terms": [
+        "mutinynet"
+      ],
+      "buttons": 2
+    },
+    "Chapter c1": {
+      "words": 83,
+      "jargon": 0,
+      "jargonInDrawer": 0,
+      "terms": [],
+      "buttons": 2
+    },
+    "Chapter c2": {
+      "words": 138,
+      "jargon": 0,
+      "jargonInDrawer": 0,
+      "terms": [],
+      "buttons": 2
+    },
+    "Chapter c3": {
+      "words": 85,
+      "jargon": 0,
+      "jargonInDrawer": 0,
+      "terms": [],
+      "buttons": 4
+    },
+    "Chapter c4": {
+      "words": 134,
+      "jargon": 0,
+      "jargonInDrawer": 0,
+      "terms": [],
+      "buttons": 6
+    }
+  },
+  "scenarios": {
+    "s1": {
+      "jargon": 54,
+      "words": 1067
+    },
+    "s2": {
+      "jargon": 38,
+      "words": 989
+    },
+    "s3": {
+      "jargon": 61,
+      "words": 1192
+    },
+    "s4": {
+      "jargon": 53,
+      "words": 1139
+    },
+    "s5": {
+      "jargon": 22,
+      "words": 775
+    },
+    "s6": {
+      "jargon": 15,
+      "words": 759
+    },
+    "s7": {
+      "jargon": 24,
+      "words": 617
+    },
+    "s8": {
+      "jargon": 19,
+      "words": 818
+    },
+    "s9": {
+      "jargon": 22,
+      "words": 799
+    },
+    "s10": {
+      "jargon": 23,
+      "words": 843
+    },
+    "s11": {
+      "jargon": 49,
+      "words": 1326
+    },
+    "s12": {
+      "jargon": 27,
+      "words": 819
+    },
+    "s13": {
+      "jargon": 26,
+      "words": 726
+    },
+    "s14": {
+      "jargon": 34,
+      "words": 876
+    },
+    "s15": {
+      "jargon": 21,
+      "words": 658
+    },
+    "s16": {
+      "jargon": 51,
+      "words": 618
+    },
+    "s17": {
+      "jargon": 12,
+      "words": 623
+    },
+    "s18": {
+      "jargon": 19,
+      "words": 611
+    },
+    "s19": {
+      "jargon": 18,
+      "words": 655
+    },
+    "s20": {
+      "jargon": 13,
+      "words": 721
+    },
+    "s21": {
+      "jargon": 27,
+      "words": 685
+    },
+    "s22": {
+      "jargon": 15,
+      "words": 586
+    },
+    "s23": {
+      "jargon": 12,
+      "words": 637
+    },
+    "s24": {
+      "jargon": 28,
+      "words": 725
+    },
+    "s25": {
+      "jargon": 21,
+      "words": 1216
+    },
+    "s26": {
+      "jargon": 19,
+      "words": 1216
+    },
+    "s27": {
+      "jargon": 14,
+      "words": 915
+    }
+  }
+}

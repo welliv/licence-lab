@@ -3,7 +3,9 @@ import { Menu, X } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { useRoute } from './store';
 import { ScenarioPage } from './ScenarioPage';
-import { StoryShell, Home, Chapter1, Chapter2, Chapter3, Chapter4 } from './story/Story';
+import { StoryShell, Home, Stop1, Stop2, Stop3, RightsExtra } from './story/Story';
+import { TestPanel } from './TestPanel';
+import { testkit } from './testkit';
 import { UnderTheHood } from './story/UnderTheHood';
 import { Production } from './tabs/Production';
 import { RedTeamIndex, AttackPage } from './RedTeam';
@@ -15,10 +17,12 @@ import { LivePage } from './LivePage';
 import { MiniPlayer } from './MiniPlayer';
 export function App() {
   const { path, params } = useRoute(); const [open, setOpen] = useState(false);
-  useEffect(() => { exposeRepl(); }, []);
+  useEffect(() => { exposeRepl(); testkit.start(); }, []);
   useEffect(() => { document.querySelector('main')?.scrollTo(0, 0); }, [path]);
-  const STORY: Record<string, () => React.ReactNode> = { '': () => <Home />, start: () => <Home />, home: () => <Home />, c1: () => <Chapter1 />, c2: () => <Chapter2 />, c3: () => <Chapter3 />, c4: () => <Chapter4 /> };
-  if (STORY[path]) return <div className="flex h-full flex-col"><div className="min-h-0 flex-1"><StoryShell path={path}>{STORY[path]()}</StoryShell></div><MiniPlayer /></div>;
+  // Old chapter links (c1–c4) still land on the matching stop.
+  const ALIAS: Record<string, string> = { start: '', home: '', c1: 'stop1', c2: 'stop2', c3: 'stop3', c4: 'rights' }; const sp = ALIAS[path] ?? path;
+  const STORY: Record<string, () => React.ReactNode> = { '': () => <Home />, stop1: () => <Stop1 />, stop2: () => <Stop2 />, stop3: () => <Stop3 />, rights: () => <RightsExtra /> };
+  if (STORY[sp]) return <div className="flex h-full flex-col"><div className="min-h-0 flex-1"><StoryShell path={sp}>{STORY[sp]()}</StoryShell></div><MiniPlayer /><TestPanel /></div>;
   let page: React.ReactNode;
   if (path === 'hood') page = <UnderTheHood />;
   else if (path === 'hood/runs') page = <div className="mx-auto max-w-[1000px] px-5 py-6 md:px-8"><h1 className="mb-4 text-[20px] font-semibold">Real runs on Bitcoin's test network</h1><Production /></div>;
@@ -37,5 +41,5 @@ export function App() {
       <main className="scroll-thin flex-1 overflow-y-auto">{page}
         <footer className="border-t border-neutral-100 px-6 py-4 text-center text-[11px] text-neutral-400">Test money and test keys only · demo names on owner-supplied recordings (see Credits)</footer></main>
       <MiniPlayer />
-    </div></div>;
+    </div><TestPanel /></div>;
 }

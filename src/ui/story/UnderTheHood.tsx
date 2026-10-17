@@ -1,5 +1,6 @@
 // "Under the hood": everything the story hides, skimmable. Nothing was deleted from the Lab; it moved here.
-import { SCENARIOS, PARTS } from '../../scenarios';
+import { SCENARIOS, byId } from '../../scenarios';
+import { GROUPS, S22_LINE, STOP_OF } from '../groups';
 import { ATTACKS } from '../../engine/attacks';
 import { go } from '../store';
 import { TierBadge } from '../bits';
@@ -42,9 +43,11 @@ export function UnderTheHood() {
       <Card icon={<Library size={18} />} title="Protocol library" body="The audited library, byte for byte, plus the rights extension." to="about/library" />
       <Card icon={<FileText size={18} />} title="White paper and spec" body="The nine checks and event kinds." to="about/paper" />
     </div>
-    <h2 className="mt-10 text-[18px] font-semibold">Explore all scenarios ({SCENARIOS.length})</h2>
-    <div className="mt-3 grid gap-6 md:grid-cols-2">{([1, 2, 3, 4, 5, 6] as const).map(p => <div key={p}><div className="mb-1.5 text-[12px] font-medium uppercase tracking-wide text-neutral-400">{p}. {PARTS[p]}</div>
-      <ul className="space-y-0.5">{SCENARIOS.filter(s => s.part === p).map(s => <li key={s.id}><button onClick={() => go(s.id)} className="flex w-full items-start gap-2 rounded-md px-2 py-1 text-left text-[14px] hover:bg-neutral-50"><span className="w-5 text-center">{s.emoji}</span><span><span className="font-medium">{s.n}. {s.title}</span><span className="block text-[12px] text-neutral-500">{s.summary}</span></span></button></li>)}</ul></div>)}</div>
+    <h2 className="mt-10 text-[18px] font-semibold">Explore all scenarios ({SCENARIOS.length}), in {GROUPS.length} groups</h2>
+    <div className="mt-3 grid gap-6 md:grid-cols-2" data-testid="hood-groups">{GROUPS.map(g => <div key={g.id} data-group={g.id}><div className="text-[15px] font-semibold">{g.title}</div><div className="mb-1.5 text-[12px] text-neutral-500">{g.line}</div>
+      {g.to ? <button onClick={() => go(g.to!)} className="rounded-md border border-neutral-200 px-3 py-1.5 text-[14px] hover:bg-neutral-50">Open the game →</button> :
+      <ul className="space-y-0.5">{g.ids.map(id => byId(id)!).map(s => <li key={s.id}><button onClick={() => go(s.id)} className="flex w-full items-start gap-2 rounded-md px-2 py-1 text-left text-[14px] hover:bg-neutral-50"><span className="w-5 text-center">{s.emoji}</span><span className="flex-1"><span className="font-medium">{s.title}</span>{STOP_OF[s.id] && <span className="ml-2 rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-500">in {STOP_OF[s.id]}</span>}<span className="block text-[12px] text-neutral-500">{s.summary}</span></span></button></li>)}
+        {g.id === 'deals' && <li className="px-2 py-1 text-[13px] text-neutral-600" data-testid="s22-line">🌍 {S22_LINE} <button className="text-[12px] text-neutral-400 underline" onClick={() => go('s22')}>see it run</button></li>}</ul>}</div>)}</div>
     <h2 id="glossary" className="mt-10 text-[18px] font-semibold">Words, in one line each</h2>
     <dl className="mt-3 grid gap-x-8 gap-y-3 md:grid-cols-2">{GLOSSARY.map(([k, v]) => <div key={k}><dt className="text-[14px] font-semibold">{k}</dt><dd className="text-[13px] leading-5 text-neutral-600">{v}</dd></div>)}</dl>
     <div className="mt-10 flex flex-wrap gap-4 text-[13px] text-neutral-500"><button className="inline-flex items-center gap-1 underline" onClick={() => go('about/help')}><HelpCircle size={13} />Help</button><span>Test keys only. Never paste a real key or wallet.</span></div>

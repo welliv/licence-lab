@@ -16,7 +16,7 @@ export const S12: Scenario = {
   steps: [
     { id: 'list', actor: 'thief', to: 'relays', title: 'Thief lists "Rain"', button: 'Thief signs an offer', narration: 'The thief makes a key and a node, signs a binding, and signs an offer for the same audio file, cheaper, with no co-owners.',
       run: lab => { onboardAva(lab, 'thief', { quiet: true }); const o = signOffer(lab, 'thief', 'creator', { name: 'offer.fake', price: 500, coOwners: [] }); return { ok: true, badge: 'real', json: o, summary: `Offer ${short(o.id)} by ${short(o.pubkey)} for track ${short(tagv(o, 'x'))}. Validly signed: maths alone cannot say it is stolen.` }; } },
-    { id: 'spot', actor: 'echo', title: 'Echo finds the copy', button: 'Search by track hash', narration: 'Echo searches relays by track hash and finds two offers for the same audio.',
+    { id: 'spot', actor: 'echo', title: 'Echo finds the copy', button: 'Search by fingerprint', narration: 'Echo searches relays by track hash and finds two offers for the same audio.',
       run: lab => { const all: Event[] = lab.relays[0].events.filter(e => e.kind === KIND.OFFER && tagv(e, 'x') === lab.trackHash); return { ok: all.length === 2, badge: 'real', summary: `${all.length} offers for track ${short(lab.trackHash)}: ${all.map(o => short(o.pubkey)).join(' and ')}.` }; } },
     { id: 'report', actor: 'ava', to: 'relays', title: 'Ava reports it', button: 'File a report', narration: 'Echo files a report (NIP-56) signed by Ava\'s key: "this offer is not mine; the original is here".',
       run: lab => { const e = report(lab, 'ava', lab.a['offer.fake'], `Not mine. The original is ${lab.a['offer.creator'].id}`); return { ok: verifyEvent(e), badge: 'real', json: e, summary: `Report ${short(e.id)} (kind 1984) signed by Ava.` }; } },
@@ -80,7 +80,7 @@ export const S14: Scenario = {
     { id: 'lookup', actor: 'scout', to: 'ava', title: '3b. Retry safely', button: 'Retry', narration: 'Scout retries. Its rule: look the payment up first, never pay again blindly.',
       run: lab => { const { offer, binding } = listing(lab, 'offer.creator'); const x = lab.a['s14.x']; const r = lab.agentPay('scout', x.reqs, x.request, offer, binding); const extra = lab.a['s14.bal'] - lab.balances.clipai;
         return { ok: r.ok && extra === 0, badge: 'sim', trace: [...r.trace, `extra sats spent on retry: ${extra}`], summary: 'Lookup found it settled; Scout used that preimage and paid nothing more.' }; } },
-    { id: 'double', actor: 'mia', to: 'ava', title: '4. Try to pay twice', button: 'Pay the same invoice again', expectFail: true, narration: 'A buggy app tries to pay the same invoice a second time.',
+    { id: 'double', actor: 'mia', to: 'ava', title: '4. Try to pay twice', button: 'Pay the same bill again', expectFail: true, narration: 'A buggy app tries to pay the same invoice a second time.',
       run: lab => { const r = lab.pay('mia', lab.a['s14.x'].rec.bolt11); return { ok: r.ok, badge: 'sim', summary: `Refused: ${r.error}. A Lightning invoice can be paid only once. (The live faucet in our research gave the same answer.)` }; } },
   ],
   proven: 'If the buyer has the preimage, they have paid and they hold the licence.',
@@ -123,11 +123,11 @@ export const S16: Scenario = {
   how: [{ title: 'Many relays', description: 'One going down changes nothing.' }, { title: 'Node down', description: 'No invoice, nothing paid.' }, { title: 'App crash', description: 'Rebuild from wallet history.' }],
   cast: ['mia', 'ava', 'relays'], setup: lab => baseWorld(lab, { kinds: ['creator'] }),
   steps: [
-    { id: 'relay', actor: 'relays', title: 'Relay one goes down', button: 'Switch off relay one', narration: 'Relay one goes offline. Mia\'s app asks the other relays for Ava\'s offer.',
+    { id: 'relay', actor: 'relays', title: 'One server goes down', button: 'Switch off one server', narration: 'Relay one goes offline. Mia\'s app asks the other relays for Ava\'s offer.',
       run: lab => { lab.relays[0].online = false; const got = lab.fromRelays(lab.a['offer.creator'].id); return { ok: !!got, badge: 'sim', summary: got ? `Found the offer on ${lab.relays.filter(r => r.online && r.events.some(e => e.id === got.id)).length} other relays.` : 'Not found.' }; } },
-    { id: 'nodedown', actor: 'ava', title: 'Node down before the invoice', button: 'Switch off Ava\'s node and request', expectFail: true, narration: 'Ava\'s node is offline when Mia asks for an invoice. No invoice, so nothing can be paid.',
+    { id: 'nodedown', actor: 'ava', title: 'Ava\'s wallet down before the bill', button: 'Switch off her wallet, then ask', expectFail: true, narration: 'Ava\'s node is offline when Mia asks for an invoice. No invoice, so nothing can be paid.',
       run: lab => { lab.nodes['node.ava'].online = false; try { purchase(lab, 'mia', 'offer.creator'); return { ok: true, summary: '' }; } catch (e: any) { return { ok: false, badge: 'sim', summary: `${e.message}. Mia has paid nothing; she tries again later.` }; } finally { lab.nodes['node.ava'].online = true; } } },
-    { id: 'mid', actor: 'mia', to: 'ava', title: 'Node down after the invoice', button: 'Get invoice, then node goes down', expectFail: true, narration: 'Mia gets an invoice, then the node goes down before she pays. The payment cannot reach it, so no money moves.',
+    { id: 'mid', actor: 'mia', to: 'ava', title: 'Ava\'s wallet down after the bill', button: 'Get the bill, then switch off', expectFail: true, narration: 'Mia gets an invoice, then the node goes down before she pays. The payment cannot reach it, so no money moves.',
       run: lab => { const { offer, binding, consents } = listing(lab, 'offer.creator'); const rq = lab.lib.makePrivateRequest(lab.key('mia'), { offer, binding, use: ['creator-video', 'worldwide', 'perpetual', 'non-exclusive', 'seconds=30'], network: tagNet(), notBefore: lab.notBefore() });
         const x = lab.issueInvoice({ nodeId: 'node.ava', creditTo: 'ava', offer, binding, consents, request: rq.request, label: 'mid' }); lab.a['s16'] = { x, rq }; lab.nodes['node.ava'].online = false; const r = lab.pay('mia', x.rec.bolt11); lab.nodes['node.ava'].online = true;
         return { ok: r.ok, badge: 'sim', summary: `Payment failed: ${r.error}. Nothing paid. When the node is back she pays the same invoice.` }; } },

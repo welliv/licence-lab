@@ -7,7 +7,7 @@ export const CAST: Record<string, Persona> = Object.fromEntries([
   P('ava', 'Ava', '👩🏽‍🎤', 'artist', 'Independent artist. Owns the recording of "Rain".', '#7c3aed', 1_000),
   P('echo', 'Echo', '🤖', 'agent', "Ava's AI agent. Runs her licensing within rules she signed.", '#8b5cf6', 0, 'ava'),
   P('jay', 'Jay', '🎛️', 'collaborator', 'Producer. Co-owns the recording (20%).', '#0ea5e9'),
-  P('nova', 'Nova', '🎙️', 'collaborator', 'Featured singer. Co-owns the recording (15%).', '#ec4899'),
+  P('nova', 'Nova', '🎙️', 'collaborator', 'Singer. Features on "Rain" (15%) and has her own song, "Nova Lights".', '#ec4899'),
   P('lena', 'Lena', '✍️', 'collaborator', 'Songwriter. Agreed share of recording income (15%).', '#14b8a6'),
   P('mia', 'Mia', '🎬', 'buyer', 'Video creator. Wants "Rain" without a copyright claim.', '#f59e0b', 50_000),
   P('sam', 'Sam', '🎧', 'fan', 'A fan. Wants to support Ava and get early access.', '#22c55e', 20_000),

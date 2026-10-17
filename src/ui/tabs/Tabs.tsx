@@ -10,7 +10,10 @@ import { highlight } from '../highlight';
 import { Repl } from './Repl';
 import { Terminal, BookOpen, Upload as UploadIcon, ShoppingCart, Bot, ShieldCheck, Ban, Anchor, Play as PlayIcon } from 'lucide-react';
 const CAT_ICON: Record<string, any> = { 'This scenario': PlayIcon, 'Getting started': BookOpen, REPL: Terminal, Publish: UploadIcon, Buy: ShoppingCart, Agent: Bot, Verify: ShieldCheck, Revoke: Ban, Anchor };
-const TABS = [['log', 'Log', FileText], ['flow', 'Flow Diagram', GitBranch], ['balance', 'Balance Chart', LineChart], ['checks', 'Nine Checks', ListChecks], ['code', 'Code', Code2], ['inspect', 'Inspect', Braces], ['prompts', 'Example Prompts', MessageSquare], ['production', 'Production', Rocket]] as const;
+// Three tabs. "What happened" opens first; the flow diagram and balances fold inside it, inspect and prompts fold inside Code.
+const TABS = [['what', 'What happened', FileText], ['checks', 'Nine checks', ListChecks], ['code', 'Code', Code2]] as const;
+function Fold({ title, children, icon: Icon }: { title: string; children: React.ReactNode; icon: any }) { const [o, setO] = useState(false);
+  return <div className="mt-4 rounded-lg border border-neutral-200"><button aria-expanded={o} onClick={() => setO(!o)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] text-neutral-600 hover:text-neutral-900"><Icon size={13} />{o ? 'Hide' : 'Show'} {title.toLowerCase()}<ChevronRight size={13} className={cx('ml-auto transition-transform', o && 'rotate-90')} /></button>{o && <div className="border-t border-neutral-100 p-3">{children}</div>}</div>; }
 export function Tabs({ sid, tab, setTab }: { sid: string; tab: string; setTab: (t: string) => void }) {
   useVersion(); const s = session(sid); const n = s.runs.length; const [cursor, setCursor] = useState<number | null>(null); const [playing, setPlaying] = useState(false);
   const at = cursor ?? n; // replay cursor: show the world as it was after step `at`
@@ -19,28 +22,23 @@ export function Tabs({ sid, tab, setTab }: { sid: string; tab: string; setTab: (
   return <div>
     <div className="flex flex-wrap items-center gap-2"><div role="tablist" className="flex flex-wrap gap-0.5 rounded-lg bg-neutral-100 p-1">{TABS.map(([id, label, Icon]) =>
       <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={cx('inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[13px]', tab === id ? 'bg-white font-medium shadow-sm' : 'text-neutral-600 hover:text-neutral-900')}><Icon size={13} />{label}</button>)}</div>
-      {['log', 'flow', 'balance', 'inspect'].includes(tab) && n > 0 && <div className="ml-auto flex items-center gap-1 text-[12px] text-neutral-600" aria-label="Replay timeline">
+      {tab === 'what' && n > 0 && <div className="ml-auto flex items-center gap-1 text-[12px] text-neutral-600" aria-label="Replay timeline">
         <button aria-label="Previous step" className="rounded p-1 hover:bg-neutral-100" onClick={() => setCursor(Math.max(0, at - 1))}><ChevronLeft size={14} /></button>
         <div className="flex items-center gap-1">{Array.from({ length: n + 1 }, (_, i) => <button key={i} aria-label={i ? `After step ${i}` : 'Setup'} onClick={() => setCursor(i === n ? null : i)} className={cx('h-2.5 w-2.5 rounded-full', i <= at ? 'bg-neutral-900' : 'bg-neutral-300')} />)}</div>
         <button aria-label="Next step" className="rounded p-1 hover:bg-neutral-100" onClick={() => setCursor(at + 1 >= n ? null : at + 1)}><ChevronRight size={14} /></button>
         <span className="w-20 text-center">{at === 0 ? 'setup' : `step ${at}/${n}`}</span><Button variant="outline" className="h-7 px-2" onClick={() => { setCursor(0); setPlaying(true); }}><Play size={12} />Replay</Button></div>}</div>
     <div className="mt-3 border-t border-neutral-200 pt-3">
-      {tab === 'log' && <LogTab sid={sid} stepIds={stepIds} />}
-      {tab === 'flow' && <FlowTab sid={sid} stepIds={stepIds} />}
-      {tab === 'balance' && <BalanceTab sid={sid} at={at} />}
+      {tab === 'what' && <><LogTab sid={sid} stepIds={stepIds} />{n > 0 && <><Fold title="Flow diagram" icon={GitBranch}><FlowTab sid={sid} stepIds={stepIds} /></Fold><Fold title="Balances" icon={LineChart}><BalanceTab sid={sid} at={at} /></Fold></>}</>}
       {tab === 'checks' && <ChecksTab sid={sid} />}
-      {tab === 'code' && <CodeTab sid={sid} />}
-      {tab === 'inspect' && <InspectTab sid={sid} at={at} />}
-      {tab === 'prompts' && <PromptsTab sid={sid} />}
-      {tab === 'production' && <Production />}
+      {tab === 'code' && <><CodeTab sid={sid} /><Fold title="Signed events and bundles" icon={Braces}><InspectTab sid={sid} at={at} /></Fold><Fold title="Example prompts" icon={MessageSquare}><PromptsTab sid={sid} /></Fold><Fold title="What is real and what is simulated" icon={Rocket}><Production /></Fold></>}
     </div></div>;
 }
 function Empty({ children }: { children: React.ReactNode }) { return <div className="py-10 text-center text-[13px] text-neutral-400">{children}</div>; }
 function LogTab({ sid, stepIds }: { sid: string; stepIds: Set<string> }) {
   const s = session(sid); const [open, setOpen] = useState<number | null>(null); const [hide, setHide] = useState(0);
   const logs = (s.lab?.logs ?? []).filter(l => stepIds.has(l.step ?? 'setup') && l.id > hide);
-  return <div><div className="mb-2 flex items-center justify-between"><h3 className="text-[15px] font-semibold">Transaction Log</h3><Button variant="ghost" className="h-7" onClick={() => setHide(s.lab?.logs.at(-1)?.id ?? 0)}><Trash2 size={13} />Clear</Button></div>
-    {!logs.length ? <Empty>No entries yet. Set up the parties and run a step.</Empty> : <ul className="divide-y divide-neutral-100">{logs.slice().reverse().map(l => <li key={l.id} className="py-2 text-[12px]">
+  return <div><div className="mb-2 flex items-center justify-between"><h3 className="text-[15px] font-semibold">What happened</h3><Button variant="ghost" className="h-7" onClick={() => setHide(s.lab?.logs.at(-1)?.id ?? 0)}><Trash2 size={13} />Clear</Button></div>
+    {!logs.length ? <Empty>Nothing has happened yet. Press "Run all steps", or any step above.</Empty> : <ul className="divide-y divide-neutral-100">{logs.slice().reverse().map(l => <li key={l.id} className="py-2 text-[12px]">
       <div className="flex items-start gap-3">{l.ok ? <Check size={14} className="mt-0.5 shrink-0 text-emerald-600" /> : <XIcon size={14} className="mt-0.5 shrink-0 text-red-600" />}
         <span className="w-16 shrink-0 font-mono text-neutral-500">{new Date(l.t * 1000).toISOString().slice(11, 19)}</span>
         <span className="w-36 shrink-0 font-medium">{persona(l.from).name}{l.to ? ` → ${persona(l.to).name}` : ''}</span><span className="min-w-0 flex-1 break-words text-neutral-600">{l.text}</span><TierBadge b={l.badge} /></div>

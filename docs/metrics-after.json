@@ -1,0 +1,208 @@
+{
+  "mode": "new",
+  "url": "http://localhost:4180/",
+  "at": "2026-10-17T14:28:06.477Z",
+  "ttfl": {
+    "artist": {
+      "ms": 1191,
+      "taps": 3
+    },
+    "buyer": {
+      "ms": 467,
+      "taps": 2
+    },
+    "builder": {
+      "ms": 448,
+      "taps": 2
+    }
+  },
+  "pages": {
+    "home→first licence (artist)": {
+      "words": 210,
+      "jargon": 1,
+      "jargonInDrawer": 0,
+      "terms": [
+        "mutinynet"
+      ],
+      "buttons": 6
+    },
+    "home→first licence (buyer)": {
+      "words": 134,
+      "jargon": 0,
+      "jargonInDrawer": 0,
+      "terms": [],
+      "buttons": 3
+    },
+    "home→first licence (builder)": {
+      "words": 203,
+      "jargon": 1,
+      "jargonInDrawer": 12,
+      "terms": [
+        "mutinynet"
+      ],
+      "buttons": 7
+    },
+    "Home": {
+      "words": 77,
+      "jargon": 0,
+      "jargonInDrawer": 0,
+      "terms": [],
+      "buttons": 3
+    },
+    "Stop 1 Hear it, license it": {
+      "words": 284,
+      "jargon": 2,
+      "jargonInDrawer": 0,
+      "terms": [
+        "mutinynet",
+        "signature"
+      ],
+      "buttons": 6
+    },
+    "Stop 2 Agents buy at scale": {
+      "words": 276,
+      "jargon": 1,
+      "jargonInDrawer": 0,
+      "terms": [
+        "mutinynet"
+      ],
+      "buttons": 2
+    },
+    "Stop 3 Anyone verifies": {
+      "words": 303,
+      "jargon": 1,
+      "jargonInDrawer": 0,
+      "terms": [
+        "mutinynet"
+      ],
+      "buttons": 4
+    },
+    "Extra Rights change hands": {
+      "words": 295,
+      "jargon": 0,
+      "jargonInDrawer": 0,
+      "terms": [],
+      "buttons": 9
+    },
+    "Stop 3 (builder, drawer open)": {
+      "words": 303,
+      "jargon": 1,
+      "jargonInDrawer": 12,
+      "terms": [
+        "mutinynet"
+      ],
+      "buttons": 6
+    }
+  },
+  "scenarios": {
+    "s1": {
+      "jargon": 39,
+      "words": 1003
+    },
+    "s2": {
+      "jargon": 26,
+      "words": 923
+    },
+    "s3": {
+      "jargon": 50,
+      "words": 1110
+    },
+    "s4": {
+      "jargon": 37,
+      "words": 1064
+    },
+    "s5": {
+      "jargon": 12,
+      "words": 725
+    },
+    "s6": {
+      "jargon": 6,
+      "words": 714
+    },
+    "s7": {
+      "jargon": 15,
+      "words": 575
+    },
+    "s8": {
+      "jargon": 9,
+      "words": 769
+    },
+    "s9": {
+      "jargon": 9,
+      "words": 696
+    },
+    "s10": {
+      "jargon": 10,
+      "words": 741
+    },
+    "s11": {
+      "jargon": 29,
+      "words": 1241
+    },
+    "s12": {
+      "jargon": 14,
+      "words": 737
+    },
+    "s13": {
+      "jargon": 11,
+      "words": 638
+    },
+    "s14": {
+      "jargon": 20,
+      "words": 801
+    },
+    "s15": {
+      "jargon": 13,
+      "words": 603
+    },
+    "s16": {
+      "jargon": 35,
+      "words": 573
+    },
+    "s17": {
+      "jargon": 2,
+      "words": 569
+    },
+    "s18": {
+      "jargon": 11,
+      "words": 557
+    },
+    "s19": {
+      "jargon": 8,
+      "words": 603
+    },
+    "s20": {
+      "jargon": 3,
+      "words": 676
+    },
+    "s21": {
+      "jargon": 15,
+      "words": 633
+    },
+    "s22": {
+      "jargon": 5,
+      "words": 535
+    },
+    "s23": {
+      "jargon": 0,
+      "words": 566
+    },
+    "s24": {
+      "jargon": 13,
+      "words": 651
+    },
+    "s25": {
+      "jargon": 6,
+      "words": 1094
+    },
+    "s26": {
+      "jargon": 1,
+      "words": 1087
+    },
+    "s27": {
+      "jargon": 1,
+      "words": 827
+    }
+  },
+  "scaleMs": 3008
+}

@@ -158,7 +158,7 @@ export class Lab {
   }
   pub(id: string, purpose = 'main') { return getPublicKey(this.key(id, purpose)); }
   setUp(id: string) { if (this.ready.has(id)) return; this.ready.add(id); this.balances[id] = persona(id).startSats; this.key(id);
-    this.log({ from: id, text: `${persona(id).name} is set up: Nostr key ${short(this.pub(id))} (real), test wallet with ${persona(id).startSats.toLocaleString()} sats (simulated)`, badge: 'sim' }); }
+    this.log({ from: id, text: `${persona(id).name} is ready: account ${short(this.pub(id))} (a real key), test wallet with ${persona(id).startSats.toLocaleString('en-GB')} sats (simulated)`, badge: 'sim' }); }
   setUpAll(ids: string[]) { ids.forEach(i => this.setUp(i)); }
   name(id: string) { return persona(id).name; }
   // ---------- logging ----------

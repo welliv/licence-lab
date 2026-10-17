@@ -225,3 +225,84 @@ All files are under `screenshots/jobs-audit/`.
 | Mobile density on the long pages | `mobile-s11.png`, `mobile-s24.png` |
 
 All 27 first views and after-run views are there as well, for side-by-side review (`s1-first-view.png` … `s27-after-run.png`).
+
+---
+
+# After: the rebuilt main path
+
+Branch `simple`, after the rebuild (the commit after 8e92014). Walked on 17 Oct 2026, about 17:00–17:30 EAT. Headless Chrome on the box against `vite preview` at http://localhost:4180/. The "before" build (741303a) was served at :4190 and measured with the same script, `scripts/main-path-metrics.mjs`. The raw numbers are in `docs/metrics-before.json` and `docs/metrics-after.json`. Screenshots are in `screenshots/main-path/`.
+
+## What changed
+
+- **Home** has one headline and one tap: "I make music / I buy music / I build". The choice sets the order of the stops (artist 1-2-3, buyer 2-1-3, builder 3-1-2), is remembered, and can be changed ("Seen as" in the header, or Home).
+- **Three stops plus one extra**, each with one magic moment, one verdict card, one "Try to cheat" and a "Next" button:
+  - **Stop 1, Hear it, license it** (S3 + S2 + S8/S13): the preview stops, you license for 100 sats, the full track plays, and the 100 sats visibly split 65 / 20 / 15 to Ava, Jay and Nova. To cheat, change the price or one byte of the song, and the offer breaks.
+  - **Stop 2, Agents buy at scale** (S4, S5, S15): Scout buys inside ClipAI's budget, then refuses a poisoned offer asking for 500,000 sats. Then a live counter buys 1,000 licences under one Bitcoin timestamp, with 20 picked at random and re-checked from scratch, and the budget bar shown.
+  - **Stop 3, Anyone verifies** (S19, S6, S12): a "License this" button on a video gives one verdict. Then the regulator's AI-training check, and the fake "Ava Official" caught. The real Mutinynet proof link sits next to "Proven on Bitcoin", with the practice-chain note beside it.
+  - **Extra, Rights change hands** (S25, S26, the stolen-key half of S11): offered after stop 3, never forced. Old licences stay valid, the old account can't sell (the A23 cheat), 2 of 3 heirs sign, and a stolen key is retired. S27 is linked as the honest limit.
+- **No set-up gate anywhere.** Scenario pages set everyone up silently. A cast strip replaces the party cards.
+- **Calmer scenario pages:** 3 tabs (What happened, Nine checks, Code), opening on What happened. The diagram, balances, signed events, prompts and the real-vs-simulated list are folded inside them.
+- **Under the hood** has 9 groups: Getting set up, Deals and money, Changing your offer, When things go wrong, Privacy, Fans, Running the network, Honest limits, Try to break it. Badges show which stop uses each scenario. S22 is one line with a "see it run" link. All 27 behaviours and their tests are kept.
+- **Red team as a game:** grouped by what it protects (your song, your money, your agent, your rights, the record). Plain titles, numbered 1–24 with no gaps, the result shown only after you try, and a score.
+- **One cast, one price:** 100 sats everywhere on the main path. Nova is one person (S18 now uses her song "Nova Lights"). Helper parties are off the main path.
+- **Stale copy fixed:** the S1 "never sees the word Nostr" clash, the "not yet filled" Mutinynet lines in S2 and S11, and the "A1./B1." step labels. About 34 step titles were made plain.
+- **Smaller mobile player.**
+- **User-test kit:** `docs/user-test-script.md`, plus a local-only timer shown only with `?test=1`. It records time to first licence and stop times to localStorage, with an Export button. There are no analytics and no network calls.
+
+## Scores: the same 10 lenses
+
+Before: the old Home + chapters (741303a) were scored now with the same walk; they were not a row in the first audit. The source-scenario averages are from the scorecard above.
+
+| Page | Sim | Q | Exp | Inv | Del | Det | Fut | Int | No | Proto | Overall | Before |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Home (one tap, three personas) | 5 | 5 | 5 | 5 | 3 | 4 | 4 | 5 | 5 | 4 | **4.5** | old Home + chapters 3.6 |
+| Stop 1 Hear it, license it | 4 | 5 | 5 | 4 | 5 | 4 | 4 | 5 | 4 | 5 | **4.5** | S3 3.7, S2 3.4, S8 4.2, S13 3.3 (mean 3.65) |
+| Stop 2 Agents buy at scale | 4 | 5 | 4 | 4 | 5 | 4 | 5 | 5 | 5 | 5 | **4.6** | S4 3.8, S5 3.8, S15 4.3 (mean 3.97) |
+| Stop 3 Anyone verifies | 4 | 5 | 5 | 4 | 4 | 4 | 5 | 5 | 4 | 5 | **4.5** | S19 4.5, S6 4.4, S12 4.2 (mean 4.37) |
+| Extra Rights change hands | 3 | 4 | 4 | 5 | 4 | 4 | 5 | 4 | 4 | 5 | **4.2** | S25 4.4, S26 4.5, S11 3.4 (mean 4.1) |
+| **Main path average** | 4.0 | 4.8 | 4.6 | 4.4 | 4.2 | 4.0 | 4.6 | 4.8 | 4.4 | 4.8 | **4.46** | 3.43 (all 27) / 3.6 (old main path) |
+| Under the hood (groups + calm pages) | 4 | 4 | 3 | 3 | 3 | 4 | 3 | 4 | 4 | 5 | **3.7** | — |
+| Red-team game | 4 | 4 | 4 | 3 | 4 | 4 | 3 | 3 | 4 | 5 | **3.8** | 3.4 |
+
+Why not higher:
+
+- Stop 2 still has three beats on one page (about 276 words).
+- The rights extra has three small worlds and 9 buttons, so Simplicity is 3.
+- Home's delight is only the choice itself.
+- Attack pages still show the nine technical checks once you open them. That is fine under the hood, but it is not invisible.
+
+## Measured, headless
+
+Time to first licence is measured from navigation start to the verdict appearing, with scripted taps and no reading time. Same machine, same script.
+
+| | Taps | Time to first licence |
+|---|---|---|
+| Before: Home (hear → license) | 2 | 1.84 s |
+| After: artist (persona → hear → license) | 3 | 1.19 s (the in-app timer recorded 1.48–1.50 s in earlier walks) |
+| After: buyer (persona → "Let Scout buy") | 2 | 0.47 s |
+| After: builder (persona → "Check the licence") | 2 | 0.45 s |
+
+1,000 licences in stop 2 took 3.0 s in this run (2.5–3.0 s across runs) inside a 150,000-sat budget, and 20 of 20 random re-checks passed.
+
+Jargon is counted case-insensitively on visible text, with the code drawer left out. The terms are Nostr, relay, node, NIP-n, kind n, 402, x402, preimage, NWC, binding, OP_RETURN, OpenTimestamps, invoice, hash, BOLT11, lntbs…, secp256k1, merkle, npub, Mutinynet, signature, verifyLicence, bundle, event id, description hash, SHA-256.
+
+| Page, after every button is pressed | Words | Jargon | Terms left |
+|---|---|---|---|
+| Home | 77 | 0 | — |
+| Stop 1 | 284 | 2 | Mutinynet, signature |
+| Stop 2 | 276 | 1 | Mutinynet |
+| Stop 3 | 303 | 1 | Mutinynet (12 more inside the builder's open code drawer) |
+| Extra: rights | 295 | 0 | — |
+| Before: old Home / c1 / c2 / c3 / c4 | 95 / 83 / 138 / 85 / 134 | 1 / 0 / 0 / 0 / 0 | Mutinynet |
+
+So every main-path page is under the 10-term target. The stops carry more words than the old chapters, because each one now holds 3–4 scenarios' worth of story.
+
+Scenario pages after "Run all steps", for all 27:
+
+- Jargon fell from an average of **27.3 to 14.8** per page (worst page: S3, 61 → 50; S1 54 → 39; S4 53 → 37; S16 51 → 35).
+- Words fell from 837 to 767.
+- These counts use the term list above, which differs a little from the first audit's hand count, so compare before with after, not with the 21–92 range quoted earlier.
+
+## Next
+
+Run `docs/user-test-script.md` with 5 artists, 5 buyers and 5 builders. Machine timings show the path is fast; only people can show whether the idea lands.

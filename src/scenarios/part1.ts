@@ -7,7 +7,7 @@ import { bindMessage } from '../lib/mll/events';
 
 export const S1: Scenario = {
   id: 's1', n: 1, part: 1, emoji: '👋', title: 'Ava onboards with Echo', complexity: 'simplest', status: 'v1',
-  summary: 'Ava gets a key, a node and a signed node binding by talking to her agent Echo. She never sees the word "Nostr".',
+  summary: 'Ava talks to her agent Echo. Echo sets up her key and her own wallet, and links them, so payments can only reach her.',
   situation: "Ava has finished 'Rain'. She is not technical. She opens the app and talks to Echo, her agent.",
   education: 'A Nostr key is Ava\'s identity. A node binding is a signed note: "this Lightning node is mine". Vouching from people who know her is what makes the key believable. Echo can only ask Ava\'s signer for signatures; it holds no key.',
   how: [{ title: 'Key in a signer', description: 'The key lives in a remote signer (NIP-46) on Ava\'s phone, not in the app.' }, { title: 'Node binding', description: 'Ava\'s key and her node each sign, so the link works both ways.' }, { title: 'Vouching', description: 'Her distributor signs that the key is really Ava.' }],
@@ -25,10 +25,10 @@ export const S1: Scenario = {
       run: lab => { lab.flow('echo', 'ava', 'sign? (no key)', 'refuse', false); return { ok: false, badge: 'real', summary: 'Refused: Echo holds no secret key. Every signature goes through Ava\'s signer, and anything outside her signed rules needs her tap.' }; } },
     { id: 'recovery', actor: 'ava', title: 'Choose two ways to recover', button: 'Choose recovery', narration: 'Ava picks a printed recovery sheet and a trusted contact. Echo shows her the one-tap revocation button: "If your phone is stolen, press this."',
       run: lab => { lab.a.recovery = ['printed sheet', 'trusted contact']; return { ok: true, badge: 'sim', summary: 'Recovery set: printed sheet and trusted contact. One-tap revocation is ready (see S11).', fields: [F('recovery', 'printed sheet + trusted contact', false)] }; } },
-    { id: 'node', actor: 'host', to: 'ava', title: 'Start a hosted node', button: 'Start node', narration: 'Ava picks a one-click hosted Lightning node. The node\'s key belongs to Ava; HostCo only runs the hardware. (Many artists sharing one node is a known open issue: see attack A18.)',
+    { id: 'node', actor: 'host', to: 'ava', title: 'Open her own wallet', button: 'Open wallet', narration: 'Ava picks a one-click hosted Lightning node. The node\'s key belongs to Ava; HostCo only runs the hardware. (Many artists sharing one node is a known open issue: see attack A18.)',
       run: lab => { const n = lab.makeNode('node.ava', 'ava', "Ava's node (hosted by HostCo)"); lab.a['node.ava'] = 'node.ava'; lab.flow('host', 'ava', '⚡ node ready', 'message');
         return { ok: true, badge: 'sim', summary: `Node ready: ${short(n.pub, 10)}. The node is simulated; its key is real and signs real BOLT11 invoices.`, fields: [F('node public key', n.pub), F('who holds the node key', 'Ava', false)] }; } },
-    { id: 'bind', actor: 'ava', to: 'relays', title: 'Sign the node binding', button: 'Sign binding', narration: 'Ava taps to sign: "this Lightning node is mine". The node also signs Ava\'s key, so the link works both ways. Echo publishes it to several relays.',
+    { id: 'bind', actor: 'ava', to: 'relays', title: 'Link her wallet to her account', button: 'Link them', narration: 'Ava taps to sign: "this Lightning node is mine". The node also signs Ava\'s key, so the link works both ways. Echo publishes it to several relays.',
       run: lab => { const b = onboardAva(lab, 'ava', { quiet: true }); const rec = recoverLnMessage(bindMessage(b.pubkey), tagv(b, 'node-sig')!);
         return { ok: verifyEvent(b) && rec === tagv(b, 'node'), badge: 'real', json: b, proves: [2], summary: `Binding ${short(b.id)} signed by Ava and by her node. Both signatures check out.`,
           fields: [F('event kind', `${b.kind} (binding, draft kind)`), F('node', short(tagv(b, 'node'), 10)), F('node-sig recovers to', short(rec, 10)), F('relays holding it', '3 of 3 (simulated)', false)],
@@ -55,7 +55,7 @@ export const S2: Scenario = {
   cast: ['ava', 'echo', 'jay', 'nova', 'lena'],
   setup: lab => { lab.setUpAll(['ava', 'distributor']); onboardAva(lab, 'ava', { quiet: true }); vouch(lab, 'distributor', 'ava'); },
   steps: [
-    { id: 'hash', actor: 'echo', title: 'Hash the track', button: 'Hash "Rain"', narration: 'Echo computes the track hash: a fingerprint of the exact audio file. Press play in the card to hear the demo recording.',
+    { id: 'hash', actor: 'echo', title: 'Fingerprint the track', button: 'Fingerprint "Rain"', narration: 'Echo computes the track hash: a fingerprint of the exact audio file. Press play in the card to hear the demo recording.',
       run: lab => ({ ok: true, badge: 'real', summary: `SHA-256 of the ${lab.track.length.toLocaleString()}-byte demo recording: ${short(lab.trackHash, 12)}`, fields: [F('track hash', lab.trackHash)], code: `const masterSha256 = sha256hex(await file.arrayBuffer()) // "${short(lab.trackHash)}"` }) },
     { id: 'offer', actor: 'ava', to: 'relays', title: 'Sign the offer', button: 'Sign offer', narration: 'Ava checks the summary on her phone and taps Sign: creator video, worldwide, perpetual, with the splits. The offer gets a unique event id.',
       inputs: [{ key: 'price', label: 'Price (sats)', type: 'number', default: 2000 }],
@@ -68,11 +68,11 @@ export const S2: Scenario = {
       run: (lab: any) => { const c = consent(lab, who, 'offer.creator'); const l = listing(lab, 'offer.creator');
         return { ok: verifyEvent(c), badge: 'real' as const, json: c, proves: l.forSale ? [3] : [], summary: `Consent ${short(c.id)} signed. ${l.forSale ? 'All three consents are in: the offer is FOR SALE.' : `Still waiting: ${l.reason}`}`,
           fields: [F('names offer', short(tagv(c, 'e'))), F('share', `${Number(tagv(c, 'share')) / 100}%`), F('listing', l.forSale ? 'for sale' : 'waiting for consent', false)], code: `makeConsent(${who}Sk, offer, ${tagv(c, 'share')}, payout)\ncheckDeal(offer, binding, consents, null) // ${l.forSale ? 'passes' : 'throws ' + l.code}` }; } })),
-    { id: 'ots', actor: 'echo', to: 'bitcoin', title: 'Timestamp the release', button: 'Stamp with OpenTimestamps', narration: 'Echo timestamps the offer and consents with OpenTimestamps. This is the proof of release: anyone can later show the offer for this exact audio existed by a certain Bitcoin block.',
+    { id: 'ots', actor: 'echo', to: 'bitcoin', title: 'Timestamp the release', button: 'Date it on Bitcoin', narration: 'Echo timestamps the offer and consents with OpenTimestamps. This is the proof of release: anyone can later show the offer for this exact audio existed by a certain Bitcoin block.',
       run: async lab => { const D = sha256hex(JSON.stringify([lab.a['offer.creator'].id, ...lab.a['offer.creator.consents'].map((c: any) => c.id)])); lab.stamp(D, 'proof of release'); lab.stamp(lab.a['offer.creator'].id, 'offer id');
         lab.advance(1800); const b = lab.anchorBatch('Proof of release')!; const r = await lab.checkStamp(D);
-        return { ok: r.status === 'confirmed', badge: 'sim', summary: `Real .ots proof, checked against simulated block ${b.height}: ${r.status}. (Live OpenTimestamps on Mutinynet: recorded-proof slot, not yet filled.)`, fields: [F('digest', short(D, 12)), F('block', b.height), F('proof bytes', lab.proofs[D].ots.length / 2)], code: `const proof = await otsStamp(calendar, digest)\nawait verifyOts(proof, digest, chain) // ${r.status}` }; } },
-    { id: 'changed', actor: 'mallory', title: 'Try it: change the audio', button: 'Hash a changed file', expectFail: true, narration: 'Someone changes a few bytes of the audio and claims it is the same song. A different file has a different hash, so this offer does not cover it.',
+        return { ok: r.status === 'confirmed', badge: 'sim', summary: `Real .ots proof, checked against simulated block ${b.height}: ${r.status}. (A real OpenTimestamps proof on Mutinynet, from the recorded live run, is under the hood in Real runs.)`, fields: [F('digest', short(D, 12)), F('block', b.height), F('proof bytes', lab.proofs[D].ots.length / 2)], code: `const proof = await otsStamp(calendar, digest)\nawait verifyOts(proof, digest, chain) // ${r.status}` }; } },
+    { id: 'changed', actor: 'mallory', title: 'Try it: change the audio', button: 'Fingerprint a changed file', expectFail: true, narration: 'Someone changes a few bytes of the audio and claims it is the same song. A different file has a different hash, so this offer does not cover it.',
       run: lab => { const b = lab.track.slice(); b[1000] ^= 1; const h = sha256hex(b); return { ok: false, badge: 'real', summary: `One flipped bit gives a different hash: ${short(h, 12)} ≠ ${short(lab.trackHash, 12)}. Not covered by this offer.` }; } },
   ],
   proven: 'Exactly who agreed to sell what, at what price and split, and since when.',
