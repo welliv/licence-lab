@@ -46,7 +46,7 @@
     "purchase": {
       "title": "Purchase with a real payment",
       "when": "2026-10-17 11:29 EAT (UTC+3)",
-      "summary": "Sam's agent paid Ava's own Mutinynet node 50 sats over Lightning (NWC), Jay got his 30% by keysend, and the licence passed verifyLicence 9/9, re-checked after the run.",
+      "summary": "Grace's agent paid Alice's own Mutinynet node 50 sats over Lightning (NWC), Carol got her 30% by keysend, and the licence passed verifyLicence 9/9, re-checked after the run.",
       "fields": [
         [
           "Payment hash",
@@ -61,11 +61,11 @@
           "lntbs500n1p4dxvwmpp5kwh5rckejs640xccpqdahg4fcy57lkc7lj2nas6qgnfk7t52xfdshp53jcnypk7nhsvg7cekxps7zj3zq7j4lu3cqnxxghtlk642frdnzkqcqzzsxqzfvsp56chxurjs0gvxzfqz44d2xvmfyknknxplxu249y2tkcsrn24m7ggs9qxpqysgq6jfzvgcev3qnqwksw4s820djfmg55j939gfh8qqum29h82j0zmah7kl7utxcc30s0y0vfg932xmaz65f3gz9j5h3px86a5defxc4asqqnqjst0"
         ],
         [
-          "Ava's node",
+          "Alice's node",
           "02c619f9de5ade8d537521724253b04b75541c5206981053ad64447f362d6e9b5d"
         ],
         [
-          "Jay payout",
+          "Carol payout",
           "15 sats"
         ],
         [
@@ -83,7 +83,7 @@
     "revocation": {
       "title": "OP_RETURN revocation in a block",
       "when": "2026-10-17 11:29 EAT (UTC+3)",
-      "summary": "Ava signed an 80-byte MLR2 revocation of the \"Rain\" offer. A licence anchored after it is refused (\"revoked\"); licences anchored before it stay valid; the seller now answers 410.",
+      "summary": "Alice signed an 80-byte MLR2 revocation of the \"Rain\" offer. A licence anchored after it is refused (\"revoked\"); licences anchored before it stay valid; the seller now answers 410.",
       "fields": [
         [
           "Revocation tx",

@@ -7,11 +7,11 @@ import { TierBadge } from '../bits';
 import { ShieldCheck, Swords, Globe, Radio, Library, FileText, HelpCircle, ArrowLeft } from 'lucide-react';
 export const GLOSSARY: [string, string][] = [
   ['Nostr', 'An open network of relays that pass on signed notes. Anyone can read them; nobody owns it.'],
-  ['Key and signature', 'A secret only Ava holds signs her notes; anyone can check the signature with her public key.'],
+  ['Key and signature', 'A secret only Alice holds signs her notes; anyone can check the signature with her public key.'],
   ['Relay', 'A server that stores and passes on Nostr notes. Use several, so none can hide one.'],
-  ['Offer (kind 30402)', 'Ava\'s signed price, use and licence text for one track.'],
+  ['Offer (kind 30402)', 'Alice\'s signed price, use and licence text for one track.'],
   ['Consent (kind 3413)', 'A co-owner\'s signed "yes" to an offer and their share.'],
-  ['Binding (kind 3411)', 'Ava\'s key and her Lightning node sign each other, so payments go only to her.'],
+  ['Binding (kind 3411)', 'Alice\'s key and her Lightning node sign each other, so payments go only to her.'],
   ['Lightning', 'Bitcoin payments that settle in seconds for a fraction of a cent.'],
   ['sats', 'The smallest unit of bitcoin (100 million to one bitcoin). Here they are test sats.'],
   ['Invoice (BOLT 11)', 'A payment request signed by the seller\'s node. Its description hash commits to the buyer\'s exact request.'],

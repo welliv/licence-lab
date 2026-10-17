@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-17T13:51:22.864Z",
+  "generatedAt": "2026-10-17T14:51:20.078Z",
   "ffmpeg": true,
   "hero": "54bdd6209af9",
   "tracks": [
     {
       "id": "54bdd6209af9",
-      "file": "01-ava-rain.mp3",
+      "file": "01-alice-rain.mp3",
       "mime": "audio/mpeg",
       "bytes": 2501217,
       "sha256": "54bdd6209af9d5aa84cdd71f904047fb7269cd0cf106f79c32356c20c4b65695",
@@ -18,12 +18,12 @@
       "licence": "Owner-supplied for this local demo; licence to be confirmed by the owner before any public use",
       "source": "Owner upload 01M54C9RR8RVQ1183C30Z0J230.mp3",
       "notes": "ID3 tags contain only encoder=Lavf58.12.100",
-      "cast": "ava",
+      "cast": "alice",
       "demoTitle": "Rain"
     },
     {
       "id": "837b31cb1083",
-      "file": "02-nova.mp3",
+      "file": "02-dave.mp3",
       "mime": "audio/mpeg",
       "bytes": 5932186,
       "sha256": "837b31cb1083083505f405dc9798104b0032c0c88cced8a94a8ddf5e67770172",
@@ -36,12 +36,12 @@
       "licence": "Owner-supplied for this local demo; licence to be confirmed by the owner before any public use",
       "source": "Owner upload 01M54C9RVCC1P930NTHV4233KY.mp3",
       "notes": "ID3 tags contain only encoder=Lavf58.12.100",
-      "cast": "nova",
-      "demoTitle": "Nova Lights"
+      "cast": "dave",
+      "demoTitle": "Northern Lights"
     },
     {
       "id": "f3209115e475",
-      "file": "03-jay.mp3",
+      "file": "03-carol.mp3",
       "mime": "audio/mpeg",
       "bytes": 1901550,
       "sha256": "f3209115e4750e8a4f8bc9ccc2d1ef8ca1e1f976cf7679a9447642f12fb0cea8",
@@ -54,12 +54,12 @@
       "licence": "Owner-supplied for this local demo; licence to be confirmed by the owner before any public use",
       "source": "Owner upload 01M54C9RQCS988JVKJ88CFHRMZ.mp3",
       "notes": "ID3 tags contain only encoder=Lavf58.12.100",
-      "cast": "jay",
+      "cast": "carol",
       "demoTitle": "Night Shift"
     },
     {
       "id": "5f8ef58edb05",
-      "file": "04-lena.mp3",
+      "file": "04-erin.mp3",
       "mime": "audio/mpeg",
       "bytes": 7190170,
       "sha256": "5f8ef58edb0564a243e39b28db314d1743e502a8f1b4dd736fbf3536de43f086",
@@ -72,12 +72,12 @@
       "licence": "Owner-supplied for this local demo; licence to be confirmed by the owner before any public use",
       "source": "Owner upload 01M54C9RR28K70M7S5MFV48WHG.mp3",
       "notes": "ID3 tags contain only encoder=Lavf58.12.100",
-      "cast": "lena",
+      "cast": "erin",
       "demoTitle": "Paper Boats"
     },
     {
       "id": "c7d20d3f7d44",
-      "file": "05-kai.mp3",
+      "file": "05-frank.mp3",
       "mime": "audio/mpeg",
       "bytes": 5402266,
       "sha256": "c7d20d3f7d44d3bb6d1fd56a653451e8ed4dddf6547b435363bbaec628c5396a",
@@ -90,8 +90,8 @@
       "licence": "Owner-supplied for this local demo; licence to be confirmed by the owner before any public use",
       "source": "Owner upload 01M54C9SV5NHGJ7ZQAD72C7CZB.mp3",
       "notes": "ID3 tags contain only encoder=Lavf58.12.100",
-      "cast": "kai",
-      "demoTitle": "Rain (Kai remix)"
+      "cast": "frank",
+      "demoTitle": "Rain (Frank remix)"
     }
   ]
 }

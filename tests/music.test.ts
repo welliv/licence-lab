@@ -6,7 +6,7 @@ import { runScenario } from '../src/engine/runner';
 import { byId } from '../src/scenarios';
 import { tagv } from '../src/engine/lab';
 const manifest = existsSync('public/music/tracks.json') ? JSON.parse(readFileSync('public/music/tracks.json', 'utf8')) : { tracks: [] };
-const hero = manifest.tracks.find((t: any) => t.cast === 'ava');
+const hero = manifest.tracks.find((t: any) => t.cast === 'alice');
 const h = (b: Uint8Array) => createHash('sha256').update(b).digest('hex');
 afterAll(() => clearTrackFiles());
 describe.skipIf(!hero)('real audio files bind to the licence', () => {

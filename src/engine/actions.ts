@@ -6,13 +6,13 @@ export interface Out { ok: boolean; summary: string; fields?: { label: string; v
 const F = (label: string, value: string | number, mono = true) => ({ label, value: String(value), mono });
 export { F };
 
-/** S1: Ava's key (in a simulated NIP-46 signer), her node, her binding, vouching, agent rules. */
-export function onboardAva(lab: Lab, artist = 'ava', o: { nodeId?: string; quiet?: boolean } = {}) {
+/** S1: Alice's key (in a simulated NIP-46 signer), her node, her binding, vouching, agent rules. */
+export function onboardAlice(lab: Lab, artist = 'alice', o: { nodeId?: string; quiet?: boolean } = {}) {
   const nodeId = o.nodeId ?? `node.${artist}`; lab.setUp(artist);
   lab.makeNode(nodeId, artist, `${lab.name(artist)}'s node`);
   const binding = lab.bind(artist, nodeId); lab.a[`binding.${artist}`] = binding; lab.a[`node.${artist}`] = nodeId;
   lab.publish(binding, artist, 'binding ✍');
-  if (!o.quiet) lab.log({ from: artist, to: 'relays', text: `Node binding signed: "this Lightning node ${short(lab.nodes[nodeId].pub)} is mine" (event ${short(binding.id)})`, badge: 'real', code: `makeBinding(avaKey, nodePub, signLnMessage(bindMessage(avaPub), nodeKey))` });
+  if (!o.quiet) lab.log({ from: artist, to: 'relays', text: `Node binding signed: "this Lightning node ${short(lab.nodes[nodeId].pub)} is mine" (event ${short(binding.id)})`, badge: 'real', code: `makeBinding(aliceKey, nodePub, signLnMessage(bindMessage(alicePub), nodeKey))` });
   return binding;
 }
 export function vouch(lab: Lab, voucher: string, artist: string) {
@@ -31,18 +31,18 @@ export function consent(lab: Lab, who: string, offerName: string) {
   const c = lab.lib.makeConsent(lab.key(who), offer, Number(p?.[3] ?? 0), `${who}@lab.test`); (lab.a[`${offerName}.consents`] ??= []).push(c);
   lab.publish(c, who, 'consent ✍'); return c;
 }
-export function listing(lab: Lab, offerName: string, artist = 'ava') {
+export function listing(lab: Lab, offerName: string, artist = 'alice') {
   const offer = lab.a[offerName], binding = lab.a[`binding.${artist}`] ?? lab.a[`${offerName}.binding`], consents = lab.a[`${offerName}.consents`] ?? [];
   try { lab.lib.checkDeal(offer, binding, consents, null); return { forSale: true, reason: 'all co-owners consented; shares add up', offer, binding, consents }; }
   catch (e: any) { return { forSale: false, reason: e.message, code: e.code, offer, binding, consents }; }
 }
-export function releaseRain(lab: Lab, kinds: (keyof typeof USES)[] = ['creator', 'advert', 'training', 'podcast'], artist = 'ava') {
-  ['jay', 'nova', 'lena'].forEach(x => lab.setUp(x));
-  for (const k of kinds) { signOffer(lab, artist, k); for (const who of ['jay', 'nova', 'lena']) consent(lab, who, `offer.${k}`); }
+export function releaseRain(lab: Lab, kinds: (keyof typeof USES)[] = ['creator', 'advert', 'training', 'podcast'], artist = 'alice') {
+  ['carol', 'dave', 'erin'].forEach(x => lab.setUp(x));
+  for (const k of kinds) { signOffer(lab, artist, k); for (const who of ['carol', 'dave', 'erin']) consent(lab, who, `offer.${k}`); }
 }
 /** A full honest purchase (request → 402 → pay → bundle). Used by setups and by buying steps. */
 export function purchase(lab: Lab, buyer: string, offerName: string, o: { seconds?: number; name?: string; fresh?: boolean; artist?: string; invoiceTimestamp?: number; payer?: string; useOverride?: string[] } = {}) {
-  const artist = o.artist ?? 'ava'; const { offer, binding, consents } = listing(lab, offerName, artist);
+  const artist = o.artist ?? 'alice'; const { offer, binding, consents } = listing(lab, offerName, artist);
   const use = o.useOverride ?? [...offer.tags.find((t: string[]) => t[0] === 'use')!.slice(1, 5), ...(offer.tags.find((t: string[]) => t[0] === 'use')!.some((s: string) => s.startsWith('max-seconds')) ? [`seconds=${o.seconds ?? 60}`] : [])];
   const r = o.fresh === false ? { request: lab.lib.makeRequest(lab.key(buyer), { offer, binding, use, network: tagNet(), notBefore: lab.notBefore() }), link: undefined }
     : lab.lib.makePrivateRequest(lab.key(buyer), { offer, binding, use, network: tagNet(), notBefore: lab.notBefore() });
@@ -57,7 +57,7 @@ export function purchase(lab: Lab, buyer: string, offerName: string, o: { second
 }
 export const tagNet = () => 'lnbtc:00000008819873e925422c1ff0f99f7c';
 /** Seller node pays each co-owner their share and signs a sales statement (simulated payouts, real signed statements). */
-export function payout(lab: Lab, offerName: string, b: LicenceBundle, artist = 'ava', o: { skip?: string[] } = {}) {
+export function payout(lab: Lab, offerName: string, b: LicenceBundle, artist = 'alice', o: { skip?: string[] } = {}) {
   const offer: Event = lab.a[offerName]; const total = Number(tagv(b.request, 'amount')) / 1000; const lines: string[] = [];
   const statements: Event[] = [];
   for (const p of offer.tags.filter(t => t[0] === 'p')) { const who = Object.keys(CAST).find(id => lab.ready.has(id) && lab.pub(id) === p[1]) ?? 'unknown'; const share = Math.floor(total * Number(p[3]) / 10000);

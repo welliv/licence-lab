@@ -20,7 +20,7 @@ export function rainWav(): Uint8Array {
 export function remixWav(): Uint8Array { const b = rainWav().slice(); for (let i = b.length - 4000; i < b.length; i++) b[i] = b[i] ^ 0x5a; return b; }
 
 // ---------- Real audio files (the owner's tracks in public/music). When registered, offers bind to their SHA-256. ----------
-export interface TrackFile { role: 'rain' | 'remix' | 'nova' | string; sha256: string; label: string; bytes?: Uint8Array }
+export interface TrackFile { role: 'rain' | 'remix' | 'dave' | string; sha256: string; label: string; bytes?: Uint8Array }
 const FILES: Record<string, TrackFile> = {};
 /** Register a real file. If bytes are given, their hash is recomputed here and must match. */
 export function registerTrackFile(f: TrackFile, hash?: (b: Uint8Array) => string) {

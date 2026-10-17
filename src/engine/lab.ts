@@ -132,16 +132,16 @@ export class Lab {
   addPlan(owner: string, p: PlanInput) { const e = makeSuccessionPlan(this.key(owner), p); const r: Anchored = { event: e }; this.title.plans.push(r); this.publish(e, owner, 'succession plan ✍'); const b = this.chain.mine({ time: this.now, opReturns: [titlePayload(titleDigest(e.id))], note: 'succession plan' }); r.anchor = { type: 'opreturn', txid: b.ors[0].txid, blockhash: b.hash, height: b.height }; return r; }
   cosign(who: string, t: Event, role: 'co-owner' | 'plan-key') { const c = makeCosign(this.key(who), t, role); this.title.cosigns.push(c); this.publish(c, who, 'co-sign ✍'); return c; }
   courtVouch(who: string, t: Event, ref: string) { const v = makeCourtVouch(this.key(who), t, ref); this.title.vouches.push(v); this.publish(v, who, 'court voucher ✍'); return v; }
-  async titleAt(key: string, height = this.chain.tip.height) { return checkTitle(this.trackHash, key, height, this.chain, this.title, { origin: this.titleOrigin ?? this.pub('ava'), trust: this.titleTrust }); }
+  async titleAt(key: string, height = this.chain.tip.height) { return checkTitle(this.trackHash, key, height, this.chain, this.title, { origin: this.titleOrigin ?? this.pub('alice'), trust: this.titleTrust }); }
   logs: LogEntry[] = []; flows: Flow[] = []; history: { step: string; t: number; balances: Record<string, number> }[] = [];
   currentStep?: string;
   track: Uint8Array; trackHash: string; trackLabel = 'demo tone (synthesised)';
-  /** Hash of Kai's remix file (real file when registered, else a changed copy of the master). */
+  /** Hash of Frank's remix file (real file when registered, else a changed copy of the master). */
   remixHash() { return trackFile('remix')?.sha256 ?? sha256hex(this.track.map((b, k) => k > this.track.length - 4000 ? b ^ 0x5a : b)); }
-  novaHash() { return trackFile('nova')?.sha256 ?? sha256hex('Dawn master v1'); }
+  daveHash() { return trackFile('dave')?.sha256 ?? sha256hex('Dawn master v1'); }
   /** Extra check (not one of the nine): do the audio bytes we hold hash to the offer's "x" tag? */
   fileCheck(offer: Event): FileCheck { const x = tagv(offer, 'x') ?? '';
-    const known: TrackFile[] = [{ role: 'rain', sha256: this.trackHash, label: this.trackLabel, bytes: this.track }, ...(['remix', 'nova'].map(r => trackFile(r)).filter(Boolean) as TrackFile[])];
+    const known: TrackFile[] = [{ role: 'rain', sha256: this.trackHash, label: this.trackLabel, bytes: this.track }, ...(['remix', 'dave'].map(r => trackFile(r)).filter(Boolean) as TrackFile[])];
     const f = known.find(k => k.sha256 === x); if (!f) return { ok: false, offerHash: x, reason: 'no audio file here hashes to the offer\'s track hash' };
     const fileHash = f.bytes ? hashBytes(f.bytes) : f.sha256; return { ok: fileHash === x, offerHash: x, fileHash, label: f.label, recomputed: !!f.bytes, reason: fileHash === x ? undefined : 'file bytes changed' }; }
   constructor(seed = 'rain') {
@@ -229,7 +229,7 @@ export class Lab {
   agentPay(agent: string, reqs: Requirements, request: Event, offer: Event, binding: Event, o: { loseResponse?: boolean } = {}) {
     const trace: string[] = []; const ledger = (this.ledgers[agent] ??= {}); const caps = this.agentCaps[agent];
     const url = tagv(offer, 'pay-link')!; const expected = requestHash(httpBinding('POST', url, requestBytes(request), { 'content-type': 'application/json' }));
-    let inv: Invoice; try { inv = clientCheck(reqs, expected, tagv(binding, 'node')!, this.now, 60, tagv(request, 'amount')); trace.push('✓ invoice amount equals my own signed request', '✓ description hash commits to my request', '✓ invoice signed by the node Ava bound'); }
+    let inv: Invoice; try { inv = clientCheck(reqs, expected, tagv(binding, 'node')!, this.now, 60, tagv(request, 'amount')); trace.push('✓ invoice amount equals my own signed request', '✓ description hash commits to my request', '✓ invoice signed by the node Alice bound'); }
     catch (e: any) { trace.push(`✗ refused before paying: ${e.message}`); return { ok: false, trace, error: e.message, code: 'AGENT_RULE' as const }; }
     const amt = Number(inv.amountMsat) / 1000; const prior = ledger[inv.paymentHash];
     if (prior?.status === 'paid') { trace.push('✓ already paid this exact invoice (payment record): reuse preimage, pay nothing'); return { ok: true, trace, preimage: prior.preimage!, reused: true, inv }; }
@@ -283,6 +283,6 @@ export class Lab {
     return { track: 'rain', title: 'Rain', masterSha256: this.trackHash, use: USES[kind].slice(1), termsText: TERMS[kind], priceSats: 2_000, payLink: `https://${artist}.lab.test/licence/rain/${kind}`,
       bindingId: '', validUntil: this.chain.tip.height + 52_560, coOwners: [], ...Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) };
   }
-  coOwners() { return [{ pubkey: this.pub('jay'), role: 'producer', bps: 2000 }, { pubkey: this.pub('nova'), role: 'featured-artist', bps: 1500 }, { pubkey: this.pub('lena'), role: 'songwriter-share', bps: 1500 }]; }
+  coOwners() { return [{ pubkey: this.pub('carol'), role: 'producer', bps: 2000 }, { pubkey: this.pub('dave'), role: 'featured-artist', bps: 1500 }, { pubkey: this.pub('erin'), role: 'songwriter-share', bps: 1500 }]; }
 }
 export { CAST };

@@ -1,6 +1,8 @@
 # Jobs audit: all 27 scenarios and the attacks
 
 Branch `simple` (commit 741303a). Audit only: nothing in the app was changed.
+
+> Names: the cast was later renamed to the usual crypto-example names (Ava → Alice, Mia → Bob, Jay → Carol, Nova → Dave, Lena → Erin, Kai → Frank, Sam → Grace, Scout → Bob's agent, Iris/Leo/Rosa → Heidi/Ivan/Judy, the observer → Eve). The text below uses the new names; the screenshots in `screenshots/jobs-audit/` still show the old ones.
 Walked on 17 Oct 2026, about 16:00–17:00 EAT, on the preview at http://localhost:4180/ with headless Chrome, as a first-time user (fresh storage, "Set up all", "Run all steps", every scenario). Then read against the scenario and attack definitions in `src/scenarios/` and `src/engine/attacks.ts`.
 
 ## Headline verdict
@@ -41,19 +43,19 @@ Overall is the plain mean.
 
 | # | Scenario | Sim | Q | Exp | Inv | Del | Det | Fut | Int | No | Proto | Overall | Verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| S1 | Ava onboards with Echo | 2 | 3 | 2 | 1 | 2 | 2 | 3 | 3 | 3 | 4 | **2.5** | MERGE into Artist sells (setup runs silently) |
-| S2 | Release "Rain" with Jay, Nova, Lena | 3 | 4 | 3 | 2 | 3 | 3 | 3 | 4 | 4 | 5 | **3.4** | KEEP (core of Artist sells) |
-| S3 | Mia licenses by hand | 3 | 5 | 4 | 1 | 4 | 3 | 3 | 4 | 5 | 5 | **3.7** | KEEP (it is the Home flow) |
-| S4 | Scout buys automatically | 3 | 5 | 4 | 1 | 4 | 2 | 5 | 4 | 5 | 5 | **3.8** | KEEP (core of Agents buy) |
+| S1 | Alice onboards with Echo | 2 | 3 | 2 | 1 | 2 | 2 | 3 | 3 | 3 | 4 | **2.5** | MERGE into Artist sells (setup runs silently) |
+| S2 | Release "Rain" with Carol, Dave, Erin | 3 | 4 | 3 | 2 | 3 | 3 | 3 | 4 | 4 | 5 | **3.4** | KEEP (core of Artist sells) |
+| S3 | Bob licenses by hand | 3 | 5 | 4 | 1 | 4 | 3 | 3 | 4 | 5 | 5 | **3.7** | KEEP (it is the Home flow) |
+| S4 | Bob's agent buys automatically | 3 | 5 | 4 | 1 | 4 | 2 | 5 | 4 | 5 | 5 | **3.8** | KEEP (core of Agents buy) |
 | S5 | StreamCo licenses at scale | 3 | 4 | 4 | 3 | 4 | 3 | 5 | 4 | 4 | 4 | **3.8** | MERGE into Agents buy (scale beat) |
 | S6 | ModelCo trains, a regulator checks | 4 | 5 | 4 | 4 | 4 | 4 | 5 | 4 | 5 | 5 | **4.4** | KEEP (core of Anyone verifies) |
-| S7 | Sam the fan | 4 | 2 | 4 | 2 | 3 | 3 | 3 | 2 | 2 | 3 | **2.8** | UNDER THE HOOD (fans, not licensing) |
-| S8 | Kai's remix pays the original | 4 | 4 | 4 | 4 | 5 | 4 | 4 | 4 | 4 | 5 | **4.2** | KEEP (core of Everyone gets paid) |
+| S7 | Grace the fan | 4 | 2 | 4 | 2 | 3 | 3 | 3 | 2 | 2 | 3 | **2.8** | UNDER THE HOOD (fans, not licensing) |
+| S8 | Frank's remix pays the original | 4 | 4 | 4 | 4 | 5 | 4 | 4 | 4 | 4 | 5 | **4.2** | KEEP (core of Everyone gets paid) |
 | S9 | Sync for a game | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 4 | **3.1** | UNDER THE HOOD (custom deals) |
 | S10 | A price change | 4 | 3 | 3 | 3 | 2 | 4 | 2 | 4 | 3 | 5 | **3.3** | MERGE with S23 under the hood ("Change your offer") |
 | S11 | Revocation and a stolen key | 2 | 5 | 3 | 2 | 4 | 2 | 3 | 4 | 4 | 5 | **3.4** | MERGE: stolen-key half into Rights change hands; revocation half under the hood |
-| S12 | A thief, "Ava Official" | 4 | 5 | 5 | 3 | 4 | 4 | 4 | 4 | 4 | 5 | **4.2** | MERGE into Anyone verifies (fake-copy beat) |
-| S13 | Jay finds under-reporting | 3 | 4 | 3 | 3 | 4 | 3 | 3 | 3 | 3 | 4 | **3.3** | MERGE into Everyone gets paid |
+| S12 | A thief, "Alice Official" | 4 | 5 | 5 | 3 | 4 | 4 | 4 | 4 | 4 | 5 | **4.2** | MERGE into Anyone verifies (fake-copy beat) |
+| S13 | Carol finds under-reporting | 3 | 4 | 3 | 3 | 4 | 3 | 3 | 3 | 3 | 4 | **3.3** | MERGE into Everyone gets paid |
 | S14 | Four payment worries | 2 | 4 | 3 | 2 | 3 | 3 | 3 | 3 | 3 | 4 | **3.0** | MERGE with S16 + S17 under the hood ("When things go wrong") |
 | S15 | Prompt injection | 4 | 5 | 4 | 3 | 5 | 4 | 5 | 4 | 4 | 5 | **4.3** | MERGE into Agents buy (safety beat) |
 | S16 | Relay or node down | 3 | 3 | 2 | 1 | 2 | 3 | 2 | 3 | 2 | 3 | **2.4** | UNDER THE HOOD (When things go wrong) |
@@ -103,7 +105,7 @@ Overall is the plain mean.
 - **S3, S4: the right idea, the wrong words.** They are the two core purchases, and the jargon is worst here.
   - S3 has 92 jargon terms. A step is titled "402 with invoice", and the page shows `preimage` seven times, "description hash" and an `lntbs…` invoice.
   - S4 has 89. It shows raw field keys (`max_amount`, `renewal`, `request_methods`), "wrapper kind 1059" and "HTTP 402 / x402".
-  - A buyer needs only "Scout asked, Ava's shop sent a bill, Scout checked it and paid".
+  - A buyer needs only "Bob's agent asked, Alice's shop sent a bill, Bob's agent checked it and paid".
 - **S1 says one thing and shows another.** The subtitle says "She never sees the word 'Nostr'". The same page shows "Nostr key + test wallet" on every card and "Nostr key inside a remote signer (NIP-46)" in step 2. It also opens with keys, nodes, a binding and a vouch, which is set-up, not story.
 - **S11 has two kinds of detail bug.**
   - Its step labels "A1., A2., B1." clash with the attack ids A1, A2 on the red-team page.
@@ -126,8 +128,8 @@ Overall is the plain mean.
 - **S24 is for operators only.** It has 44 jargon terms, and its first step is "Pay an OP_RETURN service".
 - **Money and cast do not line up.**
   - The story uses 100 sats; the scenarios use 2,000 sats per licence.
-  - The cast changes between pages: Mia buys on Home, Scout in chapter 2, and StreamCo, ModelCo, Kai and Sam in the scenarios.
-  - "Nova" is the featured singer in "Rain" and also the label artist with "Dawn" in S18.
+  - The cast changes between pages: Bob buys on Home, Bob's agent in chapter 2, and StreamCo, ModelCo, Frank and Grace in the scenarios.
+  - "Dave" is the featured singer in "Rain" and also the label artist with "Dawn" in S18.
   - A newcomer cannot tell it is one world.
 
 ### The attacks (red-team page)
@@ -151,7 +153,7 @@ Scored as one row above (3.4). The engine is honest. Every one of the 24 attacks
 2. **Delete the set-up gate.** Parties set themselves up when a page opens, steps come first, and the 4–7 cards shrink to a one-line cast strip. Today a newcomer meets a yellow "Set up all (5)" bar and up to six "Create test party" buttons before any story. On mobile the first step is two screens down. *Exp, Sim.*
 3. **Plain words on every step title, result line and button.** Kind numbers, raw field keys, MLR2 payloads, "402", "NWC", "preimage", "binding" and "OP_RETURN" move into each step's code drawer. Target: under 10 jargon terms per page after the run (today 21–92). *Inv.*
 4. **One verdict and one magic moment per stop.** End every stop with a single card ("Licensed ✓ Proven", "Paid ✓ Split to 4 people", "Fake ✗ Caught", "Rights passed ✓ Still paying"). Each stop gets one moment you can feel: the full track unlocks, money visibly fans out, a counter runs to 1,000 licences under one proof, the heirs' signatures click in. *Del, Exp.*
-5. **Show the future on the main path.** Chapter 2 buys one licence. It should end with S5's scale ("Scout licensed 1,000 tracks in X seconds; one Bitcoin timestamp proves them all"), and chapter 3 should include S6's regulator check. This is what makes it "any agent", not "one shopper". *Fut.*
+5. **Show the future on the main path.** Chapter 2 buys one licence. It should end with S5's scale ("Bob's agent licensed 1,000 tracks in X seconds; one Bitcoin timestamp proves them all"), and chapter 3 should include S6's regulator check. This is what makes it "any agent", not "one shopper". *Fut.*
 6. **Fix honesty and stale copy.**
    - Remove "recorded-proof slot, not yet filled" from S2 and S11 and link the real Mutinynet run.
    - Fix S1's "never sees the word Nostr" claim, or hide the word.
@@ -159,7 +161,7 @@ Scored as one row above (3.4). The engine is honest. Every one of the 24 attacks
    - Put the "practice chain" note right beside "Proven on Bitcoin", not further down.
 
    *Det, Proto.*
-7. **One world, one cast.** Ava, Rain, Mia (person), Scout (agent), the co-owners, and Harbour and the heirs for rights. Rename the S18 label artist so there are not two Novas. Drop casts the main path does not need: Sam, Echo as a separate onboarding agent, HostCo, Indexes, Relays. *Int, Sim.*
+7. **One world, one cast.** Alice, Rain, Bob (person), Bob's agent, the co-owners, and Harbour and the heirs for rights. Rename the S18 label artist so there are not two Daves. Drop casts the main path does not need: Grace, Echo as a separate onboarding agent, HostCo, Indexes, Relays. *Int, Sim.*
 8. **Calm the scenario page.** Cut eight tabs to three (What happened, Nine checks, Code). Open on "What happened", not on an empty "No entries yet" log. Remove the "Nostr key + test wallet" line from cards. Shrink the mini player on mobile; it takes about a fifth of the screen. *Det, Sim.*
 9. **Say no to four scenarios and fold three.**
    - Cut S22 (one territory line in Artist sells).
@@ -185,10 +187,10 @@ Scored as one row above (3.4). The engine is honest. Every one of the 24 attacks
 | Stop | Built from | Magic moment | One verdict |
 |---|---|---|---|
 | 0. Hear it, license it (Home) | S3 | Preview stops, 100 sats, full track plays | "Licensed ✓ Proven on Bitcoin" |
-| 1. Artist sells | S2, with S1 run silently, plus one line each from S18 (labels) and S22 (territory) | Change one byte of the audio and the offer no longer matches | "On sale ✓ Signed by Ava and her co-owners" |
-| 2. Agents buy | S4 + S5 + S15 | Scout refuses a poisoned prompt, then a counter runs to 1,000 licences under one timestamp | "1,000 licences ✓ inside budget" |
-| 3. Everyone gets paid | S8 + S13 (+ the split from S3) | One payment visibly fans out to Ava, Jay, Nova, Lena and the remix original | "Paid ✓ 4 people, at once" |
-| 4. Anyone verifies | S19 + S6 + S12 | A "License this" button on a video, a regulator checks training data, "Ava Official" is caught | "Real ✓ / Fake ✗" |
+| 1. Artist sells | S2, with S1 run silently, plus one line each from S18 (labels) and S22 (territory) | Change one byte of the audio and the offer no longer matches | "On sale ✓ Signed by Alice and her co-owners" |
+| 2. Agents buy | S4 + S5 + S15 | Bob's agent refuses a poisoned prompt, then a counter runs to 1,000 licences under one timestamp | "1,000 licences ✓ inside budget" |
+| 3. Everyone gets paid | S8 + S13 (+ the split from S3) | One payment visibly fans out to Alice, Carol, Dave, Erin and the remix original | "Paid ✓ 4 people, at once" |
+| 4. Anyone verifies | S19 + S6 + S12 | A "License this" button on a video, a regulator checks training data, "Alice Official" is caught | "Real ✓ / Fake ✗" |
 | 5. Rights change hands | S25 + S26 + the stolen-key half of S11 (S27 as a linked limit) | Two of three heirs sign; an old stolen key's offer fails | "Rights passed ✓ Still paying" |
 
 **Under the hood (grouped, not numbered 1–27):**
@@ -236,15 +238,15 @@ Branch `simple`, after the rebuild (the commit after 8e92014). Walked on 17 Oct 
 
 - **Home** has one headline and one tap: "I make music / I buy music / I build". The choice sets the order of the stops (artist 1-2-3, buyer 2-1-3, builder 3-1-2), is remembered, and can be changed ("Seen as" in the header, or Home).
 - **Three stops plus one extra**, each with one magic moment, one verdict card, one "Try to cheat" and a "Next" button:
-  - **Stop 1, Hear it, license it** (S3 + S2 + S8/S13): the preview stops, you license for 100 sats, the full track plays, and the 100 sats visibly split 65 / 20 / 15 to Ava, Jay and Nova. To cheat, change the price or one byte of the song, and the offer breaks.
-  - **Stop 2, Agents buy at scale** (S4, S5, S15): Scout buys inside ClipAI's budget, then refuses a poisoned offer asking for 500,000 sats. Then a live counter buys 1,000 licences under one Bitcoin timestamp, with 20 picked at random and re-checked from scratch, and the budget bar shown.
-  - **Stop 3, Anyone verifies** (S19, S6, S12): a "License this" button on a video gives one verdict. Then the regulator's AI-training check, and the fake "Ava Official" caught. The real Mutinynet proof link sits next to "Proven on Bitcoin", with the practice-chain note beside it.
+  - **Stop 1, Hear it, license it** (S3 + S2 + S8/S13): the preview stops, you license for 100 sats, the full track plays, and the 100 sats visibly split 65 / 20 / 15 to Alice, Carol and Dave. To cheat, change the price or one byte of the song, and the offer breaks.
+  - **Stop 2, Agents buy at scale** (S4, S5, S15): Bob's agent buys inside ClipAI's budget, then refuses a poisoned offer asking for 500,000 sats. Then a live counter buys 1,000 licences under one Bitcoin timestamp, with 20 picked at random and re-checked from scratch, and the budget bar shown.
+  - **Stop 3, Anyone verifies** (S19, S6, S12): a "License this" button on a video gives one verdict. Then the regulator's AI-training check, and the fake "Alice Official" caught. The real Mutinynet proof link sits next to "Proven on Bitcoin", with the practice-chain note beside it.
   - **Extra, Rights change hands** (S25, S26, the stolen-key half of S11): offered after stop 3, never forced. Old licences stay valid, the old account can't sell (the A23 cheat), 2 of 3 heirs sign, and a stolen key is retired. S27 is linked as the honest limit.
 - **No set-up gate anywhere.** Scenario pages set everyone up silently. A cast strip replaces the party cards.
 - **Calmer scenario pages:** 3 tabs (What happened, Nine checks, Code), opening on What happened. The diagram, balances, signed events, prompts and the real-vs-simulated list are folded inside them.
 - **Under the hood** has 9 groups: Getting set up, Deals and money, Changing your offer, When things go wrong, Privacy, Fans, Running the network, Honest limits, Try to break it. Badges show which stop uses each scenario. S22 is one line with a "see it run" link. All 27 behaviours and their tests are kept.
 - **Red team as a game:** grouped by what it protects (your song, your money, your agent, your rights, the record). Plain titles, numbered 1–24 with no gaps, the result shown only after you try, and a score.
-- **One cast, one price:** 100 sats everywhere on the main path. Nova is one person (S18 now uses her song "Nova Lights"). Helper parties are off the main path.
+- **One cast, one price:** 100 sats everywhere on the main path. Dave is one person (S18 now uses his song "Northern Lights"). Helper parties are off the main path.
 - **Stale copy fixed:** the S1 "never sees the word Nostr" clash, the "not yet filled" Mutinynet lines in S2 and S11, and the "A1./B1." step labels. About 34 step titles were made plain.
 - **Smaller mobile player.**
 - **User-test kit:** `docs/user-test-script.md`, plus a local-only timer shown only with `?test=1`. It records time to first licence and stop times to localStorage, with an Export button. There are no analytics and no network calls.
@@ -257,17 +259,17 @@ Before: the old Home + chapters (741303a) were scored now with the same walk; th
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Home (one tap, three personas) | 5 | 5 | 5 | 5 | 3 | 4 | 4 | 5 | 5 | 4 | **4.5** | old Home + chapters 3.6 |
 | Stop 1 Hear it, license it | 4 | 5 | 5 | 4 | 5 | 4 | 4 | 5 | 4 | 5 | **4.5** | S3 3.7, S2 3.4, S8 4.2, S13 3.3 (mean 3.65) |
-| Stop 2 Agents buy at scale | 4 | 5 | 4 | 4 | 5 | 4 | 5 | 5 | 5 | 5 | **4.6** | S4 3.8, S5 3.8, S15 4.3 (mean 3.97) |
+| Stop 2 Agents buy at scale | 5 | 5 | 4 | 4 | 5 | 4 | 5 | 5 | 5 | 5 | **4.7** | S4 3.8, S5 3.8, S15 4.3 (mean 3.97) |
 | Stop 3 Anyone verifies | 4 | 5 | 5 | 4 | 4 | 4 | 5 | 5 | 4 | 5 | **4.5** | S19 4.5, S6 4.4, S12 4.2 (mean 4.37) |
-| Extra Rights change hands | 3 | 4 | 4 | 5 | 4 | 4 | 5 | 4 | 4 | 5 | **4.2** | S25 4.4, S26 4.5, S11 3.4 (mean 4.1) |
-| **Main path average** | 4.0 | 4.8 | 4.6 | 4.4 | 4.2 | 4.0 | 4.6 | 4.8 | 4.4 | 4.8 | **4.46** | 3.43 (all 27) / 3.6 (old main path) |
+| Extra Rights change hands | 4 | 4 | 4 | 5 | 4 | 4 | 5 | 4 | 4 | 5 | **4.3** | S25 4.4, S26 4.5, S11 3.4 (mean 4.1) |
+| **Main path average** | 4.4 | 4.8 | 4.6 | 4.4 | 4.2 | 4.0 | 4.6 | 4.8 | 4.4 | 4.8 | **4.50** | 3.43 (all 27) / 3.6 (old main path) |
 | Under the hood (groups + calm pages) | 4 | 4 | 3 | 3 | 3 | 4 | 3 | 4 | 4 | 5 | **3.7** | — |
 | Red-team game | 4 | 4 | 4 | 3 | 4 | 4 | 3 | 3 | 4 | 5 | **3.8** | 3.4 |
 
 Why not higher:
 
-- Stop 2 still has three beats on one page (about 276 words).
-- The rights extra has three small worlds and 9 buttons, so Simplicity is 3.
+- Stop 2 still has three beats on one page, though it is now 148 words (it was 276).
+- The rights extra has one "Show what happens" button that plays the three beats, plus the one cheat (at most 3 buttons on screen at once, 2 after the cheat). It is still three small worlds.
 - Home's delight is only the choice itself.
 - Attack pages still show the nine technical checks once you open them. That is fine under the hood, but it is not invisible.
 
@@ -278,11 +280,11 @@ Time to first licence is measured from navigation start to the verdict appearing
 | | Taps | Time to first licence |
 |---|---|---|
 | Before: Home (hear → license) | 2 | 1.84 s |
-| After: artist (persona → hear → license) | 3 | 1.19 s (the in-app timer recorded 1.48–1.50 s in earlier walks) |
-| After: buyer (persona → "Let Scout buy") | 2 | 0.47 s |
+| After: artist (persona → hear → license) | 3 | 1.37 s (the in-app timer recorded 1.49–1.53 s) |
+| After: buyer (persona → "Let Bob's agent buy") | 2 | 0.38 s |
 | After: builder (persona → "Check the licence") | 2 | 0.45 s |
 
-1,000 licences in stop 2 took 3.0 s in this run (2.5–3.0 s across runs) inside a 150,000-sat budget, and 20 of 20 random re-checks passed.
+1,000 licences in stop 2 took 3.0 s in this run (2.3–3.2 s across runs) inside a 150,000-sat budget, and 20 of 20 random re-checks passed.
 
 Jargon is counted case-insensitively on visible text, with the code drawer left out. The terms are Nostr, relay, node, NIP-n, kind n, 402, x402, preimage, NWC, binding, OP_RETURN, OpenTimestamps, invoice, hash, BOLT11, lntbs…, secp256k1, merkle, npub, Mutinynet, signature, verifyLicence, bundle, event id, description hash, SHA-256.
 
@@ -290,9 +292,9 @@ Jargon is counted case-insensitively on visible text, with the code drawer left 
 |---|---|---|---|
 | Home | 77 | 0 | — |
 | Stop 1 | 284 | 2 | Mutinynet, signature |
-| Stop 2 | 276 | 1 | Mutinynet |
+| Stop 2 | 148 | 0 | — |
 | Stop 3 | 303 | 1 | Mutinynet (12 more inside the builder's open code drawer) |
-| Extra: rights | 295 | 0 | — |
+| Extra: rights | 226 | 0 | — (2 buttons) |
 | Before: old Home / c1 / c2 / c3 / c4 | 95 / 83 / 138 / 85 / 134 | 1 / 0 / 0 / 0 / 0 | Mutinynet |
 
 So every main-path page is under the 10-term target. The stops carry more words than the old chapters, because each one now holds 3–4 scenarios' worth of story.
@@ -306,3 +308,13 @@ Scenario pages after "Run all steps", for all 27:
 ## Next
 
 Run `docs/user-test-script.md` with 5 artists, 5 buyers and 5 builders. Machine timings show the path is fast; only people can show whether the idea lands.
+
+### Update: names and the two weak spots
+
+Done later on 17 Oct 2026 (about 17:40–18:00 EAT):
+
+- The cast now uses the usual crypto-example names (see the note at the top).
+- Stop 2 was cut from 276 to 148 words.
+- The rights extra went from 9 buttons to at most 3 on screen; 2 remain after the cheat. A single "Show what happens" button plays the three beats; the extra's verdict cards no longer have their own "9 checks" toggles; the links are plain links.
+
+The scores and measurements above already include this update; the screenshots in `screenshots/main-path/` were retaken.

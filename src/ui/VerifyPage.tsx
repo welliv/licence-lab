@@ -9,7 +9,7 @@ import { tagv, sha256hex } from '../engine/lab';
 import { music } from './music';
 export function VerifyPage() {
   const [text, setText] = useState(''); const [v, setV] = useState<Verdict | null>(null); const [note, setNote] = useState(''); const [useChain, setUseChain] = useState(true);
-  const example = async () => { const lab = new Lab('rain'); const b = await honestWorld(lab); extraLabs.push(lab); setText(JSON.stringify(b, null, 2)); setV(null); setNote('Example loaded: Mia\'s licence from an honest purchase.'); };
+  const example = async () => { const lab = new Lab('rain'); const b = await honestWorld(lab); extraLabs.push(lab); setText(JSON.stringify(b, null, 2)); setV(null); setNote('Example loaded: Bob\'s licence from an honest purchase.'); };
   const run = async () => { let b: LicenceBundle; try { b = JSON.parse(text); } catch (e: any) { setNote('Not valid JSON: ' + e.message); return; }
     const labs = [...allLabs(), ...extraLabs]; const h = (b as any).anchor?.height; const lab = labs.find(l => h !== undefined && l.chain.at(h)) ?? labs[0] ?? new Lab('rain');
     const r = await lab.verify(b, { chain: useChain ? undefined : false }); setV(r); setNote(useChain ? `Checked against ${lab.chain.method}.` : 'Checked without a chain: checks 1 to 8 only.'); };

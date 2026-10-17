@@ -6,7 +6,7 @@ import { Cover, cx } from './bits';
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 export const coverColours = (cast: string) => { const c = persona(cast).colour; return ['#111827', c, '#0ea5e9']; };
 export function Art({ t, size }: { t?: Track; size: number }) {
-  return t?.artwork ? <img src={`./music/${t.artwork}`} width={size} height={size} className="shrink-0 rounded-md object-cover" alt={`${t.demoTitle} artwork`} /> : <Cover size={size} title={t?.demoTitle ?? 'Rain'} colours={t && t.cast !== 'ava' ? coverColours(t.cast) : undefined} />;
+  return t?.artwork ? <img src={`./music/${t.artwork}`} width={size} height={size} className="shrink-0 rounded-md object-cover" alt={`${t.demoTitle} artwork`} /> : <Cover size={size} title={t?.demoTitle ?? 'Rain'} colours={t && t.cast !== 'alice' ? coverColours(t.cast) : undefined} />;
 }
 /** Dark mini-player, always dark (whatever the theme), pinned under the page. */
 export function MiniPlayer() {
@@ -16,7 +16,7 @@ export function MiniPlayer() {
   return <div className="border-t border-white/10 bg-[#0a0a0d] text-[#f3f4f6]" role="region" aria-label="Music player">
     <div className="flex items-center gap-2 px-3 py-1.5 sm:flex-wrap sm:gap-3 sm:px-4 sm:py-2" data-testid="mini-player">
       <span className="hidden sm:block"><Art t={t} size={42} /></span><span className="sm:hidden"><Art t={t} size={30} /></span>
-      <div className="min-w-0 flex-1 sm:w-[230px] sm:flex-none"><div className="truncate text-[13px] font-semibold">{t ? `${t.demoTitle}` : 'Rain'} <span className="font-normal text-[#9ca3af]">· {persona(t?.cast ?? 'ava').name} (demo name)</span></div>
+      <div className="min-w-0 flex-1 sm:w-[230px] sm:flex-none"><div className="truncate text-[13px] font-semibold">{t ? `${t.demoTitle}` : 'Rain'} <span className="font-normal text-[#9ca3af]">· {persona(t?.cast ?? 'alice').name} (demo name)</span></div>
         <div className="hidden truncate text-[11px] text-[#9ca3af] sm:block" title={t ? `${t.title} — ${t.artist} — ${t.licence}` : ''}>{t ? `Real recording: ${t.file} · ${t.artist}` : 'No music yet: placeholder tone. Add files to public/music/'}</div></div>
       <button aria-label={playing ? 'Pause' : 'Play'} onClick={() => music.toggle(t?.id ?? null)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-black hover:bg-[#e5e7eb] sm:h-9 sm:w-9">{playing ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}</button>
       <div className="hidden min-w-[200px] flex-1 items-center gap-2 text-[11px] tabular-nums text-[#9ca3af] sm:flex"><span>{fmt(now)}</span>
@@ -33,7 +33,7 @@ export function MiniPlayer() {
 export function Credits({ onClose }: { onClose: () => void }) {
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}><div className="max-h-[80vh] w-full max-w-[760px] overflow-auto rounded-xl border border-neutral-200 bg-white p-5 text-neutral-800" onClick={e => e.stopPropagation()} role="dialog" aria-label="Music credits">
     <div className="mb-2 flex items-center justify-between"><h2 className="text-[16px] font-semibold">Music credits</h2><button aria-label="Close" onClick={onClose}><X size={16} /></button></div>
-    <p className="mb-3 text-[13px] text-neutral-600">Ava, "Rain", Nova, Jay, Lena and Kai are demo names. They are attached to real recordings supplied by the owner of this Lab. The full list is in <code>public/music/CREDITS.md</code>.</p>
+    <p className="mb-3 text-[13px] text-neutral-600">Alice, "Rain", Dave, Carol, Erin and Frank are demo names. They are attached to real recordings supplied by the owner of this Lab. The full list is in <code>public/music/CREDITS.md</code>.</p>
     {!music.tracks.length ? <p className="text-[13px] text-neutral-500">No tracks yet. Add audio files to <code>public/music/</code> and run <code>npm run music</code>.</p> :
       <table className="w-full text-[12px]"><thead><tr className="text-left text-neutral-500"><th className="py-1">Demo name</th><th>File</th><th>Title / artist</th><th>Licence</th><th>SHA-256</th></tr></thead><tbody>{music.tracks.map(t => <tr key={t.id} className="border-t border-neutral-100 align-top"><td className="py-1.5 pr-2">{t.demoTitle}<div className="text-neutral-500">{persona(t.cast).name}</div></td><td className="pr-2 font-mono">{t.file}<div className="text-neutral-500">{t.durationSec ? fmt(t.durationSec) : ''} · {(t.bytes / 1e6).toFixed(1)} MB</div></td><td className="pr-2">{t.title}<div className="text-neutral-500">{t.artist}</div></td><td className="pr-2">{t.licence}{t.source && <div className="text-neutral-500">{t.source}</div>}</td><td className="break-all font-mono text-[10px] text-neutral-500">{t.sha256}</td></tr>)}</tbody></table>}</div></div>;
 }

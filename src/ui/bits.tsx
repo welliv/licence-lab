@@ -40,7 +40,7 @@ export function Cover({ size = 40, className, title = 'Rain', colours = ['#312e8
     <rect width="100" height="100" fill={`url(#${id})`} />{drops.map((d, i) => <line key={i} x1={d.x} y1={d.y} x2={d.x - 3} y2={d.y + d.l} stroke="white" strokeOpacity=".45" strokeWidth="1.4" strokeLinecap="round" />)}
     <circle cx="70" cy="30" r="13" fill="white" fillOpacity=".15" /><text x="8" y="90" fontSize={label.length > 6 ? 13 : 17} fontWeight="700" fill="white" fontFamily="Inter, sans-serif">{label}</text></svg>;
 }
-export function Player({ compact, cast = 'ava' }: { compact?: boolean; cast?: string }) {
+export function Player({ compact, cast = 'alice' }: { compact?: boolean; cast?: string }) {
   useMusic(); const t = music.byCast(cast); const playing = music.isPlaying(t?.id);
   return <button onClick={() => music.toggle(t?.id)} aria-label={playing ? 'Pause' : `Play ${t?.demoTitle ?? 'Rain'}`} className={cx('inline-flex items-center gap-1.5 rounded-full bg-neutral-900 text-white hover:bg-neutral-700', compact ? 'h-6 w-6 justify-center' : 'h-8 px-3 text-[12px]')}>{playing ? <Pause size={12} /> : <Play size={12} />}{!compact && (playing ? 'Pause' : `Play "${t?.demoTitle ?? 'Rain'}" (${music.unlocked(t?.id) ? 'full track' : '30 s preview'})`)}</button>;
 }

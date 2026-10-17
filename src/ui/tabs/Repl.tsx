@@ -6,7 +6,7 @@ import { Button, Card } from '../bits';
 import * as verify from '../../lib/mll/verify';
 import * as events from '../../lib/mll/events';
 import { SNIPPETS } from '../snippets';
-const EXAMPLES = ["Object.keys(w.a)", "w.balances", "await w.verify(w.a[Object.keys(w.a).find(k => k.startsWith('bundle'))])", "w.chain.tip", "w.pub('ava')", "Object.keys(events)"];
+const EXAMPLES = ["Object.keys(w.a)", "w.balances", "await w.verify(w.a[Object.keys(w.a).find(k => k.startsWith('bundle'))])", "w.chain.tip", "w.pub('alice')", "Object.keys(events)"];
 const show = (v: unknown) => { try { return typeof v === 'string' ? v : JSON.stringify(v, (_k, x) => typeof x === 'bigint' ? x.toString() : x instanceof Uint8Array ? `Uint8Array(${x.length})` : x, 2) ?? String(v); } catch { return String(v); } };
 export function Repl({ sid }: { sid: string }) {
   const s = session(sid); const [code, setCode] = useState(EXAMPLES[0]); const [hist, setHist] = useState<{ code: string; out: string; err?: boolean }[]>([]);

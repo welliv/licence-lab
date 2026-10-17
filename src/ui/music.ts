@@ -13,13 +13,13 @@ let audio: HTMLAudioElement | null = null; let current: string | null = null; le
 const UKEY = 'll.unlocked'; const unlocks = (): Record<string, Unlock> => { try { return JSON.parse(localStorage.getItem(UKEY) ?? '{}'); } catch { return {}; } };
 function el() { if (!audio) { audio = new Audio(); audio.preload = 'metadata'; for (const e of ['play', 'pause', 'timeupdate', 'loadedmetadata', 'ended']) audio.addEventListener(e, bump); } return audio; }
 export const music = {
-  /** Load tracks.json and the hero file's bytes; register the hero (and remix, Nova) with the engine so offers bind to their hashes. */
+  /** Load tracks.json and the hero file's bytes; register the hero (and remix, Dave) with the engine so offers bind to their hashes. */
   async load() {
     try { const r = await fetch(base + 'tracks.json', { cache: 'no-cache' }); if (r.ok) { const j = await r.json(); tracks = j.tracks ?? []; heroId = j.hero ?? null; } } catch {}
     const hero = tracks.find(t => t.id === heroId);
     if (hero) { try { const b = new Uint8Array(await (await fetch(base + hero.file)).arrayBuffer()); registerTrackFile({ role: 'rain', sha256: hero.sha256, label: `${hero.file} (${(hero.bytes / 1e6).toFixed(1)} MB)`, bytes: b }, sha256hex); heroStatus = 'hash checked'; }
       catch (e: any) { heroStatus = `not used: ${e.message}`; } }
-    for (const [cast, role] of [['kai', 'remix'], ['nova', 'nova']] as const) { const t = tracks.find(x => x.cast === cast); if (t) registerTrackFile({ role, sha256: t.sha256, label: t.file }); }
+    for (const [cast, role] of [['frank', 'remix'], ['dave', 'dave']] as const) { const t = tracks.find(x => x.cast === cast); if (t) registerTrackFile({ role, sha256: t.sha256, label: t.file }); }
     loaded = true; bump();
   },
   get loaded() { return loaded; }, get tracks() { return tracks; }, get heroStatus() { return heroStatus; },

@@ -47,13 +47,13 @@ function ThemeButton() { const [d, setD] = useState(() => document.documentEleme
   return <button aria-label={d ? 'Switch to light mode' : 'Switch to dark mode'} onClick={() => { document.documentElement.classList.toggle('dark', !d); try { localStorage.setItem('ll.theme', d ? 'light' : 'dark'); } catch {} setD(!d); }} className="rounded-full p-2 text-neutral-500 hover:bg-neutral-100">{d ? <Sun size={15} /> : <Moon size={15} />}</button>; }
 
 /** The one verdict card. The nine checks are behind a tap. */
-export function VerdictCard({ v, title, line, compact, children, testid = 'verdict' }: { v: Verdict; title?: string; line?: string; compact?: boolean; children?: ReactNode; testid?: string }) {
+export function VerdictCard({ v, title, line, compact, children, testid = 'verdict', noChecks }: { v: Verdict; title?: string; line?: string; compact?: boolean; children?: ReactNode; testid?: string; noChecks?: boolean }) {
   const [open, setOpen] = useState(false); const ok = v.result.ok;
   return <div className={cx('fade-in rounded-2xl border text-left', ok ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50', compact ? 'p-4' : 'p-6')} data-testid={testid}>
     {title && <div className="mb-1 text-[13px] text-neutral-500">{title}</div>}
     <div className={cx('flex items-start gap-3 font-semibold', compact ? 'text-[18px]' : 'text-[24px] leading-tight', ok ? 'text-emerald-700' : 'text-red-700')}>{ok ? <CheckCircle2 className="mt-0.5 shrink-0" size={compact ? 22 : 28} /> : <XCircle className="mt-0.5 shrink-0" size={compact ? 22 : 28} />}<span>{line ?? verdictLine(v)}</span></div>
     {children}
-    <button onClick={() => setOpen(!open)} aria-expanded={open} className="mt-3 inline-flex items-center gap-1 text-[14px] text-neutral-600 hover:text-neutral-900"><ChevronDown size={15} className={cx('transition-transform', open && 'rotate-180')} />{open ? 'Hide' : 'Show'} the 9 checks</button>
+    {!noChecks && <button onClick={() => setOpen(!open)} aria-expanded={open} className="mt-3 inline-flex items-center gap-1 text-[14px] text-neutral-600 hover:text-neutral-900"><ChevronDown size={15} className={cx('transition-transform', open && 'rotate-180')} />{open ? 'Hide' : 'Show'} the 9 checks</button>}
     {open && <ol className="fade-in mt-3 space-y-1.5 text-[14px]">{v.checks.map(c => <li key={c.n} className="flex items-start gap-2"><span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold', c.status === 'pass' ? 'bg-emerald-500 text-white' : c.status === 'fail' ? 'bg-red-500 text-white' : 'bg-neutral-200 text-neutral-500')}>{c.status === 'pass' ? '✓' : c.status === 'fail' ? '✗' : c.n}</span>
       <span className="text-neutral-700">{c.label}{c.status === 'fail' && c.detail && <span className="block text-[12px] text-red-700">{c.detail}</span>}</span></li>)}
       {v.file && <li className="flex items-start gap-2"><span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px]', v.file.ok ? 'bg-emerald-500 text-white' : 'bg-neutral-200')}>♪</span><span className="text-neutral-700">The audio file is the one in the offer{v.file.ok ? ' (fingerprint matches)' : `: ${v.file.reason}`}</span></li>}
@@ -61,12 +61,12 @@ export function VerdictCard({ v, title, line, compact, children, testid = 'verdi
   </div>;
 }
 /** "Proven on Bitcoin" with the real Mutinynet proof and the practice-chain note right next to it. */
-export function Proven({ label = 'Proven on Bitcoin ✓' }: { label?: string }) {
+export function Proven({ label = 'Proven on Bitcoin ✓', short }: { label?: string; short?: boolean }) {
   const proof = useProof();
   return <div className="mt-3 flex flex-col gap-1" data-testid="proven">
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1"><span className="rounded-full bg-emerald-500/15 px-3 py-1 text-[15px] font-semibold text-emerald-700">{label}</span>
       {proof ? <a href={proof.txUrl} target="_blank" rel="noreferrer" data-testid="proof-link" className="inline-flex items-center gap-1 text-[14px] text-neutral-700 underline decoration-neutral-300 underline-offset-4 hover:text-neutral-900">See a real one{proof.block ? ` (block ${n(Number(proof.block))})` : ''}<ExternalLink size={13} /></a> : proof === null ? <span className="text-[13px] text-neutral-500">No recorded proof yet.</span> : null}</div>
-    <p className="text-[12px] leading-5 text-neutral-500" data-testid="practice-note">Here it was dated on a practice chain in your browser. The link is a licence our live run proved on Mutinynet, Bitcoin's public test network.</p></div>;
+    <p className="text-[12px] leading-5 text-neutral-500" data-testid="practice-note">{short ? 'Dated on a practice chain here; the link is real, on Bitcoin\'s test network.' : 'Here it was dated on a practice chain in your browser. The link is a licence our live run proved on Mutinynet, Bitcoin\'s public test network.'}</p></div>;
 }
 /** Technical words and code live here, closed unless you are a builder. */
 function CodeDrawer({ children, title = 'For builders: how it works' }: { children: ReactNode; title?: string }) {
@@ -129,7 +129,7 @@ export function Stop1() {
     <div className="flex flex-col items-center text-center">
       <button onClick={listen} className="group relative rounded-2xl shadow-2xl" aria-label={playing ? 'Pause Rain' : 'Play Rain'}><Art t={hero} size={190} />
         <span className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/0 transition group-hover:bg-black/20"><span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-black shadow-lg">{playing ? <Pause size={26} /> : <Play size={26} className="ml-1" />}</span></span></button>
-      <div className="mt-4 text-[22px] font-semibold">"Rain" <span className="font-normal text-neutral-500">· Ava</span></div>
+      <div className="mt-4 text-[22px] font-semibold">"Rain" <span className="font-normal text-neutral-500">· Alice</span></div>
       <div className="mt-1 text-[14px] text-neutral-500" data-testid="track-state">{r?.verdict.result.ok ? 'Full track' : music.unlocked(hero?.id) ? 'Full track (licensed earlier)' : '30-second preview'}</div>
       {!r && <div className="mt-6 flex min-h-[64px] flex-col items-center">
         {st.busy !== 's1' && (phase === 'idle' ? <BigButton onClick={listen}><Play size={18} />Hear "Rain"</BigButton> : <BigButton onClick={buy}>License for {S.PRICE} sats</BigButton>)}
@@ -141,8 +141,8 @@ export function Stop1() {
       </VerdictCard>
       <FanOut split={r.split} total={total} />
       <CheatStop1 />
-      <CodeDrawer><p>Ava's <b>offer</b> is a signed Nostr event (kind 30402), id <code>{short(r.bundle.offer.id)}</code>. It names the track by the SHA-256 of the audio file, the price, the use and the licence text. Jay and Nova each sign a <b>consent</b> (kind 3413) with their share.</p>
-        <p>You sign a <b>request</b>; Ava's shop answers <b>402 Payment Required</b> with a Lightning <b>invoice</b> whose description hash commits to your request. Paying returns the <b>preimage</b>. The <b>bundle</b> (offer, consents, binding, request, invoice, preimage, Bitcoin timestamp) is your licence. Ava's node pays Jay and Nova and signs a statement for each ({r.statements} statements).</p>
+      <CodeDrawer><p>Alice's <b>offer</b> is a signed Nostr event (kind 30402), id <code>{short(r.bundle.offer.id)}</code>. It names the track by the SHA-256 of the audio file, the price, the use and the licence text. Carol and Dave each sign a <b>consent</b> (kind 3413) with their share.</p>
+        <p>You sign a <b>request</b>; Alice's shop answers <b>402 Payment Required</b> with a Lightning <b>invoice</b> whose description hash commits to your request. Paying returns the <b>preimage</b>. The <b>bundle</b> (offer, consents, binding, request, invoice, preimage, Bitcoin timestamp) is your licence. Alice's node pays Carol and Dave and signs a statement for each ({r.statements} statements).</p>
         <Code>{`const bundle = await buy(offer)          // request → 402 → pay → preimage
 const result = await verifyLicence(bundle, chain)
 // → { ok: ${r.verdict.result.ok}, anchoredHeight: ${r.block} }`}</Code></CodeDrawer>
@@ -151,7 +151,7 @@ const result = await verifyLicence(bundle, chain)
 }
 function FanOut({ split, total }: { split: { who: string; id: string; sats: number }[]; total: number }) {
   const [go1, setGo] = useState(false); useEffect(() => { const t = setTimeout(() => setGo(true), 150); return () => clearTimeout(t); }, []);
-  const colour: Record<string, string> = { ava: 'bg-violet-500', jay: 'bg-sky-500', nova: 'bg-pink-500' }; const role: Record<string, string> = { ava: 'the artist', jay: 'producer, 20%', nova: 'featured singer, 15%' };
+  const colour: Record<string, string> = { alice: 'bg-violet-500', carol: 'bg-sky-500', dave: 'bg-pink-500' }; const role: Record<string, string> = { alice: 'the artist', carol: 'producer, 20%', dave: 'featured singer, 15%' };
   return <section className="rounded-2xl border border-neutral-200 bg-white p-6" data-testid="fanout"><div className="flex items-baseline justify-between"><h2 className="text-[20px] font-semibold">Your {total} sats, shared out at once</h2><span className="text-[13px] text-neutral-500">no label, no waiting</span></div>
     <ul className="mt-4 space-y-3">{split.map((s, i) => <li key={s.id} className="grid grid-cols-[88px_1fr_64px] items-center gap-3"><span className="text-[15px] font-medium">{s.who}<span className="block text-[11px] font-normal text-neutral-500">{role[s.id]}</span></span>
       <span className="h-3 overflow-hidden rounded-full bg-neutral-100"><span className={cx('block h-3 rounded-full transition-all duration-1000 ease-out', colour[s.id])} style={{ width: go1 ? `${(s.sats / total) * 100}%` : '0%', transitionDelay: `${i * 250}ms` }} /></span>
@@ -163,7 +163,7 @@ function CheatStop1() {
   return <Cheat title="change one thing">
     <p className="text-[15px] text-neutral-600">Take the licence you just bought and change one thing. Then check it again.</p>
     <div className="mt-3 flex flex-wrap gap-2"><BigButton variant="cheat" disabled={!!st.busy} onClick={() => story.run('s1cheatPrice', S.cheatPrice)}>Change the price to 1 sat</BigButton><BigButton variant="cheat" disabled={!!st.busy} onClick={() => story.run('s1cheatAudio', lab => S.cheatAudio(lab))}>Change one byte of the song</BigButton></div>
-    <div className="mt-3 space-y-3">{price && <Bad testid="cheat-price" title="The licence with the price changed to 1 sat" line={`Not valid: ${plainReason(price)}`}><p className="mt-1 text-[14px] text-neutral-600">Ava's signature covers the price. Change anything, and it no longer matches.</p></Bad>}
+    <div className="mt-3 space-y-3">{price && <Bad testid="cheat-price" title="The licence with the price changed to 1 sat" line={`Not valid: ${plainReason(price)}`}><p className="mt-1 text-[14px] text-neutral-600">Alice's signature covers the price. Change anything, and it no longer matches.</p></Bad>}
       {audio && <Bad testid="cheat-audio" title={`The song with 1 of its ${n(audio.ofBytes)} bytes changed`} line="Not the licensed file: the offer names the exact song"><p className="mt-1 text-[14px] text-neutral-600">The original file's fingerprint {audio.originalMatches ? 'matches' : 'does not match'} the offer. The changed file's fingerprint is completely different, so no one can pass off an edited copy.</p></Bad>}</div>
   </Cheat>;
 }
@@ -173,32 +173,31 @@ export function Stop2() {
   const st = useStory(); const one = st.r.s2one; const poison = st.r.s2poison; const scale = st.r.s2scale;
   const buyer = st.persona === 'buyer';
   const runScale = async () => { const out = await story.run('s2scale', lab => S.atScale(lab, S.SCALE, k => { story.progress = k; story.set('tick', k); })); if (out && out.sampleOk === out.sample) { testkit.stopDone('stop2'); story.finish('stop2'); } };
-  return <Stop id="stop2" title="Agents buy at scale" why={buyer ? 'You set the limits once. Your agent licenses every song your users need, checks every bill, and never spends past your budget.' : 'Most buyers will be software. ClipAI, an AI video tool, gives its agent Scout a budget: 150,000 sats a day, at most 500 at a time. Scout does the rest.'}>
-    {!one ? (st.busy === 's2one' ? <Busy label="Scout is buying…" /> : <div><BigButton onClick={async () => { const o = await story.run('s2one', S.scoutBuys); if (o?.verdict.result.ok) testkit.licence(); }}>Let Scout buy a licence</BigButton></div>) : <>
-      <div className="fade-in rounded-2xl border border-neutral-200 bg-white p-6" data-testid="s2-one"><div className="text-[22px] font-semibold">Scout licensed "Rain" for {S.PRICE} sats. No person clicked.</div>
-        <div className="mt-4 text-[14px] font-medium text-neutral-500">Before paying, Scout checked:</div><ul className="mt-2 space-y-2"><Row>The price is the one Ava set</Row><Row>The bill is for this exact licence</Row><Row>The money goes to Ava's own wallet</Row><Row>It fits the budget ClipAI set</Row></ul>
-        <Budget spent={one.spent} cap={one.cap} /></div>
-      <Cheat title="hide an order in an offer">
-        <p className="text-[15px] text-neutral-600">A cheat writes a message to AI agents inside an offer, then asks Scout for far more money.</p>
-        {!poison ? <div className="mt-3"><BigButton variant="cheat" disabled={!!st.busy} onClick={() => story.run('s2poison', S.poisonedPrompt)}>Send Scout the poisoned offer</BigButton></div>
+  return <Stop id="stop2" title="Agents buy at scale" why={buyer ? 'Set a budget once. Your agent checks every bill and never spends past it.' : `Most buyers will be software. Bob's agent gets a budget: ${S.BUDGET.maxPerPaymentSat} sats a payment, ${n(S.BUDGET.dailyCapSat)} a day.`}>
+    {!one ? (st.busy === 's2one' ? <Busy label="Bob's agent is buying…" /> : <div><BigButton onClick={async () => { const o = await story.run('s2one', S.agentBuys); if (o?.verdict.result.ok) testkit.licence(); }}>Let Bob's agent buy a licence</BigButton></div>) : <>
+      <div className="fade-in rounded-2xl border border-neutral-200 bg-white p-6" data-testid="s2-one"><div className="text-[22px] font-semibold">Licensed for {S.PRICE} sats. No one clicked.</div>
+        <ul className="mt-3 grid grid-cols-2 gap-2"><Row>Right price</Row><Row>Right licence</Row><Row>Paid to Alice</Row><Row>Inside budget</Row></ul></div>
+      <Cheat title="hide an order">
+        <p className="text-[15px] text-neutral-600">Mallory hides an order in her offer and bills {n(500_000)} sats.</p>
+        {!poison ? <div className="mt-3"><BigButton variant="cheat" disabled={!!st.busy} onClick={() => story.run('s2poison', S.poisonedPrompt)}>Send the poisoned offer</BigButton></div>
           : <div className="mt-3 space-y-3" data-testid="cheat-poison"><blockquote className="rounded-lg bg-neutral-100 px-4 py-3 font-mono text-[13px] text-neutral-500 line-through decoration-red-400">"{poison.text}"</blockquote>
-            <Good line={poison.refused ? `Blocked: Scout ignored the text and refused a bill for ${n(poison.asked)} sats` : 'It got through'}><p className="mt-1 text-[14px] text-neutral-600">Scout only obeys the price Ava signed and the amount it agreed to itself ({S.PRICE} sats). Paid: <b>{poison.paid} sats</b>. Even a fooled agent would hit the 500-sat limit per payment.</p></Good></div>}
+            <Good line={poison.refused ? `Blocked: order ignored. Paid: ${poison.paid} sats` : 'It got through'} /></div>}
       </Cheat>
-      {!scale ? (st.busy === 's2scale' ? <Counter k={story.progress} /> : <div><BigButton onClick={runScale} data-testid="scale-go"><Sparkles size={18} />Now let Scout buy {n(S.SCALE)}</BigButton></div>) : <>
+      {!scale ? (st.busy === 's2scale' ? <Counter k={story.progress} /> : <div><BigButton onClick={runScale} data-testid="scale-go"><Sparkles size={18} />Now buy {n(S.SCALE)}</BigButton></div>) : <>
         <Good testid="verdict-scale" line={scale.sampleOk === scale.sample ? `${n(scale.n)} licences ✓ inside budget` : 'Some licences failed'}>
-          <div className="mt-3 grid grid-cols-3 gap-3 text-center">{[[n(scale.n), 'licences'], [(scale.buyMs / 1000).toFixed(1) + ' s', 'to buy them here'], ['1', 'Bitcoin timestamp for all']].map(([a, b]) => <div key={b} className="rounded-xl bg-white/70 p-3"><div className="text-[24px] font-bold tabular-nums">{a}</div><div className="text-[12px] text-neutral-500">{b}</div></div>)}</div>
-          <p className="mt-3 text-[15px] text-neutral-600">Every bill was checked before paying. {scale.sampleOk} of {scale.sample} licences picked at random were re-checked from scratch: all real.</p>
-          <Budget spent={scale.spentToday} cap={scale.cap} /><Proven label="One proof on Bitcoin for all of them ✓" /></Good>
+          <div className="mt-3 grid grid-cols-2 gap-3 text-center">{[[(scale.buyMs / 1000).toFixed(1) + ' s', 'in total'], ['1', 'Bitcoin proof']].map(([a, b]) => <div key={b} className="rounded-xl bg-white/70 p-3"><div className="text-[24px] font-bold tabular-nums">{a}</div><div className="text-[12px] text-neutral-500">{b}</div></div>)}</div>
+          <p className="mt-3 text-[15px] text-neutral-600">{scale.sampleOk} of {scale.sample} re-checked: all real.</p>
+          <Budget spent={scale.spentToday} cap={scale.cap} /><Proven short label="Proven on Bitcoin ✓" /></Good>
       </>}
-      <CodeDrawer><p>Scout pays through <b>NWC</b> (Nostr Wallet Connect): the connection only allows paying, at most {S.BUDGET.maxPerPaymentSat} sats a payment and {n(S.BUDGET.dailyCapSat)} a day. Before each payment it checks the <b>invoice</b> amount equals its own signed request, the <b>description hash</b> commits to that request, and the invoice is signed by the <b>node</b> Ava bound to her key. Scout's own trace for the first licence:</p>
+      <CodeDrawer><p>Bob's agent pays through <b>NWC</b> (Nostr Wallet Connect): the connection only allows paying, at most {S.BUDGET.maxPerPaymentSat} sats a payment and {n(S.BUDGET.dailyCapSat)} a day, on ClipAI's wallet. Before each payment it checks the <b>invoice</b> amount equals its own signed request ({S.PRICE} sats; the poisoned one asked {poison ? n(poison.asked) : '500,000'}), the <b>description hash</b> commits to that request, and the invoice is signed by the <b>node</b> Alice bound to her key. The agent's own trace for the first licence:</p>
         <Code>{one.trace.join('\n')}</Code>
         {poison && <Code>{poison.trace.join('\n')}</Code>}
-        {scale && <p>The {n(scale.n)} licences went into one <b>OpenTimestamps</b> batch: one Bitcoin block ({scale.block}) commits to all of them, each with its own small proof. Money is simulated here; signatures, invoices, proofs and checks are real.</p>}</CodeDrawer>
+        {scale && <p>The {n(scale.n)} licences went into one <b>OpenTimestamps</b> batch: one Bitcoin block ({scale.block}) commits to all of them, each with its own small proof. Every bill was checked before paying, and {scale.sample} picked at random were re-checked from scratch with <b>verifyLicence</b>. Money is simulated here; signatures, invoices, proofs and checks are real.</p>}</CodeDrawer>
       {scale && <Next from="stop2" />}</>}
   </Stop>;
 }
 function Budget({ spent, cap }: { spent: number; cap: number }) {
-  return <div className="mt-5" data-testid="budget"><div className="flex justify-between text-[13px] text-neutral-500"><span>ClipAI's daily budget</span><span className="tabular-nums">{n(spent)} of {n(cap)} sats used</span></div><div className="mt-1 h-2.5 rounded-full bg-neutral-200"><div className="h-2.5 rounded-full bg-neutral-900 transition-all duration-500" style={{ width: `${Math.min(100, spent / cap * 100)}%` }} /></div></div>;
+  return <div className="mt-5" data-testid="budget"><div className="flex justify-between text-[13px] text-neutral-500"><span>Daily budget</span><span className="tabular-nums">{n(spent)} of {n(cap)} sats used</span></div><div className="mt-1 h-2.5 rounded-full bg-neutral-200"><div className="h-2.5 rounded-full bg-neutral-900 transition-all duration-500" style={{ width: `${Math.min(100, spent / cap * 100)}%` }} /></div></div>;
 }
 function Counter({ k }: { k: number }) {
   return <div className="rounded-2xl border border-neutral-200 bg-white p-6 text-center" data-testid="counter" aria-live="polite"><div className="text-[64px] font-bold leading-none tabular-nums">{n(k)}</div><div className="mt-2 text-[15px] text-neutral-500">licences bought and checked, one by one</div>
@@ -209,23 +208,23 @@ function Counter({ k }: { k: number }) {
 export function Stop3() {
   const st = useStory(); const v = st.r.s3button as Verdict | undefined; const reg = st.r.s3reg; const fake = st.r.s3fake as Verdict | undefined;
   const check = async () => { const out = await story.run('s3button', S.licenseButton); if (out?.result.ok) { testkit.licence(); testkit.stopDone('stop3'); story.finish('stop3'); } };
-  return <Stop id="stop3" title="Anyone verifies" why="A video site, a regulator or a fan can check a licence alone, in seconds, without asking Ava or any company, and without anyone being online.">
+  return <Stop id="stop3" title="Anyone verifies" why="A video site, a regulator or a fan can check a licence alone, in seconds, without asking Alice or any company, and without anyone being online.">
     <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white" data-testid="video-card">
-      <div className="relative flex aspect-video items-center justify-center bg-[linear-gradient(135deg,#334155,#0f172a_55%,#000)]"><span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-black"><Play size={22} className="ml-1" /></span><span className="absolute bottom-3 left-3 rounded-md bg-black/60 px-2 py-1 text-[12px] text-white">♪ "Rain" · Ava</span></div>
-      <div className="flex flex-wrap items-center gap-3 p-4"><div className="flex-1"><div className="font-semibold">Mia's travel video</div><div className="text-[13px] text-neutral-500">A video site, with a licence attached</div></div>
+      <div className="relative flex aspect-video items-center justify-center bg-[linear-gradient(135deg,#334155,#0f172a_55%,#000)]"><span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-black"><Play size={22} className="ml-1" /></span><span className="absolute bottom-3 left-3 rounded-md bg-black/60 px-2 py-1 text-[12px] text-white">♪ "Rain" · Alice</span></div>
+      <div className="flex flex-wrap items-center gap-3 p-4"><div className="flex-1"><div className="font-semibold">Bob's travel video</div><div className="text-[13px] text-neutral-500">A video site, with a licence attached</div></div>
         {!v ? (st.busy === 's3button' ? <Busy label="Checking…" /> : <BigButton onClick={check} data-testid="license-this">✓ Check the licence</BigButton>) : <span className="rounded-full bg-emerald-500/15 px-3 py-1.5 text-[14px] font-semibold text-emerald-700">Licensed ✓</span>}</div></div>
     {v && <>
-      <VerdictCard v={v}>{v.result.ok && <><p className="mt-1 text-[15px] text-neutral-600">Checked here, alone, in {Math.max(1, Math.round(v.ms))} ms: Ava and her co-owners agreed, the money went to her, and it was paid.</p><Proven /></>}</VerdictCard>
+      <VerdictCard v={v}>{v.result.ok && <><p className="mt-1 text-[15px] text-neutral-600">Checked here, alone, in {Math.max(1, Math.round(v.ms))} ms: Alice and her co-owners agreed, the money went to her, and it was paid.</p><Proven /></>}</VerdictCard>
       <section className="rounded-2xl border border-neutral-200 bg-white p-6" data-testid="regulator"><h2 className="text-[20px] font-semibold">A regulator asks: "Prove you had permission to train on this song."</h2>
         <p className="mt-1 text-[15px] text-neutral-600">ModelCo trains an AI music model on "Rain". Months later it hands over its licence and its training log.</p>
         {!reg ? <div className="mt-4"><BigButton variant="quiet" disabled={!!st.busy} onClick={() => story.run('s3reg', S.regulatorCheck)}>{st.busy === 's3reg' ? 'Checking…' : 'Check ModelCo\'s proof'}</BigButton></div>
           : <><ul className="mt-4 space-y-2">{reg.checks.map((c: any) => <Row key={c.text} ok={c.ok}>{c.text}</Row>)}</ul><div className={cx('mt-4 text-[18px] font-semibold', reg.ok ? 'text-emerald-700' : 'text-red-700')}>{reg.ok ? 'Permission proven ✓' : 'Not proven'}</div></>}</section>
-      <Cheat title='sell a copy as "Ava Official"'>
-        <p className="text-[15px] text-neutral-600">A copycat account calls itself "Ava Official", signs its own offer for "Rain" and sells a licence. Is it real?</p>
+      <Cheat title='sell a copy as "Alice Official"'>
+        <p className="text-[15px] text-neutral-600">A copycat account calls itself "Alice Official", signs its own offer for "Rain" and sells a licence. Is it real?</p>
         {!fake ? <div className="mt-3"><BigButton variant="cheat" disabled={!!st.busy} onClick={() => story.run('s3fake', S.fakeCaught)}>Check the copycat's licence</BigButton></div>
-          : <div className="mt-3"><Bad testid="cheat-fake" line={fake.result.ok ? 'It got through' : 'Fake ✗ Caught: "Ava Official" never owned the rights to "Rain"'}><p className="mt-1 text-[14px] text-neutral-600">The copy is signed correctly. What it cannot fake is Ava's history: her account, vouched for by her distributor, and her earlier proof of release on Bitcoin.</p></Bad></div>}
+          : <div className="mt-3"><Bad testid="cheat-fake" line={fake.result.ok ? 'It got through' : 'Fake ✗ Caught: "Alice Official" never owned the rights to "Rain"'}><p className="mt-1 text-[14px] text-neutral-600">The copy is signed correctly. What it cannot fake is Alice's history: her account, vouched for by her distributor, and her earlier proof of release on Bitcoin.</p></Bad></div>}
       </Cheat>
-      <CodeDrawer><p><b>verifyLicence</b> runs nine checks on the <b>bundle</b>: the offer signature, the <b>binding</b> between Ava's key and her Lightning <b>node</b>, every co-owner's consent, the request, the <b>invoice</b> (signed by the bound node, committing to the request), the <b>preimage</b>, and the Bitcoin timestamp (an <b>OpenTimestamps</b> proof). Check 9 also walks the chain of title: has the offer been withdrawn, or the rights sold?</p>
+      <CodeDrawer><p><b>verifyLicence</b> runs nine checks on the <b>bundle</b>: the offer signature, the <b>binding</b> between Alice's key and her Lightning <b>node</b>, every co-owner's consent, the request, the <b>invoice</b> (signed by the bound node, committing to the request), the <b>preimage</b>, and the Bitcoin timestamp (an <b>OpenTimestamps</b> proof). Check 9 also walks the chain of title: has the offer been withdrawn, or the rights sold?</p>
         <Code>{`import { verifyLicence } from 'mll'
 const result = await verifyLicence(bundle, chain)  // no server, no one online
 if (result.ok) showBadge('Licensed ✓')
@@ -239,26 +238,29 @@ if (result.ok) showBadge('Licensed ✓')
 export function RightsExtra() {
   const st = useStory(); const sale = st.r.xsale; const old = st.r.xold as Verdict | undefined; const succ = st.r.xsucc; const stolen = st.r.xstolen;
   useEffect(() => { if (sale && succ && stolen) { story.finish('rights'); testkit.stopDone('rights'); } }, [sale, succ, stolen]);
-  return <Stop id="rights" title="Rights change hands" why="Songs are sold, and outlive the people who made them. Licences have to survive both. Three short beats.">
-    <section className="space-y-4"><h2 className="text-[20px] font-semibold">1. Ava sells "Rain" to Harbour Music</h2>
-      {!sale ? (st.busy === 'xsale' ? <Busy label="Signing the sale…" /> : <BigButton onClick={() => story.run('xsale', S.rightsSale, 'sale')}>Sell the rights</BigButton>) : <>
-        <Good testid="x-sale" line='"Rain" now belongs to Harbour Music'><p className="mt-1 text-[14px] text-neutral-600">Ava signed, Jay and Nova agreed, and the date is fixed on Bitcoin (here a practice chain).</p></Good>
-        <div className="grid gap-3 sm:grid-cols-2"><VerdictCard compact v={sale.earlier} title="Your licence, bought before the sale" testid="verdict-earlier" /><VerdictCard compact v={sale.newOwner} title="A new licence, sold by Harbour" testid="verdict-harbour" /></div>
-        <Cheat title="keep selling from Ava's old account">{!old ? <BigButton variant="cheat" disabled={!!st.busy} onClick={() => story.run('xold', S.cheatOldAccount, 'sale')}>Sell from the old account</BigButton> : <Bad testid="cheat-old" line={old.result.ok ? 'It got through' : `Not valid: ${plainReason(old)}`} />}</Cheat></>}
-    </section>
-    <section className="space-y-4"><h2 className="text-[20px] font-semibold">2. Ava planned ahead</h2><p className="text-[16px] text-neutral-600">Her plan names her daughter Iris, her brother Leo and her lawyer Rosa. Any two of the three may take over.</p>
-      {!succ ? (st.busy === 'xsucc' ? <Busy label="Collecting signatures…" /> : <BigButton onClick={() => story.run('xsucc', S.succession, 'succ')}>Ava has died: the heirs act</BigButton>) : <div className="fade-in space-y-3" data-testid="x-succ">
-        <div className="flex flex-wrap gap-2">{[['Iris', true], ['Leo', true], ['Rosa', false]].map(([who, signed], i) => <span key={who as string} className={cx('fade-in inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[15px]', signed ? 'bg-emerald-500/15 font-semibold text-emerald-700' : 'bg-neutral-100 text-neutral-500')} style={{ animationDelay: `${i * 300}ms` }}>{signed ? <CheckCircle2 size={15} /> : null}{who as string}{signed ? ' signed' : ' not needed'}</span>)}</div>
-        <VerdictCard compact v={succ.heirs} title="A new licence, sold by the heirs (2 of 3 signed)" line={succ.heirs.result.ok ? 'Real ✓ The music keeps paying' : undefined} testid="verdict-heirs" />
-        <p className="text-[14px] text-neutral-500">Leo alone was not enough: {succ.oneHeir.result.ok ? 'it went through' : 'his licence is not valid'}. Your licence from Ava's lifetime is {succ.earlier.result.ok ? 'still real' : 'not valid'}.</p></div>}
-    </section>
-    <section className="space-y-4"><h2 className="text-[20px] font-semibold">3. Ava's phone is stolen</h2><p className="text-[16px] text-neutral-600">She moves to a new account in one tap. The thief still has the old one.</p>
-      {!stolen ? (st.busy === 'xstolen' ? <Busy label="Moving to a new account…" /> : <BigButton onClick={() => story.run('xstolen', S.stolenKey, 'stolen')}>Move Ava to a new account</BigButton>) : <div className="grid gap-3 sm:grid-cols-2" data-testid="x-stolen"><VerdictCard compact v={stolen.thief} title="The thief sells with the old account" testid="verdict-thief" /><VerdictCard compact v={stolen.earlier} title="Your licence, from before the theft" testid="verdict-before-theft" /></div>}
-    </section>
-    <p className="rounded-xl bg-neutral-100 px-4 py-3 text-[14px] text-neutral-600">An honest limit: if there is no plan, the estate needs a court order, and each checker must decide whether to trust the court's note. <button className="underline" onClick={() => go('s27')}>See the estate with no plan →</button></p>
-    <CodeDrawer><p>A <b>transfer record</b> (draft kind 3417) signed by the holder names the track's fingerprint and the new key; co-owners co-sign (kind 3419). A 36-byte <b>OP_RETURN</b> ("MLT1" and a digest of the record and its co-signatures) dates it. A <b>succession plan</b> (kind 3418) names keys and a threshold. A key rotation is a transfer to your own new key. Check 9 walks this chain of title from Ava's vouched key; the first dated transfer wins, so a double sale fails.</p>
-      <p>Under the hood: <button className="underline" onClick={() => go('s25')}>rights sale</button> · <button className="underline" onClick={() => go('s26')}>planned succession</button> · <button className="underline" onClick={() => go('s11')}>stolen key</button> · <button className="underline" onClick={() => go('redteam')}>rights attacks</button></p></CodeDrawer>
-    {sale && succ && stolen && <div className="pt-2 text-center" data-testid="rights-done"><div className="text-[19px] text-neutral-600">{SHORT}</div><div className="mt-5 flex flex-wrap justify-center gap-3"><BigButton onClick={() => go('hood')}>Explore under the hood <ArrowRight size={18} /></BigButton><BigButton variant="quiet" onClick={() => { story.reset(); go(''); }}><RotateCcw size={16} />Start again</BigButton></div></div>}
+  const play = async () => { if (!st.r.xsale) await story.run('xsale', S.rightsSale, 'sale'); await sleep(700); if (!story.r.xsucc) await story.run('xsucc', S.succession, 'succ'); await sleep(700); if (!story.r.xstolen) await story.run('xstolen', S.stolenKey, 'stolen'); };
+  const busy = st.busy === 'xsale' || st.busy === 'xsucc' || st.busy === 'xstolen';
+  return <Stop id="rights" title="Rights change hands" why="Songs are sold, and outlive the people who made them. Licences must survive both.">
+    {!sale && !busy && <div><BigButton onClick={play} data-testid="rights-play">Show what happens</BigButton></div>}
+    {(sale || busy) && <section className="space-y-3"><h2 className="text-[20px] font-semibold">1. Alice sells "Rain" to Harbour Music</h2>
+      {!sale ? <Busy label="Signing the sale…" /> : <>
+        <Good testid="x-sale" line='"Rain" now belongs to Harbour Music'><p className="mt-1 text-[14px] text-neutral-600">Carol and Dave agreed. The date is fixed on Bitcoin.</p></Good>
+        <div className="grid gap-3 sm:grid-cols-2"><VerdictCard compact noChecks v={sale.earlier} title="Your licence, from before the sale" testid="verdict-earlier" /><VerdictCard compact noChecks v={sale.newOwner} title="A new licence from Harbour" testid="verdict-harbour" /></div>
+        <Cheat title="sell from Alice's old account">{!old ? <BigButton variant="cheat" disabled={!!st.busy} onClick={() => story.run('xold', S.cheatOldAccount, 'sale')}>Sell from the old account</BigButton> : <Bad testid="cheat-old" line={old.result.ok ? 'It got through' : `Not valid: ${plainReason(old)}`} />}</Cheat></>}
+    </section>}
+    {(succ || st.busy === 'xsucc') && <section className="space-y-3"><h2 className="text-[20px] font-semibold">2. Alice dies, with a plan</h2><p className="text-[16px] text-neutral-600">Any two of Heidi (daughter), Ivan (brother) and Judy (lawyer) may take over.</p>
+      {!succ ? <Busy label="Collecting signatures…" /> : <div className="fade-in space-y-3" data-testid="x-succ">
+        <div className="flex flex-wrap gap-2">{[['Heidi', true], ['Ivan', true], ['Judy', false]].map(([who, signed], i) => <span key={who as string} className={cx('fade-in inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[15px]', signed ? 'bg-emerald-500/15 font-semibold text-emerald-700' : 'bg-neutral-100 text-neutral-500')} style={{ animationDelay: `${i * 300}ms` }}>{signed ? <CheckCircle2 size={15} /> : null}{who as string}{signed ? ' signed' : ' not needed'}</span>)}</div>
+        <VerdictCard compact noChecks v={succ.heirs} title="A new licence from the heirs (2 of 3)" line={succ.heirs.result.ok ? 'Real ✓ The music keeps paying' : undefined} testid="verdict-heirs" />
+        <p className="text-[14px] text-neutral-500">One heir alone: {succ.oneHeir.result.ok ? 'went through' : 'not valid'}. Your older licence: {succ.earlier.result.ok ? 'still real' : 'not valid'}.</p></div>}
+    </section>}
+    {(stolen || st.busy === 'xstolen') && <section className="space-y-3"><h2 className="text-[20px] font-semibold">3. Alice's phone is stolen</h2><p className="text-[16px] text-neutral-600">She moves to a new account. The thief keeps the old one.</p>
+      {!stolen ? <Busy label="Moving to a new account…" /> : <div className="grid gap-3 sm:grid-cols-2" data-testid="x-stolen"><VerdictCard compact noChecks v={stolen.thief} title="The thief sells with the old account" testid="verdict-thief" /><VerdictCard compact noChecks v={stolen.earlier} title="Your licence, from before the theft" testid="verdict-before-theft" /></div>}
+    </section>}
+    <p className="rounded-xl bg-neutral-100 px-4 py-3 text-[14px] text-neutral-600">Honest limit: with no plan, the estate needs a court order. <a className="underline" href="#/s27">See the estate with no plan →</a></p>
+    <CodeDrawer><p>A <b>transfer record</b> (draft kind 3417) signed by the holder names the track's fingerprint and the new key; co-owners co-sign (kind 3419). A 36-byte <b>OP_RETURN</b> ("MLT1" and a digest of the record and its co-signatures) dates it. A <b>succession plan</b> (kind 3418) names keys and a threshold. A key rotation is a transfer to your own new key. Check 9 walks this chain of title from Alice's vouched key; the first dated transfer wins, so a double sale fails. Each verdict above passed or failed the same nine checks as every licence.</p>
+      <p>Under the hood: <a className="underline" href="#/s25">rights sale</a> · <a className="underline" href="#/s26">planned succession</a> · <a className="underline" href="#/s11">stolen key</a> · <a className="underline" href="#/redteam">rights attacks</a></p></CodeDrawer>
+    {sale && succ && stolen && <div className="pt-2 text-center" data-testid="rights-done"><div className="text-[19px] text-neutral-600">{SHORT}</div><div className="mt-5 flex justify-center"><BigButton onClick={() => go('hood')}>Explore under the hood <ArrowRight size={18} /></BigButton></div></div>}
   </Stop>;
 }
 export { plainReason };

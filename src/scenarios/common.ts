@@ -1,11 +1,11 @@
 import { Lab, short, type Verdict, type LicenceBundle } from '../engine/lab';
-import { onboardAva, releaseRain, vouch, purchase, F, type Out } from '../engine/actions';
+import { onboardAlice, releaseRain, vouch, purchase, F, type Out } from '../engine/actions';
 export { F, short };
 /** Quiet setup used by scenarios that start after S1 and S2. */
 export function baseWorld(lab: Lab, o: { kinds?: Parameters<typeof releaseRain>[1] } = {}) {
-  lab.setUpAll(['ava', 'distributor']); onboardAva(lab, 'ava', { quiet: true }); vouch(lab, 'distributor', 'ava'); releaseRain(lab, o.kinds);
+  lab.setUpAll(['alice', 'distributor']); onboardAlice(lab, 'alice', { quiet: true }); vouch(lab, 'distributor', 'alice'); releaseRain(lab, o.kinds);
   lab.stamp(lab.a['offer.creator'].id, 'proof of release'); lab.anchorBatch('Proof of release');
-  lab.log({ from: 'echo', text: 'Setup: Ava onboarded (S1) and released "Rain" with Jay, Nova and Lena (S2)', badge: 'real' });
+  lab.log({ from: 'echo', text: 'Setup: Alice onboarded (S1) and released "Rain" with Carol, Dave and Erin (S2)', badge: 'real' });
 }
 export function verdictOut(v: Verdict, what = 'Licence', okText?: string): Out {
   const fail = v.checks.find(c => c.status === 'fail');

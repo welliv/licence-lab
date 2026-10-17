@@ -1,18 +1,18 @@
 {
   "mode": "new",
   "url": "http://localhost:4180/",
-  "at": "2026-10-17T14:28:06.477Z",
+  "at": "2026-10-17T14:52:16.921Z",
   "ttfl": {
     "artist": {
-      "ms": 1191,
+      "ms": 1366,
       "taps": 3
     },
     "buyer": {
-      "ms": 467,
+      "ms": 382,
       "taps": 2
     },
     "builder": {
-      "ms": 448,
+      "ms": 451,
       "taps": 2
     }
   },
@@ -27,7 +27,7 @@
       "buttons": 6
     },
     "home→first licence (buyer)": {
-      "words": 134,
+      "words": 81,
       "jargon": 0,
       "jargonInDrawer": 0,
       "terms": [],
@@ -60,12 +60,10 @@
       "buttons": 6
     },
     "Stop 2 Agents buy at scale": {
-      "words": 276,
-      "jargon": 1,
+      "words": 148,
+      "jargon": 0,
       "jargonInDrawer": 0,
-      "terms": [
-        "mutinynet"
-      ],
+      "terms": [],
       "buttons": 2
     },
     "Stop 3 Anyone verifies": {
@@ -78,11 +76,11 @@
       "buttons": 4
     },
     "Extra Rights change hands": {
-      "words": 295,
+      "words": 226,
       "jargon": 0,
       "jargonInDrawer": 0,
       "terms": [],
-      "buttons": 9
+      "buttons": 2
     },
     "Stop 3 (builder, drawer open)": {
       "words": 303,
@@ -109,7 +107,7 @@
     },
     "s4": {
       "jargon": 37,
-      "words": 1064
+      "words": 1097
     },
     "s5": {
       "jargon": 12,
@@ -137,7 +135,7 @@
     },
     "s11": {
       "jargon": 29,
-      "words": 1241
+      "words": 1248
     },
     "s12": {
       "jargon": 14,
@@ -145,15 +143,15 @@
     },
     "s13": {
       "jargon": 11,
-      "words": 638
+      "words": 641
     },
     "s14": {
       "jargon": 20,
-      "words": 801
+      "words": 815
     },
     "s15": {
       "jargon": 13,
-      "words": 603
+      "words": 625
     },
     "s16": {
       "jargon": 35,
@@ -173,7 +171,7 @@
     },
     "s20": {
       "jargon": 3,
-      "words": 676
+      "words": 675
     },
     "s21": {
       "jargon": 15,
@@ -204,5 +202,5 @@
       "words": 827
     }
   },
-  "scaleMs": 3008
+  "scaleMs": 3021
 }

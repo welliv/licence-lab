@@ -61,7 +61,7 @@ Verdict key:
 | 24 | Scenario: tier legend (4 badges) | delete | Each badge already has its own tooltip. Duplicated in the glossary. |
 | 25 | Scenario: "Set up all the parties" warning and button | keep | The Alby-style flow under the hood. |
 | 26 | Party card: name, Ready pill, options menu, blurb, balance, key line | keep | |
-| 27 | Party card: compact play button (Ava) | delete | Duplicates the music player. |
+| 27 | Party card: compact play button (Alice) | delete | Duplicates the music player. |
 | 28 | Party card: "≈ $ … Lab rate" line | delete | An invented exchange rate is noise, and close to fake data. |
 | 29 | Party card: NWC budget bar | keep | Shows the agent's limits, which is the point of agents. |
 | 30 | Steps header: done count | keep | |
@@ -127,10 +127,10 @@ On the main path the count drops:
 | NWC (Nostr Wallet Connect) | the agent's wallet, with a spending limit |
 | OP_RETURN / OpenTimestamps | a date fixed on Bitcoin |
 | x402 / HTTP 402 | "pay to continue" for apps and agents |
-| binding (kind 3411) | Ava's own wallet, linked to her account |
-| consent (kind 3413) | Jay agreed to his share |
+| binding (kind 3411) | Alice's own wallet, linked to her account |
+| consent (kind 3413) | Carol agreed to her share |
 | verifyLicence, 9 checks | "This licence is real" |
-| transfer record (kind 3417) | Ava sold her rights to … |
+| transfer record (kind 3417) | Alice sold her rights to … |
 | succession plan (kind 3418) | who takes over, and how many must agree |
 
 ## Part B: rights change hands
@@ -138,16 +138,16 @@ On the main path the count drops:
 These are specified in `/workspace/submission/nip-draft/NIP-XX-music-licence.md` ("Rights transfer (draft)") and implemented in `src/lib/mll/rights.ts`. That file is a Lab extension; mll-audit is unchanged.
 
 - **S25 Sale of rights:**
-  - Ava signs a transfer, and Jay, Nova and Lena co-sign it.
+  - Alice signs a transfer, and Carol, Dave and Erin co-sign it.
   - It is timestamped with an "MLT1" OP_RETURN that commits to the record and its co-signatures.
   - After it, only Harbour's key can sell. Licences from before stay valid.
 - **S26 Planned succession:**
-  - The plan names 3 keys and needs 2 of them, and is timestamped while Ava is alive.
-  - 2 of the 3 sign the takeover. Ava's old key is then frozen and the new key sells.
+  - The plan names 3 keys and needs 2 of them, and is timestamped while Alice is alive.
+  - 2 of the 3 sign the takeover. Alice's old key is then frozen and the new key sells.
 - **S27 Estate with no plan:** shown honestly as a limit. The protocol cannot decide. A court registry vouches, and each verifier chooses whom it trusts.
 - **Attacks:**
   - A20 fake heir (1 key).
   - A21 stolen old key signs a sale after rotation.
   - A22 double sale.
   - A23 old key sells after a transfer.
-  - A12c stolen key after a key rotation. This closes the A12b gap whenever Ava rotates.
+  - A12c stolen key after a key rotation. This closes the A12b gap whenever Alice rotates.

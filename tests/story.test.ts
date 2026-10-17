@@ -8,14 +8,14 @@ describe('main path', () => {
   it('stop 1: you license "Rain" for 100 sats; it fans out 65/20/15', async () => {
     const r = await S.hearAndLicense(lab); expect(r.verdict.result.ok).toBe(true); expect(r.verdict.passed).toBe(9);
     expect(Number(r.bundle.offer.tags.find(t => t[0] === 'price')![1])).toBe(S.PRICE);
-    expect(Object.fromEntries(r.split.map(s => [s.id, s.sats]))).toEqual({ ava: 65, jay: 20, nova: 15 }); expect(r.statements).toBe(2);
+    expect(Object.fromEntries(r.split.map(s => [s.id, s.sats]))).toEqual({ alice: 65, carol: 20, dave: 15 }); expect(r.statements).toBe(2);
   });
   it('stop 1 cheat: a changed price fails check 1; one changed byte no longer matches the offer', async () => {
     const v = await S.cheatPrice(lab); expect(v.result.ok).toBe(false); expect(v.result.code).toMatch(/^offer_/);
     const a = S.cheatAudio(lab); expect(a.originalMatches).toBe(true); expect(a.changedMatches).toBe(false);
   });
-  it('stop 2: Scout buys inside the budget; the poisoned prompt is refused with 0 sats paid', async () => {
-    const r = await S.scoutBuys(lab); expect(r.verdict.result.ok).toBe(true); expect(r.spent).toBe(S.PRICE);
+  it('stop 2: Bob\'s agent buys inside the budget; the poisoned prompt is refused with 0 sats paid', async () => {
+    const r = await S.agentBuys(lab); expect(r.verdict.result.ok).toBe(true); expect(r.spent).toBe(S.PRICE);
     const p = await S.poisonedPrompt(lab); expect(p.refused).toBe(true); expect(p.paid).toBe(0);
   });
   it('stop 2: 1,000 licences, one timestamp, inside the budget; a random sample re-checks', async () => {
@@ -23,7 +23,7 @@ describe('main path', () => {
     expect(r.n).toBe(1000); expect(r.refused).toBe(0); expect(last).toBe(1000); expect(r.oneProof).toBe(true);
     expect(r.spent).toBe(100_000); expect(r.spentToday).toBeLessThanOrEqual(r.cap); expect(r.sampleOk).toBe(r.sample); expect(r.sample).toBe(20);
   }, 120_000);
-  it('stop 3: the button verifies; the regulator check passes; "Ava Official" is caught', async () => {
+  it('stop 3: the button verifies; the regulator check passes; "Alice Official" is caught', async () => {
     expect((await S.licenseButton(lab)).result.ok).toBe(true);
     const g = await S.regulatorCheck(lab); expect(g.ok).toBe(true); expect(g.checks).toHaveLength(4);
     const f = await S.fakeCaught(lab); expect(f.result.ok).toBe(false); expect(f.result.code).toBe('rights_not_holder');

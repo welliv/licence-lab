@@ -9,7 +9,7 @@ describe('live tier guards (offline)', () => {
     expect(parseNwc(u).relays).toHaveLength(2); expect(() => parseNwc('nostr+walletconnect://abc?relay=x')).toThrow(); });
   it('every action has a clear guard when its inputs are missing', async () => {
     const w = new LiveWorld(memoryStore());
-    expect(() => w.publish()).toThrow(/Ava has no test wallet/);
+    expect(() => w.publish()).toThrow(/Alice has no test wallet/);
     expect(() => w.requestLicence()).toThrow(/not published an offer/);
     await expect(w.issueInvoice()).rejects.toThrow(/no licence request/);
     await expect(w.pay()).rejects.toThrow(/no invoice to pay/);
@@ -19,12 +19,12 @@ describe('live tier guards (offline)', () => {
 });
 describe.skipIf(!process.env.LIVE)('live tier against the real NWC faucet (LIVE=1)', () => {
   it('real invoice commits to the request; real payment; verifyLicence runs on the real preimage', async () => {
-    const w = new LiveWorld(memoryStore()); for (const p of ['ava', 'mia', 'jay', 'nova', 'lena'] as const) await w.connect(p);
-    w.publish(50); w.requestLicence('mia', 60); await w.issueInvoice(); const before = w.balances.mia!; const pre = await w.pay('mia');
-    expect(pre).toMatch(/^[0-9a-f]{64}$/); expect(w.balances.mia).toBe(before - 50);
-    await expect(w.pay('mia')).rejects.toThrow(/Already paid/);
+    const w = new LiveWorld(memoryStore()); for (const p of ['alice', 'bob', 'carol', 'dave', 'erin'] as const) await w.connect(p);
+    w.publish(50); w.requestLicence('bob', 60); await w.issueInvoice(); const before = w.balances.bob!; const pre = await w.pay('bob');
+    expect(pre).toMatch(/^[0-9a-f]{64}$/); expect(w.balances.bob).toBe(before - 50);
+    await expect(w.pay('bob')).rejects.toThrow(/Already paid/);
     const v = await w.verify(); expect(v.strict.result.ok).toBe(false); expect((v.strict.result as any).code).toBe('binding_node_sig');
     expect(v.facts.slice(0, 5).every(f => f.ok)).toBe(true);
-    const lines = await w.payout(); expect(lines.join(' ')).toMatch(/Jay 10 sats/); w.close();
+    const lines = await w.payout(); expect(lines.join(' ')).toMatch(/Carol 10 sats/); w.close();
   }, 120000);
 });

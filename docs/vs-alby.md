@@ -39,7 +39,7 @@ Observed in `scripts/alby-factcheck.mjs`, with shots `docs/compare/alby/fc-*.png
 **Patch.** Licence Lab steps are no longer locked:
 
 - Every step card can be pressed at any time once the parties are set up.
-- If something it needs is missing, the card shows a guard message, for example "Not yet: this needs step 4 ("Mia pays") first." When the library itself refuses, it shows "Refused: <the library's own reason>".
+- If something it needs is missing, the card shows a guard message, for example "Not yet: this needs step 4 ("Bob pays") first." When the library itself refuses, it shows "Refused: <the library's own reason>".
 - Done steps have a "Do it again" link, so you can pay twice and see the payment record stop you.
 - "Run all steps" still plays the story in order.
 - On the Live page, every party's actions are available all the time, as in Alby.
@@ -55,7 +55,7 @@ Shots: `docs/compare/alby/gs-slide-1.png` and `gs-after-slides.png`.
 
 **Redesign:** three centred slides in the same structure:
 
-1. "Meet Ava and "Rain"": cover, Ava, and a row of the buyers who join later, plus a demo player.
+1. "Meet Alice and "Rain"": cover, Alice, and a row of the buyers who join later, plus a demo player.
 2. "One licence, six signed parts": six tiles.
 3. "Explore real-world scenarios": 🚀, then "Try the first scenario →".
 
@@ -110,14 +110,14 @@ Shots: `docs/compare/alby/gs-slide-1.png` and `gs-after-slides.png`.
 
 Evidence: `docs/live-evidence.json`, run at 10:15 EAT on 17 Oct 2026 (`npx tsx scripts/live-run.mts`), and the browser run in `screenshots/14-17`.
 
-- **Wallets:** six faucet wallets (Ava, Mia, Jay, Nova, Lena, Scout), all on node `03b6b08e…2b430c`, network "mainnet".
-- **Top-up:** Mia +300 sats through the faucet top-up API.
-- **Invoice:** Ava's wallet made `lnbc1u1p4dxgyy…`. Its description_hash `dcd878fd…` equals the hash of Mia's exact HTTP request.
-- **Payment:** Mia paid it with a real NWC `pay_invoice`. Preimage `df054973…68d9` hashes to payment hash `42b0e2b3…0b1b`. Balances moved from Mia 2,300 → 2,200 and Ava 200 → 300.
+- **Wallets:** six faucet wallets (Alice, Bob, Carol, Dave, Erin, Bob's agent), all on node `03b6b08e…2b430c`, network "mainnet".
+- **Top-up:** Bob +300 sats through the faucet top-up API.
+- **Invoice:** Alice's wallet made `lnbc1u1p4dxgyy…`. Its description_hash `dcd878fd…` equals the hash of Bob's exact HTTP request.
+- **Payment:** Bob paid it with a real NWC `pay_invoice`. Preimage `df054973…68d9` hashes to payment hash `42b0e2b3…0b1b`. Balances moved from Bob 2,300 → 2,200 and Alice 200 → 300.
 - **Paying twice:** refused by the payment record.
 - **verifyLicence on the real preimage:** checks 1 and 3 pass, then it stops at check 2 (`binding_node_sig`), as expected on the faucet. Five payment facts are proven separately with the library's own functions: invoice node = binding node, description_hash commits to the request, amount, preimage, and clientCheck.
-- **Payouts:** Ava paid Jay 20, Nova 15 and Lena 15 sats, for real.
-- **Scout:** paid 100 sats inside a Lab-enforced budget. Its second buy was refused by the Lab daily cap (150).
+- **Payouts:** Alice paid Carol 20, Dave 15 and Erin 15 sats, for real.
+- **Bob's agent:** paid 100 sats inside a Lab-enforced budget. Its second buy was refused by the Lab daily cap (150).
 
 **The faucet's catches, all shown in the UI:**
 

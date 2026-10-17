@@ -8,7 +8,7 @@ import { createHash } from 'crypto'; import { execFileSync } from 'child_process
 const dir = process.argv[2] ?? 'public/music'; const prevDir = join(dir, 'previews'); mkdirSync(prevDir, { recursive: true });
 export const AUDIO = { '.mp3': 'audio/mpeg', '.m4a': 'audio/mp4', '.aac': 'audio/aac', '.ogg': 'audio/ogg', '.oga': 'audio/ogg', '.opus': 'audio/ogg', '.wav': 'audio/wav', '.flac': 'audio/flac', '.webm': 'audio/webm' };
 const IMG = ['.jpg', '.jpeg', '.png', '.webp'];
-const CAST_ORDER = [['ava', 'Rain'], ['nova', 'Nova Lights'], ['jay', 'Night Shift'], ['lena', 'Paper Boats'], ['kai', 'Rain (Kai remix)'], ['sam', 'Fan Mix']];
+const CAST_ORDER = [['alice', 'Rain'], ['dave', 'Northern Lights'], ['carol', 'Night Shift'], ['erin', 'Paper Boats'], ['frank', 'Rain (Frank remix)'], ['grace', 'Fan Mix']];
 const has = b => { try { execFileSync(b, ['-version'], { stdio: 'ignore' }); return true; } catch { return false; } };
 const ff = has('ffmpeg') && has('ffprobe');
 const cfgFile = join(dir, 'music.json'); const cfg = existsSync(cfgFile) ? JSON.parse(readFileSync(cfgFile, 'utf8')) : { tracks: {} };
@@ -16,7 +16,7 @@ const files = readdirSync(dir).filter(f => AUDIO[extname(f).toLowerCase()] && st
 const tracks = []; let i = 0;
 for (const f of files) {
   const p = join(dir, f); const bytes = readFileSync(p); const sha256 = createHash('sha256').update(bytes).digest('hex');
-  const c = cfg.tracks[f] ?? {}; const [castDefault, demoDefault] = CAST_ORDER[i] ?? ['ava', basename(f, extname(f))]; i++;
+  const c = cfg.tracks[f] ?? {}; const [castDefault, demoDefault] = CAST_ORDER[i] ?? ['alice', basename(f, extname(f))]; i++;
   let durationSec = null; if (ff) { try { durationSec = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', p]).toString().trim()) || null; } catch {} }
   const id = sha256.slice(0, 12); let preview = f, previewSha256 = sha256;
   if (ff) { const out = join(prevDir, `${id}.mp3`); const len = Math.min(30, durationSec ?? 30); const start = durationSec && durationSec > 60 ? Math.floor(durationSec * 0.25) : 0;
@@ -30,8 +30,8 @@ for (const f of files) {
 for (const old of readdirSync(prevDir)) if (!tracks.some(t => t.preview === `previews/${old}`)) unlinkSync(join(prevDir, old));
 for (const k of Object.keys(cfg.tracks)) if (!files.includes(k)) delete cfg.tracks[k];
 writeFileSync(cfgFile, JSON.stringify(cfg, null, 2) + '\n');
-writeFileSync(join(dir, 'tracks.json'), JSON.stringify({ generatedAt: new Date().toISOString(), ffmpeg: ff, hero: tracks.find(t => t.cast === 'ava')?.id ?? tracks[0]?.id ?? null, tracks }, null, 2) + '\n');
-const credits = ['# Music credits', '', 'Licence Lab uses demo names (Ava, "Rain", Nova, Jay, Lena…) for its story. The audio files below are real recordings; this file records who made them and under which licence.', '',
+writeFileSync(join(dir, 'tracks.json'), JSON.stringify({ generatedAt: new Date().toISOString(), ffmpeg: ff, hero: tracks.find(t => t.cast === 'alice')?.id ?? tracks[0]?.id ?? null, tracks }, null, 2) + '\n');
+const credits = ['# Music credits', '', 'Licence Lab uses demo names (Alice, "Rain", Dave, Carol, Erin…) for its story. The audio files below are real recordings; this file records who made them and under which licence.', '',
   tracks.length ? '| Demo name | File | Original title | Artist | Licence | Source | SHA-256 |\n|---|---|---|---|---|---|---|\n' + tracks.map(t => `| ${t.demoTitle} (${t.cast}) | ${t.file} | ${t.title} | ${t.artist} | ${t.licence} | ${t.source || '—'} | \`${t.sha256}\` |`).join('\n') : '_No tracks yet. Add audio files to this folder and run `npm run music`._', ''].join('\n');
 writeFileSync(join(dir, 'CREDITS.md'), credits);
 console.log(`${tracks.length} track(s) indexed in ${dir}${ff ? '' : ' (no ffmpeg: previews are the full files)'}`); for (const t of tracks) console.log(`  ${t.demoTitle} ← ${t.file}  sha256 ${t.sha256}  ${t.durationSec?.toFixed?.(1) ?? '?'} s  preview ${t.preview}`);

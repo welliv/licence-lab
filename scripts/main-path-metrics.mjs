@@ -17,16 +17,16 @@ if (MODE === 'new') {
   for (const who of ['artist', 'buyer', 'builder']) { const p = await fresh(); await p.goto(base + '#/'); await p.reload(); await p.waitForSelector('[data-persona]'); let taps = 0;
     await p.click(`[data-persona=${who}]`); taps++;
     if (who === 'artist') { await p.getByRole('button', { name: /Hear "Rain"/ }).click(); await p.getByRole('button', { name: /License for 100 sats/ }).click(); taps += 2; await p.waitForSelector('[data-testid=verdict]', { timeout: 30000 }); }
-    if (who === 'buyer') { await p.getByRole('button', { name: /Let Scout buy/ }).click(); taps++; await p.waitForSelector('[data-testid=s2-one]', { timeout: 30000 }); }
+    if (who === 'buyer') { await p.getByRole('button', { name: /Let Bob's agent buy/ }).click(); taps++; await p.waitForSelector('[data-testid=s2-one]', { timeout: 30000 }); }
     if (who === 'builder') { await p.click('[data-testid=license-this]'); taps++; await p.waitForSelector('[data-testid=verdict]', { timeout: 30000 }); }
     out.ttfl[who] = { ms: await navMs(p), taps }; await count(p, `home→first licence (${who})`); await p.close(); }
   const p = await fresh(); await p.goto(base + '#/'); await p.reload(); await p.waitForSelector('[data-persona]'); await count(p, 'Home');
   await p.click('[data-persona=artist]'); await p.getByRole('button', { name: /Hear "Rain"/ }).click(); await p.getByRole('button', { name: /License for 100 sats/ }).click(); await p.waitForSelector('[data-testid=fanout]');
   await p.getByRole('button', { name: /Change the price/ }).click(); await p.getByRole('button', { name: /Change one byte/ }).click(); await p.waitForSelector('[data-testid=cheat-audio]'); await count(p, 'Stop 1 Hear it, license it');
-  await p.click('[data-testid=next]'); await p.getByRole('button', { name: /Let Scout buy/ }).click(); await p.waitForSelector('[data-testid=s2-one]'); await p.getByRole('button', { name: /poisoned/ }).click(); await p.waitForSelector('[data-testid=cheat-poison]');
+  await p.click('[data-testid=next]'); await p.getByRole('button', { name: /Let Bob's agent buy/ }).click(); await p.waitForSelector('[data-testid=s2-one]'); await p.getByRole('button', { name: /poisoned/ }).click(); await p.waitForSelector('[data-testid=cheat-poison]');
   const t0 = await navMs(p); await p.click('[data-testid=scale-go]'); await p.waitForSelector('[data-testid=verdict-scale]', { timeout: 120000 }); out.scaleMs = (await navMs(p)) - t0; await count(p, 'Stop 2 Agents buy at scale');
   await p.click('[data-testid=next]'); await p.click('[data-testid=license-this]'); await p.waitForSelector('[data-testid=verdict]'); await p.getByRole('button', { name: /ModelCo/ }).click(); await p.waitForSelector('text=Permission proven'); await p.getByRole('button', { name: /copycat/ }).click(); await p.waitForSelector('[data-testid=cheat-fake]'); await count(p, 'Stop 3 Anyone verifies');
-  await p.click('[data-testid=next]'); for (const [n, sel] of [[/Sell the rights/, 'x-sale'], [/old account/, 'cheat-old'], [/heirs act/, 'x-succ'], [/new account/, 'x-stolen']]) { await p.getByRole('button', { name: n }).click(); await p.waitForSelector(`[data-testid=${sel}]`, { timeout: 30000 }); } await count(p, 'Extra Rights change hands');
+  await p.click('[data-testid=next]'); for (const [n, sel] of [[/Show what happens/, 'x-stolen'], [/old account/, 'cheat-old']]) { await p.getByRole('button', { name: n }).click(); await p.waitForSelector(`[data-testid=${sel}]`, { timeout: 60000 }); } await count(p, 'Extra Rights change hands');
   await p.goto(base + '#/'); await p.click('[data-persona=builder]'); await p.waitForTimeout(300); await count(p, 'Stop 3 (builder, drawer open)');
 } else {
   const p = await fresh(); await p.goto(base + '#/'); await p.reload(); await p.getByRole('button', { name: /Hear "Rain"/ }).click(); await p.getByRole('button', { name: /License for 100 sats/ }).click(); await p.waitForSelector('[data-testid=licensed]', { timeout: 30000 });
