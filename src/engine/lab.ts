@@ -8,7 +8,7 @@ import { KIND, makeBinding, makeOffer, makeConsent, makeRequest, makePrivateRequ
 import { signLnMessage } from '../lib/mll/lnmsg';
 import { encodeInvoice, decodeInvoice, type Invoice } from '../lib/mll/bolt11';
 import { httpBinding, requestHash, NETWORKS, clientCheck, type Requirements } from '../lib/mll/x402';
-import { nextKeyHash, makeOwnerVouch } from '../lib/mll/events';
+import { nextKeyHash, makeOwnerVouch, makeQuote } from '../lib/mll/events';
 import { checkDeal, verifyLicence, requestBytes, grantDigest, revocationPayloadCompact, type LicenceBundle, type Result } from '../lib/mll/verify';
 import { type ChainOracle, MLA1 } from '../lib/mll/chain';
 import { writeOts, verifyOts, type Op } from '../lib/mll/ots';
@@ -296,7 +296,7 @@ export class Lab {
     return { result, checks, ms: performance.now() - t0, passed: checks.filter(c => c.status === 'pass').length, file: b.offer ? this.fileCheck(b.offer) : undefined, ownership: ownershipCheck(result) };
   }
   // ---------- protocol building blocks, re-exported so scenario code reads plainly ----------
-  lib = { nextKeyHash, makeTransfer, makeSuccessionPlan, makeCosign, makeOffer, makeConsent, makeRequest, makePrivateRequest, makeRevocation, makeStatement, checkDeal, revocationPayloadCompact, clientCheck, requestHash, httpBinding, requestBytes, grantDigest, MLA1 };
+  lib = { nextKeyHash, makeQuote, makeTransfer, makeSuccessionPlan, makeCosign, makeOffer, makeConsent, makeRequest, makePrivateRequest, makeRevocation, makeStatement, checkDeal, revocationPayloadCompact, clientCheck, requestHash, httpBinding, requestBytes, grantDigest, MLA1 };
   offerInput(artist: string, kind: keyof typeof USES, o: Partial<OfferInput> & { coOwners?: OfferInput['coOwners'] }): OfferInput {
     return { track: 'rain', title: 'Rain', masterSha256: this.trackHash, use: USES[kind].slice(1), termsText: TERMS[kind], priceSats: 2_000, payLink: `https://${artist}.lab.test/licence/rain/${kind}`,
       bindingId: '', validUntil: this.chain.tip.height + 52_560, coOwners: [], ...Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) };

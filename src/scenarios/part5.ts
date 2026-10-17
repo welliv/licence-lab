@@ -78,7 +78,7 @@ export const S21: Scenario = {
   id: 's21', n: 21, part: 5, emoji: '💱', title: 'Fiat pricing', complexity: 'medium', status: 'v1',
   summary: 'Alice thinks in her own currency. Two price feeds set the sats price; if they disagree, no invoice.',
   situation: 'Alice thinks in her local currency, not in sats. Bitcoin\'s price moves.',
-  education: 'The signed offer must name a sats price (verifyLicence checks it). So the Lab shows the v1-safe way: Echo checks two price feeds and asks Alice\'s signer to sign a short-lived offer at today\'s rate. Locking a fiat price only at invoice time would need a spec change (the request amount must equal the signed price).',
+  education: 'The signed offer must name a sats price (verifyLicence checks it). So the Lab shows the v1-safe way: Echo checks two price feeds and asks Alice\'s signer to sign a short-lived offer at today\'s rate. V2 adds a second way: Alice signs one offer with a price band and names a pricing key; that key signs a short quote at sale time. The main key stays offline and the price can never leave the band.',
   how: [{ title: 'Two feeds', description: 'Refuse if they differ by more than 2%.' }, { title: 'Short-lived offer', description: 'valid-until a few blocks ahead.' }, { title: 'Both figures', description: 'Sats and local value on the invoice and statements.' }],
   cast: ['alice', 'echo', 'bob'], setup: lab => baseWorld(lab, { kinds: ['creator'] }),
   steps: [
@@ -89,15 +89,28 @@ export const S21: Scenario = {
         return { ok: listing(lab, 'offer.today').forSale, badge: 'real', json: o, summary: `Offer at ${satsPrice} sats (≈ 20 units), valid until block ${tagv(o, 'valid-until')}.` }; } },
     { id: 'buy', actor: 'bob', to: 'alice', title: 'Bob buys; the bill shows both', button: 'Buy', narration: 'Bob buys. The invoice expires in 10 minutes. His receipt shows sats and the local value at that moment.',
       run: async lab => { const r = purchase(lab, 'bob', 'offer.today', { name: 'bundle.today' }); const v = await anchorAndVerify(lab, r.bundle, 'today'); const inv = decodeInvoice(r.rec.bolt11); return { ...verdictOut(v), fields: [F('sats', Number(inv.amountMsat) / 1000), F('local value at invoice', (Number(inv.amountMsat) / 1e6 * lab.a['s21.rate']).toFixed(2) + ' units'), F('expiry', inv.expiry + ' s')] }; } },
-    { id: 'gap', actor: 'echo', title: 'Open question: lock the price when billed', button: 'Try a bill locked to dollars', openIssue: true, narration: 'The document says the node locks the fiat price into sats at invoice time. Let\'s try an invoice for a different sats amount than the signed offer.',
-      run: async lab => { const { offer, binding, consents } = listing(lab, 'offer.today'); const rq = lab.lib.makePrivateRequest(lab.key('bob'), { offer, binding, use: ['creator-video', 'worldwide', 'perpetual', 'non-exclusive', 'seconds=30'], network: tagNet(), notBefore: lab.notBefore() });
-        const amt = Number(tagv(rq.request, 'amount')) + 150_000; const x = lab.issueInvoice({ nodeId: 'node.alice', creditTo: 'alice', offer, binding, consents, request: rq.request, amountMsat: amt, label: 'fiat lock' }); const p = lab.pay('bob', x.rec.bolt11);
-        const v = await lab.verify(lab.bundle('bundle.fiat', { offer, binding, consents, request: rq.request, invoice: x.rec.bolt11, preimage: p.preimage! }), { chain: false });
-        return { ok: false, badge: 'open', verdict: v, summary: `Rejected by check ${v.checks.find(c => c.status === 'fail')?.n}: ${v.result.reason}. Fiat locking at invoice time needs a spec change (for example a signed price rule and a tolerance). Until then, use short-lived sats offers.` }; } },
+    { id: 'band', actor: 'echo', to: 'bob', title: 'Pricing key: a price set when billed', button: 'Quote and sell', narration: 'Alice signs one offer with a price band (floor and maximum) and names Echo\'s pricing key. Her main key stays offline. At sale time Echo signs a quote in sats; Bob\'s request names it.',
+      run: async lab => {
+        const { binding } = listing(lab, 'offer.today');         const offer = lab.lib.makeOffer(lab.key('alice'), lab.offerInput('alice', 'creator', { bindingId: binding.id, coOwners: [], priceSats: 15000, priceKey: lab.pub('echo', 'pricing'), priceMax: 30000, validUntil: lab.chain.tip.height + 144 * 30 }));
+        lab.a['s21.band'] = offer; return { ok: true, badge: 'real', json: offer, summary: `Band offer signed once: ${tagv(offer, 'price')}–${tagv(offer, 'price-max')} sats, pricing key ${short(tagv(offer, 'price-key')!)}. Echo\'s key only prices; it cannot sell outside the band.`, fields: [F('pricing key', short(lab.pub('echo', 'pricing')))] };
+      } },
+    { id: 'quote', actor: 'bob', to: 'alice', title: 'Bob buys at the quoted price', button: 'Buy at the quote', narration: 'Echo quotes today\'s price. Bob\'s request names the quote; the invoice must match it. A quote outside the band is refused by check 2.', inputs: [{ key: 'q', label: 'Quoted price (sats)', type: 'number', default: 21000, hint: 'The band is 15,000 to 30,000. Try 40000.' }],
+      run: async (lab, i) => {
+        const offer: Event = lab.a['s21.band']; if (!offer) return { ok: false, badge: 'sim', summary: 'Sign the band offer first.' };
+        const { binding } = listing(lab, 'offer.today'); const price = Math.round(Number(i.q));
+        const quote = lab.lib.makeQuote(lab.key('echo', 'pricing'), offer, price, lab.chain.tip.height + 6, `≈ ${(price / 1000 * lab.a['s21.rate']).toFixed(2)} units at today's feeds`);
+        const rq = lab.lib.makePrivateRequest(lab.key('bob'), { offer, binding, use: ['creator-video', 'worldwide', 'perpetual', 'non-exclusive', 'seconds=30'], network: tagNet(), notBefore: lab.notBefore(), quote });
+        try { lab.lib.checkDeal(offer, binding, [], rq.request, quote); } catch (e) { return { ok: false, badge: 'real', json: quote, summary: `Alice's node refused the quote: ${(e as Error).message}. The pricing key cannot sell outside the band Alice signed.` }; }
+        const x = lab.issueInvoice({ nodeId: 'node.alice', creditTo: 'alice', offer, binding, consents: [], request: rq.request, label: 'quoted sale', skipDealCheck: true });
+        const p = lab.pay('bob', x.rec.bolt11); if (!p.ok) return { ok: false, badge: 'sim', summary: `Payment failed: ${p.error}.` };
+        const b = lab.bundle('bundle.quote', { offer, binding, consents: [], request: rq.request, invoice: x.rec.bolt11, preimage: p.preimage!, quote });
+        const v = await anchorAndVerify(lab, b, 'quoted');
+        return { ...verdictOut(v), json: quote, fields: [F('quoted', price + ' sats'), F('band', `${tagv(offer, 'price')}–${tagv(offer, 'price-max')} sats`)] };
+      } },
   ],
   proven: 'What was paid in sats, and what it was worth at that moment.',
   canGoWrong: [{ text: 'A bad price feed: no invoice' }, { text: 'Price moves during payment: short expiry, new invoice' }],
-  limits: ['Fiat locking at invoice time is not in the library yet (open question).'],
+  limits: ['Quotes are in the library and this Lab; the example seller and buyer agent do not use them yet.', 'The pricing key is trusted to quote fairly inside the band.'],
   prompts: [{ title: 'Fiat pricer', prompt: 'Write a pricer that reads two BTC price feeds, refuses if they differ by more than 2%, and produces a short-lived sats offer for the artist\'s signer to sign.' }],
 };
 
