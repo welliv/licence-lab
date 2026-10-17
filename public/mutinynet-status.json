@@ -1,14 +1,144 @@
 {
-  "checkedAt": "2026-10-17T07:17:36.902Z",
-  "faucetLogin": "needs login",
-  "token": false,
-  "localNode": "not running",
-  "otsd": "not running",
+  "checkedAt": "2026-10-17T08:33:14.003Z",
+  "faucetLogin": "ok",
+  "token": true,
+  "localNode": "running",
+  "otsd": "running",
   "opReturnBot": "not running",
-  "recorded": [],
+  "recorded": [
+    {
+      "kind": "S4 licence #1 anchor (direct OP_RETURN MLA1||D, 36 B)",
+      "txid": "64ba366b0d93f72a6885af3c9dd000c670ac9102287b37229a0680b1e40f138f",
+      "height": 3512497,
+      "txUrl": "https://mutinynet.com/tx/64ba366b0d93f72a6885af3c9dd000c670ac9102287b37229a0680b1e40f138f",
+      "blockUrl": "https://mutinynet.com/block/000002fc70ef1ac60a09e31a1c99a0d043782c7dd9ce092d98e3edae2c5fa791"
+    },
+    {
+      "kind": "S5 licence #2 anchor via benthecarman/OP-RETURN-Bot (text MLA1+hex, 68 B)",
+      "txid": "8998c7e59afbb3936c71304abcfbf6034a63ba2fb3794bdfdd85c76e8eb82740",
+      "height": 3512498,
+      "txUrl": "https://mutinynet.com/tx/8998c7e59afbb3936c71304abcfbf6034a63ba2fb3794bdfdd85c76e8eb82740",
+      "blockUrl": "https://mutinynet.com/block/000000a3c45a9b16f37efabf59fe77b60ce3606d8e760af7ec42a4166fd97740"
+    },
+    {
+      "kind": "X5 offer revocation (MLR2, 80 B, artist-signed)",
+      "txid": "abb94308615fc52915a378fdeb1a7e93ae766278067061c7dc3bae8ceae5da4e",
+      "height": 3512501,
+      "txUrl": "https://mutinynet.com/tx/abb94308615fc52915a378fdeb1a7e93ae766278067061c7dc3bae8ceae5da4e",
+      "blockUrl": "https://mutinynet.com/block/000000d97b8c2e29a6f9b4269f2e0ca047e27cfd8c5af27d48165f8274752157"
+    },
+    {
+      "kind": "X5 licence #4 anchor (after revocation)",
+      "txid": "66f4fb29303ee90948094b3aaddcacee7aaa863c745c3c3810f53cdb9bfc2ba2",
+      "height": 3512502,
+      "txUrl": "https://mutinynet.com/tx/66f4fb29303ee90948094b3aaddcacee7aaa863c745c3c3810f53cdb9bfc2ba2",
+      "blockUrl": "https://mutinynet.com/block/0000004587af7458191d37ff0ca20a02ea5c8e0a7252c15a0318a7f8c51cf18f"
+    },
+    {
+      "kind": "S6 OpenTimestamps calendar tx (licence #3 via Merkle path)",
+      "txid": "674b0e809e16421214172d396729b6ed52d584cedf28da03966f8e51296b7385",
+      "height": 3512499,
+      "txUrl": "https://mutinynet.com/tx/674b0e809e16421214172d396729b6ed52d584cedf28da03966f8e51296b7385",
+      "blockUrl": "https://mutinynet.com/block/00000063340add27c6316373e016ef9c6b34a499ac2d3a46f1369b0e0c821e4f"
+    }
+  ],
+  "proofs": {
+    "purchase": {
+      "title": "Purchase with a real payment",
+      "when": "2026-10-17 11:29 EAT (UTC+3)",
+      "summary": "Sam's agent paid Ava's own Mutinynet node 50 sats over Lightning (NWC), Jay got his 30% by keysend, and the licence passed verifyLicence 9/9, re-checked after the run.",
+      "fields": [
+        [
+          "Payment hash",
+          "b3af41e2d99435579b18081bdba2a9c129efdb1efc953ec34044d36f2e8a325b"
+        ],
+        [
+          "Preimage",
+          "0e147555b55385ea3634f7bd69f6eef7d7a1765f6255a84bd4547e9d7603802c"
+        ],
+        [
+          "Invoice",
+          "lntbs500n1p4dxvwmpp5kwh5rckejs640xccpqdahg4fcy57lkc7lj2nas6qgnfk7t52xfdshp53jcnypk7nhsvg7cekxps7zj3zq7j4lu3cqnxxghtlk642frdnzkqcqzzsxqzfvsp56chxurjs0gvxzfqz44d2xvmfyknknxplxu249y2tkcsrn24m7ggs9qxpqysgq6jfzvgcev3qnqwksw4s820djfmg55j939gfh8qqum29h82j0zmah7kl7utxcc30s0y0vfg932xmaz65f3gz9j5h3px86a5defxc4asqqnqjst0"
+        ],
+        [
+          "Ava's node",
+          "02c619f9de5ade8d537521724253b04b75541c5206981053ad64447f362d6e9b5d"
+        ],
+        [
+          "Jay payout",
+          "15 sats"
+        ],
+        [
+          "Anchor tx",
+          "64ba366b0d93f72a6885af3c9dd000c670ac9102287b37229a0680b1e40f138f",
+          "https://mutinynet.com/tx/64ba366b0d93f72a6885af3c9dd000c670ac9102287b37229a0680b1e40f138f"
+        ],
+        [
+          "Block",
+          "3512497",
+          "https://mutinynet.com/block/000002fc70ef1ac60a09e31a1c99a0d043782c7dd9ce092d98e3edae2c5fa791"
+        ]
+      ]
+    },
+    "revocation": {
+      "title": "OP_RETURN revocation in a block",
+      "when": "2026-10-17 11:29 EAT (UTC+3)",
+      "summary": "Ava signed an 80-byte MLR2 revocation of the \"Rain\" offer. A licence anchored after it is refused (\"revoked\"); licences anchored before it stay valid; the seller now answers 410.",
+      "fields": [
+        [
+          "Revocation tx",
+          "abb94308615fc52915a378fdeb1a7e93ae766278067061c7dc3bae8ceae5da4e",
+          "https://mutinynet.com/tx/abb94308615fc52915a378fdeb1a7e93ae766278067061c7dc3bae8ceae5da4e"
+        ],
+        [
+          "Block",
+          "3512501",
+          "https://mutinynet.com/block/000000d97b8c2e29a6f9b4269f2e0ca047e27cfd8c5af27d48165f8274752157"
+        ],
+        [
+          "Later licence tx",
+          "66f4fb29303ee90948094b3aaddcacee7aaa863c745c3c3810f53cdb9bfc2ba2",
+          "https://mutinynet.com/tx/66f4fb29303ee90948094b3aaddcacee7aaa863c745c3c3810f53cdb9bfc2ba2"
+        ],
+        [
+          "Later licence",
+          "revoked"
+        ],
+        [
+          "Earlier licences",
+          "still valid"
+        ]
+      ]
+    },
+    "ots": {
+      "title": "OpenTimestamps proof, confirmed",
+      "when": "2026-10-17 11:29 EAT (UTC+3)",
+      "summary": "Licence #3 was stamped on our own OpenTimestamps calendar on Mutinynet. The pending proof was refused, the upgraded proof verified against the block header in 70 s, and a tampered proof was refused.",
+      "fields": [
+        [
+          "Licence digest",
+          "704ae9d08deb3a1aa3d34414d6be07f4c8b4f656a49cf1596f6beddba3913c6a"
+        ],
+        [
+          "Calendar tx",
+          "674b0e809e16421214172d396729b6ed52d584cedf28da03966f8e51296b7385",
+          "https://mutinynet.com/tx/674b0e809e16421214172d396729b6ed52d584cedf28da03966f8e51296b7385"
+        ],
+        [
+          "Block",
+          "3512499",
+          "https://mutinynet.com/block/00000063340add27c6316373e016ef9c6b34a499ac2d3a46f1369b0e0c821e4f"
+        ],
+        [
+          "Proof file",
+          "licence-mutinynet-ots.json"
+        ]
+      ]
+    }
+  },
+  "run": "Live run 2026-10-17 11:29 EAT (UTC+3): 18/18 steps passed on Mutinynet, test coins only. Also checked live: overpay refused, wrong-node invoice refused, NWC budget held (20 of 40 payments), crash recovery without paying twice, and the x402-ln check (44 passed, 0 failed).",
   "howTo": [
-    "On the box: cd /workspace/mll-audit/ref/mutinynet-cli && cargo build --release && ./target/release/mutinynet-cli login and approve the GitHub device code it prints, at github.com/login/device.",
-    "The token is saved to ~/.mutinynet/token (valid 31 days). /workspace/mutinynet/autopilot.sh then funds the node, opens channels and starts otsd and OP-RETURN-Bot.",
-    "Run: npx tsx scripts/mutinynet-anchor.mts (stamps and revokes on Mutinynet and records txids here)."
+    "Start the stack: bash /workspace/mutinynet/autopilot.sh",
+    "Then: npx tsx scripts/mutinynet-anchor.mts"
   ]
 }

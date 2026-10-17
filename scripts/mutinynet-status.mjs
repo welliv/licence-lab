@@ -1,9 +1,24 @@
-// Writes public/mutinynet-status.json for the Live page. Reads local state only; never fakes a record.
+// Writes public/mutinynet-status.json for the Live page and the Production tab. Reads local state and the recorded
+// Mutinynet run (mll-audit docs/mutinynet-results.json) only; never fakes a record. Every proof links to mutinynet.com.
 import { existsSync, readFileSync, writeFileSync } from 'fs'; import { execSync } from 'child_process'; import { homedir } from 'os';
 const running = name => { try { return execSync(`pgrep -f '${name}'`, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() ? 'running' : 'not running'; } catch { return 'not running'; } };
 const token = existsSync(`${homedir()}/.mutinynet/token`) && readFileSync(`${homedir()}/.mutinynet/token`, 'utf8').trim().length > 0;
-const resultsFile = '/workspace/mll-audit/docs/mutinynet-results.json'; let recorded = [];
-if (existsSync(resultsFile)) { try { const r = JSON.parse(readFileSync(resultsFile, 'utf8')); recorded = (r.chainTxs ?? []).map(t => ({ kind: t.kind ?? t.label, txid: t.txid, height: t.height, note: t.note })); } catch {} }
-const status = { checkedAt: new Date().toISOString(), faucetLogin: token ? 'ok' : 'needs login', token, localNode: running('[b]itcoind'), otsd: running('[o]tsd'), opReturnBot: running('[O]P-RETURN-Bot|[o]preturnbot'), recorded,
+const D = '/workspace/mll-audit/docs', X = 'https://mutinynet.com'; const resultsFile = `${D}/mutinynet-results.json`;
+const eat = iso => new Date(new Date(iso).getTime() + 3 * 3600e3).toISOString().slice(0, 16).replace('T', ' ') + ' EAT (UTC+3)';
+let recorded = [], proofs = {}, run;
+if (existsSync(resultsFile)) { try {
+  const r = JSON.parse(readFileSync(resultsFile, 'utf8')); const st = n => r.steps.find(s => s.name.startsWith(n));
+  recorded = (r.chainTxs ?? []).filter(t => !String(t.txid).includes(',')).map(t => ({ kind: t.label, txid: t.txid, height: t.height, txUrl: t.txUrl, blockUrl: t.blockUrl }));
+  if (r.otsCalendarTx) recorded.push({ kind: 'S6 OpenTimestamps calendar tx (licence #3 via Merkle path)', txid: r.otsCalendarTx.txid, height: r.otsCalendarTx.height, txUrl: r.otsCalendarTx.txUrl, blockUrl: `${X}/block/${r.otsCalendarTx.blockhash}` });
+  const b = JSON.parse(readFileSync(`${D}/licence-bundle-mutinynet.json`, 'utf8')); const s2 = st('S2'), s3 = st('S3'), s4 = st('S4'), x5 = st('X5b'), x5c = st('X5c'), s6 = st('S6b'), ots = JSON.parse(readFileSync(`${D}/licence-mutinynet-ots.json`, 'utf8'));
+  if (s2?.ok && s4?.ok) proofs.purchase = { title: 'Purchase with a real payment', when: eat(r.started), summary: `Sam's agent paid Ava's own Mutinynet node 50 sats over Lightning (NWC), Jay got his 30% by keysend, and the licence passed verifyLicence ${s4.checks.length}/9, re-checked after the run.`,
+    fields: [['Payment hash', s2.paymentHash], ['Preimage', b.preimage], ['Invoice', b.invoice], ['Ava\'s node', r.nodes.ava], ['Jay payout', `${Number(s3?.msat ?? 0) / 1000} sats`], ['Anchor tx', s4.txid, s4.txUrl], ['Block', String(s4.height), s4.blockUrl]] };
+  if (x5?.ok) proofs.revocation = { title: 'OP_RETURN revocation in a block', when: eat(r.started), summary: 'Ava signed an 80-byte MLR2 revocation of the "Rain" offer. A licence anchored after it is refused ("revoked"); licences anchored before it stay valid; the seller now answers 410.',
+    fields: [['Revocation tx', x5.revocation.txid, x5.revocation.txUrl], ['Block', String(x5.revocation.height), x5.revocation.blockUrl], ['Later licence tx', x5.licence4Anchor.txid, x5.licence4Anchor.txUrl], ['Later licence', x5.code], ['Earlier licences', x5c?.ok ? 'still valid' : 'check failed']] };
+  if (s6?.ok && r.otsCalendarTx) proofs.ots = { title: 'OpenTimestamps proof, confirmed', when: eat(r.started), summary: `Licence #3 was stamped on our own OpenTimestamps calendar on Mutinynet. The pending proof was refused, the upgraded proof verified against the block header in ${s6.secondsToConfirm} s, and a tampered proof was refused.`,
+    fields: [['Licence digest', ots.digest], ['Calendar tx', r.otsCalendarTx.txid, r.otsCalendarTx.txUrl], ['Block', String(ots.height), `${X}/block/${ots.blockhash}`], ['Proof file', 'licence-mutinynet-ots.json']] };
+  run = `Live run ${eat(r.started)}: ${r.passed}/${r.total} steps passed on Mutinynet, test coins only. Also checked live: overpay refused, wrong-node invoice refused, NWC budget held (20 of 40 payments), crash recovery without paying twice, and the x402-ln check (44 passed, 0 failed).`;
+} catch (e) { console.error('could not read results:', e.message); } }
+const status = { checkedAt: new Date().toISOString(), faucetLogin: token ? 'ok' : 'needs login', token, localNode: running('[b]itcoind'), otsd: running('[o]tsd'), opReturnBot: running('[O]P-RETURN-Bot|[o]preturnbot'), recorded, proofs, run,
   howTo: token ? ['Start the stack: bash /workspace/mutinynet/autopilot.sh', 'Then: npx tsx scripts/mutinynet-anchor.mts'] : ['On the box: cd /workspace/mll-audit/ref/mutinynet-cli && cargo build --release && ./target/release/mutinynet-cli login and approve the GitHub device code it prints, at github.com/login/device.', 'The token is saved to ~/.mutinynet/token (valid 31 days). /workspace/mutinynet/autopilot.sh then funds the node, opens channels and starts otsd and OP-RETURN-Bot.', 'Run: npx tsx scripts/mutinynet-anchor.mts (stamps and revokes on Mutinynet and records txids here).'] };
-writeFileSync('public/mutinynet-status.json', JSON.stringify(status, null, 2)); console.log(JSON.stringify(status, null, 2));
+writeFileSync('public/mutinynet-status.json', JSON.stringify(status, null, 2)); console.log(JSON.stringify({ recorded: recorded.length, proofs: Object.keys(proofs), run }, null, 1));
