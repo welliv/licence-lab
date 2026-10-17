@@ -10,7 +10,7 @@ import { decodeInvoice } from '../lib/mll/bolt11';
 import { tagv, type Event } from '../engine/lab';
 import { Nwc, faucetWallet, faucetTopUp } from './nwc';
 import { trackFile } from '../engine/track';
-import { mapChecks, TERMS, USES, type Verdict } from '../engine/lab';
+import { mapChecks, ownershipCheck, TERMS, USES, type Verdict } from '../engine/lab';
 export const LIVE_PARTIES = ['alice', 'bob', 'carol', 'dave', 'erin', 'bobagent'] as const;
 export type LiveParty = (typeof LIVE_PARTIES)[number];
 export const SHARES: Record<string, number> = { carol: 2000, dave: 1500, erin: 1500 };
@@ -50,13 +50,14 @@ export class LiveWorld {
   async topUp(p: LiveParty, sat: number) { if (!this.lud16[p]) throw new Error('Create the wallet first.'); await faucetTopUp(this.lud16[p]!, sat); await this.refresh(p); this.log({ from: 'faucet', to: p, text: `Faucet topped up ${p} by ${sat} sats (faucet-only sats)`, badge: 'real' }); }
   need(p: LiveParty, why: string) { if (!this.wallets[p]) throw new Error(`${cap(p)} has no test wallet yet. ${why}`); return this.wallets[p]!; }
   // ---------- 1. Alice publishes (binding + offer + co-owner consents) ----------
-  publish(priceSat = this.priceSat) {
+  publish(priceSat = this.priceSat, song?: { title: string; sha256: string; termsText: string }) {
     this.need('alice', 'The binding names the node behind her wallet.'); this.priceSat = priceSat;
     // The faucet refuses sign_message (RESTRICTED), so the node cannot sign Alice's key. The binding is real but has no node signature.
     this.binding = makeBinding(this.keys.alice, this.faucetNode, '', ['*']);
-    this.offer = makeOffer(this.keys.alice, { track: 'rain', title: 'Rain', masterSha256: trackFile('rain')?.sha256 ?? bytesToHex(sha256(new TextEncoder().encode('Rain (Licence Lab demo master)'))), use: USES.creator.slice(1), termsText: TERMS.creator, priceSats: priceSat,
-      payLink: 'https://alice.lab.test/licence/rain/creator', bindingId: this.binding.id, validUntil: 999_999_999, coOwners: Object.entries(SHARES).map(([p, bps]) => ({ pubkey: this.pub(p), role: p, bps })) });
-    this.consents = Object.entries(SHARES).map(([p, bps]) => makeConsent(this.keys[p], this.offer!, bps, this.lud16[p as LiveParty] ?? `${p}@lab.test`));
+    const shares = song ? {} : SHARES; // your own song: you own all of it, no co-owners
+    this.offer = makeOffer(this.keys.alice, { track: song ? 'own' : 'rain', title: song?.title ?? 'Rain', masterSha256: song?.sha256 ?? trackFile('rain')?.sha256 ?? bytesToHex(sha256(new TextEncoder().encode('Rain (Licence Lab demo master)'))), use: USES.creator.slice(1), termsText: song?.termsText ?? TERMS.creator, priceSats: priceSat,
+      payLink: `https://alice.lab.test/licence/${song ? 'own' : 'rain'}/creator`, bindingId: this.binding.id, validUntil: 999_999_999, coOwners: Object.entries(shares).map(([p, bps]) => ({ pubkey: this.pub(p), role: p, bps })) });
+    this.consents = Object.entries(shares).map(([p, bps]) => makeConsent(this.keys[p], this.offer!, bps, this.lud16[p as LiveParty] ?? `${p}@lab.test`));
     this.request = this.link = this.reqs = this.invoice = this.preimage = undefined;
     this.log({ from: 'alice', text: `Signed a binding to the faucet node, an offer for "Rain" at ${priceSat} sats, and 3 co-owner consents. The node could not co-sign the binding: the faucet refuses sign_message.`, badge: 'open', data: { binding: this.binding, offer: this.offer, consents: this.consents } });
   }
@@ -107,7 +108,7 @@ export class LiveWorld {
   // ---------- 5. Verify with the real library ----------
   async verify(): Promise<{ strict: Verdict; facts: { label: string; ok: boolean; how: string }[] }> {
     const b = this.bundle(); const t0 = performance.now(); const result = await verifyLicence(structuredClone(b), undefined, { link: this.link }); const checks = mapChecks(result, false);
-    const strict: Verdict = { result, checks, ms: performance.now() - t0, passed: checks.filter(c => c.status === 'pass').length };
+    const strict: Verdict = { result, checks, ms: performance.now() - t0, passed: checks.filter(c => c.status === 'pass').length, ownership: ownershipCheck(result) };
     const inv = decodeInvoice(b.invoice); const dh = requestHash(httpBinding('POST', tagv(b.offer, 'pay-link')!, requestBytes(b.request), { 'content-type': 'application/json' }));
     let cc = true; try { clientCheck(this.reqs!, dh, tagv(b.binding, 'node')!, Math.floor(Date.now() / 1000), 3600, tagv(b.request, 'amount')); } catch { cc = false; }
     const facts = [

@@ -1,15 +1,13 @@
-// Rights transfer, succession and key rotation (Licence Lab extension; NOT in mll-audit b268e79).
-// Draft spec: /workspace/submission/nip-draft/NIP-XX-music-licence.md, section "Rights transfer (draft)".
+// Rights transfer, succession, key rotation and pre-rotation (V2: moved into the core from the Licence Lab).
+// Draft spec: NIP-XX-music-licence.md, sections "Rights transfer" and "Pre-rotation".
 //
 // A work is named by its master hash `x` (or "*" = every work of the signing key, used for key rotation).
-// The chain of title starts at a key the verifier already trusts as the original owner (from vouching, S1),
+// The chain of title starts at a key the verifier already trusts as the original owner (an owner vouch it trusts),
 // and moves only by ANCHORED transfer records. The first valid anchored record wins; later ones from the
 // same holder are void (double sale), and a key that has handed its rights on can no longer sell them.
 import { finalizeEvent, type Event } from 'nostr-tools/pure';
-import { verifyEvent, uniqueTags, tag, tagv, tagsOf } from './events.js';
-import { decodeInvoice } from './bolt11.js';
+import { verifyEvent, uniqueTags, tag, tagv, tagsOf, nextKeyHash, KIND } from './events.js';
 import { verifyOts } from './ots.js';
-import { verifyLicence, type LicenceBundle, type Result } from './verify.js';
 import type { Anchor, ChainOracle } from './chain.js';
 import { bytesToHex, utf8ToBytes, sha256hex, jcs } from './util.js';
 
@@ -19,7 +17,8 @@ export const RIGHTS_KIND = { TRANSFER: 3417, SUCCESSION: 3418, COSIGN: 3419, VOU
 export const MLT1 = bytesToHex(utf8ToBytes('MLT1'));
 export type TransferReason = 'sale' | 'rotation' | 'succession' | 'court';
 export interface Anchored { event: Event; anchor?: Anchor; /** ids of the co-signatures committed by this timestamp */ cosigns?: string[] }
-export interface TitleRecords { transfers: Anchored[]; plans?: Anchored[]; cosigns?: Event[]; vouches?: Event[] }
+/** bindings: timestamped bindings; the earliest one by a key that carries `next` is that key's pre-rotation commitment (V2 A12b). */
+export interface TitleRecords { transfers: Anchored[]; plans?: Anchored[]; cosigns?: Event[]; vouches?: Event[]; bindings?: Anchored[] }
 export interface TitleOpts { origin: string; trust?: string[] }
 export interface TitleStep { id: string; from: string; to: string; reason: string; height: number | null; ok: boolean; why?: string; signers?: string[]; limit?: boolean }
 export interface Title { ok: boolean; code?: string; reason?: string; holder: string; steps: TitleStep[]; via?: TitleStep; limit?: string }
@@ -61,10 +60,14 @@ function wellTransfer(e: Event): string | null {
 const cosignersOf = (recs: TitleRecords, t: Event, role: string, committed: string[]) => new Set((recs.cosigns ?? []).filter(c => committed.includes(c.id) && c.kind === RIGHTS_KIND.COSIGN && verifyEvent(c) && tagv(c, 'e') === t.id && tagv(c, 'role') === role).map(c => c.pubkey));
 
 /** Walk the chain of title for work `x` from `opts.origin`, then say whether `key` held the rights at block `height`. */
+// V2: a sale invoiced before a rights transfer stays the old holder's if the licence was timestamped within ~144 blocks (24 h) of its invoice; no 2-hour margin.
 export async function checkTitle(x: string, key: string, height: number, chain: ChainOracle, recs: TitleRecords, opts: TitleOpts & { invoiceTime?: number }): Promise<Title> {
   const plans = new Map<string, { e: Event; h: number }>();
   for (const p of recs.plans ?? []) { const e = p.event; if (e.kind !== RIGHTS_KIND.SUCCESSION || !verifyEvent(e) || uniqueTags(e, ['x', 'threshold', 'owner-needs'])) continue; const h = await anchorHeight(p.anchor, titleDigest(e.id), chain); if (h !== null && (!plans.has(e.id) || plans.get(e.id)!.h > h)) plans.set(e.id, { e, h }); }
   const planFor = (owner: string, before: number) => [...plans.values()].filter(p => p.e.pubkey === owner && (tagv(p.e, 'x') === x || tagv(p.e, 'x') === '*') && p.h < before).sort((a, b) => b.h - a.h)[0];
+  const commit = new Map<string, { next: string; h: number }>(); // V2 A12b: earliest timestamped `next` per key
+  for (const b of recs.bindings ?? []) { const e = b.event; const nx = tagsOf(e, 'next'); if (e.kind !== KIND.BINDING || !verifyEvent(e) || nx.length !== 1 || !HEX64.test(nx[0][1] ?? '')) continue;
+    const h = await anchorHeight(b.anchor, titleDigest(e.id), chain); if (h === null) continue; const c = commit.get(e.pubkey); if (!c || c.h > h) commit.set(e.pubkey, { next: nx[0][1], h }); }
   const cand: { e: Event; h: number | null; i: number; co: string[] }[] = [];
   let i = 0; for (const t of recs.transfers) { const sx = tagv(t.event, 'x'); if (sx !== x && sx !== '*') continue; const co = t.cosigns ?? []; cand.push({ e: t.event, h: await anchorHeight(t.anchor, titleDigest(t.event.id, co), chain), i: i++, co }); }
   cand.sort((a, b) => (a.h ?? Infinity) - (b.h ?? Infinity) || a.i - b.i);
@@ -77,7 +80,11 @@ export async function checkTitle(x: string, key: string, height: number, chain: 
     if (steps.some(x => x.ok && x.id === e.id)) { st.why = 'same record timestamped again (ignored)'; continue; }
     if (st.from !== holder) { st.why = past.has(st.from) ? `this key had already handed the rights on: a double sale, or a stolen old key` : 'the signer does not hold these rights'; continue; }
     const plan = planFor(holder, h); const reason = st.reason as TransferReason;
-    if (reason === 'sale' || reason === 'rotation') {
+    const pre = commit.get(st.from); // V2 A12b pre-rotation
+    if (reason === 'rotation' && pre && pre.h < h) {
+      if (e.pubkey !== st.to || nextKeyHash(st.to) !== pre.next) { st.why = 'this key committed to a next key in advance; only that next key can retire it (a thief holding the old key cannot)'; continue; }
+      st.signers = [e.pubkey];
+    } else if (reason === 'sale' || reason === 'rotation') {
       if (e.pubkey !== st.from) { st.why = 'a sale or key change must be signed by the holder'; continue; }
       const need = plan ? Number(tagv(plan.e, 'owner-needs')) : 0;
       if (need > 0) { const keys = new Set(tagsOf(plan.e, 'p').map(p => p[1])); const got = [...cosigners(recs, e, 'plan-key')].filter(k => keys.has(k));
@@ -103,7 +110,7 @@ export async function checkTitle(x: string, key: string, height: number, chain: 
   if (at === key) return { ok: true, holder: at, steps, via, limit: via?.limit ? 'This ownership rests on a court order voucher the verifier chose to trust.' : undefined };
   const gave = lost.find(s => s.from === key);
   if (gave) { // AUDIT F-04 style grace: an invoice dated well before the transfer block stays valid (not for key rotation: a thief could backdate)
-    if (gave.reason !== 'rotation' && opts.invoiceTime !== undefined && chain.blockTime) { const t = await chain.blockTime(gave.height!); if (t !== null && opts.invoiceTime < t - 7200 && heldBefore(steps, opts.origin, key, gave)) return { ok: true, holder: at, steps, via: gave }; }
+    if (gave.reason !== 'rotation' && opts.invoiceTime !== undefined && chain.blockTime) { const t = await chain.blockTime(gave.height!), ta = await chain.blockTime(height); if (t !== null && ta !== null && opts.invoiceTime < t && ta - opts.invoiceTime <= 144 * 600 && heldBefore(steps, opts.origin, key, gave)) return { ok: true, holder: at, steps, via: gave }; }
     return { ok: false, code: gave.reason === 'rotation' ? 'rights_key_retired' : 'rights_transferred', reason: gave.reason === 'rotation' ? `this key was retired at block ${gave.height}; the owner moved to a new key` : `these rights were handed on at block ${gave.height}, before this licence`, holder: at, steps };
   }
   const voidTo = steps.find(s => !s.ok && s.to === key && s.why);
@@ -111,12 +118,4 @@ export async function checkTitle(x: string, key: string, height: number, chain: 
 }
 const heldBefore = (steps: TitleStep[], origin: string, key: string, gave: TitleStep) => { let h = origin; for (const s of steps) { if (s === gave) return h === key; if (s.ok) h = s.to; } return false; };
 
-/** verifyLicence plus the chain of title (folded into check 9: "no revocation or transfer cancels it"). */
-export async function verifyLicenceWithTitle(b: LicenceBundle, chain?: ChainOracle, opts: { link?: Event; requireAnchor?: boolean; title?: TitleRecords & TitleOpts } = {}): Promise<Result & { title?: Title }> {
-  const r = await verifyLicence(b, chain, opts); if (!r.ok || !opts.title || !chain || r.anchoredHeight === undefined) return r;
-  let invoiceTime: number | undefined; try { invoiceTime = decodeInvoice(b.invoice).timestamp; } catch {}
-  const t = await checkTitle(tagv(b.offer, 'x')!, b.offer.pubkey, r.anchoredHeight, chain, opts.title, { ...opts.title, invoiceTime });
-  if (!t.ok) return { ...r, ok: false, code: t.code, reason: t.reason, checks: r.checks.filter(c => !c.startsWith('9')), title: t };
-  return { ...r, checks: [...r.checks, '9b chain of title'], title: t };
-}
 export { tag };

@@ -1,7 +1,7 @@
 // The main path: three stops and one extra, on real library calls. Every signature, bill (invoice), timestamp and check is
 // the real protocol library; money, relays and Bitcoin blocks are simulated, exactly as in the scenarios. One price: 100 sats.
 // One cast: Alice (artist), Carol and Dave (co-owners), you, Bob's agent (it buys through ClipAI), ModelCo, "Alice Official", Harbour Music, the heirs.
-import { Lab, LAB_KIND, sha256hex, tagv, type Verdict, type LicenceBundle } from './lab';
+import { Lab, LAB_KIND, sha256hex, tagv, type Verdict, type LicenceBundle, type Event } from './lab';
 import { onboardAlice, vouch, signOffer, consent, purchase, payout, listing, tagNet } from './actions';
 import { anchorAndVerify } from '../scenarios/common';
 
@@ -15,7 +15,7 @@ const yieldUi = () => new Promise(r => setTimeout(r, 0));
 /** Alice's agent puts "Rain" up for licence: her key, her own wallet, vouching, a signed 100-sat offer, Carol's and Dave's "yes". */
 export function release(lab: Lab, who = 'alice') {
   if (has(lab, `offer.${who === 'alice' ? 'creator' : who}`)) return lab.a['offer.creator'];
-  lab.setUpAll([who, 'carol', 'dave', 'distributor']); onboardAlice(lab, who, { quiet: true }); vouch(lab, 'distributor', who);
+  lab.setUpAll([who, 'carol', 'dave', 'distributor']); onboardAlice(lab, who, { quiet: true }); vouch(lab, 'distributor', who); lab.ownerVouch('distributor', who, 'Harbour-style distributor record for "Rain"');
   const offer = signOffer(lab, who, 'creator', { price: PRICE, coOwners: SPLIT(lab) }); consent(lab, 'carol', 'offer.creator'); consent(lab, 'dave', 'offer.creator');
   lab.stamp(offer.id, 'proof of release'); lab.anchorBatch('Proof of release'); lab.titleOrigin = lab.pub(who);
   return offer;
@@ -29,6 +29,15 @@ export async function hearAndLicense(lab: Lab) {
   const ms = performance.now() - t0; const p = payout(lab, 'offer.creator', r.bundle);
   const split = (['alice', 'carol', 'dave'] as const).map(k => ({ who: lab.name(k), id: k, sats: (lab.balances[k] ?? 0) - before[k] }));
   return { bundle: r.bundle, verdict, ms, split, statements: p.statements.length, block: verdict.result.anchoredHeight };
+}
+/** "Put up your own song": the artist's own file (hashed in the browser, never uploaded) becomes a signed offer; Bob's agent buys it. */
+export const ownTerms = (title: string) => `Non-exclusive licence for the recording "${title}" by Alice: use in online creator videos, worldwide, with no end date, up to 240 seconds. I grant this licence to the holder of the key that signed any request naming this offer, when an invoice signed by the node in binding B, whose description hash commits to that request, is paid. The preimage of that invoice is the proof of acceptance.`;
+export async function ownSong(lab: Lab, f: { name: string; sha256: string }) {
+  release(lab); lab.setUpAll(['bob', 'bobagent']); const name = `offer.own.${f.sha256.slice(0, 8)}`; const title = f.name.replace(/\.[a-z0-9]+$/i, '').slice(0, 60) || 'My song';
+  if (!has(lab, name)) signOffer(lab, 'alice', 'creator', { name, price: PRICE, coOwners: [], masterSha256: f.sha256, title, termsText: ownTerms(title) });
+  const offer = lab.a[name] as Event; const t0 = performance.now(); const r = purchase(lab, 'bobagent', name, { name: 'bundle.own', seconds: 60, payer: 'bob' }); /* the agent pays from Bob's wallet */ const verdict = await anchorAndVerify(lab, r.bundle, 'your song');
+  verdict.file = { ok: tagv(offer, 'x') === f.sha256, offerHash: tagv(offer, 'x') ?? '', fileHash: f.sha256, label: f.name, recomputed: true };
+  return { offer, bundle: r.bundle, verdict, ms: performance.now() - t0, title };
 }
 /** Try to cheat: change the price in the licence after Alice signed. */
 export async function cheatPrice(lab: Lab) {

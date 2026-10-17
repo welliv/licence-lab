@@ -1,6 +1,6 @@
 {
   "from": "/workspace/mll-audit/src",
-  "commit": "b268e79",
+  "commit": "00038ff",
   "files": [
     "util.ts",
     "events.ts",
@@ -9,11 +9,9 @@
     "x402.ts",
     "chain.ts",
     "ots.ts",
-    "verify.ts"
+    "verify.ts",
+    "rights.ts",
+    "nodebind.ts"
   ],
-  "note": "Byte-for-byte copy. Do not edit here; edit the library and re-run npm run sync-lib.",
-  "extensions": [
-    "rights.ts"
-  ],
-  "extensionsNote": "Licence Lab extension, not in mll-audit: rights transfer, succession plans, key rotation and the chain-of-title check (verifyLicenceWithTitle wraps verifyLicence). The eight files above stay byte-for-byte."
+  "note": "Byte-for-byte copy. Do not edit here; edit the library and re-run npm run sync-lib."
 }

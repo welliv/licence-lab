@@ -15,7 +15,7 @@ describe('rights transfer: sale', () => {
   it('new owner sells 9/9; older licence stays valid; old key refused', async () => {
     const { lab, t } = await sold(); const v = await sell(lab, 'harbour', 'offer.harbour', 'grace', 'h'); expect(v.result.ok).toBe(true); expect(v.passed).toBe(9); expect(v.result.title?.holder).toBe(lab.pub('harbour'));
     expect((await lab.verify(lab.a['bundle.bob.before'])).result.ok).toBe(true);
-    const old = await sell(lab, 'alice', 'offer.creator', 'bob', 'o'); expect(old.result.code).toBe('rights_transferred'); expect(old.checks.find(c => c.status === 'fail')?.n).toBe(9); expect(old.result.reason).toContain(`block ${t.anchor!.height}`);
+    const old = await sell(lab, 'alice', 'offer.creator', 'bob', 'o'); expect(old.result.code).toBe('rights_transferred'); expect(old.checks.every(c => c.status === 'pass')).toBe(true); expect(old.ownership.status).toBe('fail'); expect(old.ownership.n).toBe(10); expect(old.result.reason).toContain(`block ${t.anchor!.height}`);
   });
   it('a transfer timestamped before the co-owners signed never counts, even after they sign', async () => {
     const lab = new Lab('rights2'); await rightsWorld(lab); const t = saleToHarbour(lab); cosignAll(lab, t.event); newSeller(lab, 'harbour');
@@ -55,7 +55,7 @@ describe('succession and estates', () => {
     const t = await checkTitle(lab.trackHash, lab.pub('mallory'), lab.chain.tip.height, lab.chain, { transfers: [{ event: forged as any }] }, { origin: lab.pub('alice') }); expect(t.ok).toBe(false); expect(t.steps[0].why).toMatch(/not validly signed/); });
 });
 describe('rights attacks fail for the right reason', () => {
-  const want: Record<string, RegExp> = { A12c: /retired/, A20: /does not count: the plan needs 2 of 3/, A21: /does not count: this key had already handed the rights on/, A22: /does not count: this key had already handed the rights on/, A23: /handed on/ };
+  const want: Record<string, RegExp> = { A12c: /retired/, A12d: /only that next key/, A20: /does not count: the plan needs 2 of 3/, A21: /does not count: this key had already handed the rights on/, A22: /does not count: this key had already handed the rights on/, A23: /handed on/ };
   for (const [id, re] of Object.entries(want)) it(id, async () => { const o = await runAttack(ATTACKS.find(a => a.id === id)!); expect(o.outcome).toBe('blocked'); expect(o.verdict?.result.reason).toMatch(re); });
   it('A22: the first timestamped sale wins and the second is void as a double sale', async () => { const o = await runAttack(ATTACKS.find(a => a.id === 'A22')!); const st = o.verdict!.result.title!.steps; expect(st[0].ok).toBe(true); expect(st[1].why).toMatch(/double sale/); });
   it('A20: the void step says the plan needs 2', async () => { const o = await runAttack(ATTACKS.find(a => a.id === 'A20')!); expect(o.verdict!.result.title!.steps.some(s => /needs 2 of 3/.test(s.why ?? ''))).toBe(true); });

@@ -20,9 +20,9 @@ export function vouch(lab: Lab, voucher: string, artist: string) {
   lab.a[`vouch.${voucher}.${artist}`] = e; lab.publish(e, voucher, 'vouch ✍'); return e;
 }
 /** S2: hash the track, sign an offer with co-owners, collect consents. */
-export function signOffer(lab: Lab, artist: string, kind: keyof typeof USES, o: { price?: number; coOwners?: { pubkey: string; role: string; bps: number }[]; name?: string; binding?: Event; validUntil?: number; masterSha256?: string; termsText?: string } = {}) {
+export function signOffer(lab: Lab, artist: string, kind: keyof typeof USES, o: { price?: number; coOwners?: { pubkey: string; role: string; bps: number }[]; name?: string; binding?: Event; validUntil?: number; masterSha256?: string; termsText?: string; title?: string; track?: string } = {}) {
   const binding = o.binding ?? lab.a[`binding.${artist}`];
-  const input = lab.offerInput(artist, kind, { priceSats: o.price ?? (kind === 'creator' ? 2_000 : kind === 'advert' ? 20_000 : kind === 'training' ? 50_000 : 5_000), bindingId: binding.id, coOwners: o.coOwners ?? lab.coOwners(), validUntil: o.validUntil, masterSha256: o.masterSha256, ...(o.termsText ? { termsText: o.termsText } : {}) });
+  const input = lab.offerInput(artist, kind, { priceSats: o.price ?? (kind === 'creator' ? 2_000 : kind === 'advert' ? 20_000 : kind === 'training' ? 50_000 : 5_000), bindingId: binding.id, coOwners: o.coOwners ?? lab.coOwners(), validUntil: o.validUntil, masterSha256: o.masterSha256, ...(o.termsText ? { termsText: o.termsText } : {}), ...(o.title ? { title: o.title, track: o.track ?? 'own' } : {}) });
   const offer = lab.lib.makeOffer(lab.key(artist), input); const name = o.name ?? `offer.${kind}`; lab.a[name] = offer; lab.a[`${name}.consents`] = [];
   lab.publish(offer, artist, `offer (${kind}) ✍`); return offer;
 }

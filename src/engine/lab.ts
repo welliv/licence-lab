@@ -8,10 +8,11 @@ import { KIND, makeBinding, makeOffer, makeConsent, makeRequest, makePrivateRequ
 import { signLnMessage } from '../lib/mll/lnmsg';
 import { encodeInvoice, decodeInvoice, type Invoice } from '../lib/mll/bolt11';
 import { httpBinding, requestHash, NETWORKS, clientCheck, type Requirements } from '../lib/mll/x402';
+import { nextKeyHash, makeOwnerVouch } from '../lib/mll/events';
 import { checkDeal, verifyLicence, requestBytes, grantDigest, revocationPayloadCompact, type LicenceBundle, type Result } from '../lib/mll/verify';
 import { type ChainOracle, MLA1 } from '../lib/mll/chain';
 import { writeOts, verifyOts, type Op } from '../lib/mll/ots';
-import { verifyLicenceWithTitle, makeTransfer, makeSuccessionPlan, makeCosign, makeCourtVouch, titlePayload, titleDigest, checkTitle, type Anchored, type TitleRecords, type Title, type TransferInput, type PlanInput } from '../lib/mll/rights';
+import { makeTransfer, makeSuccessionPlan, makeCosign, makeCourtVouch, titlePayload, titleDigest, checkTitle, type Anchored, type TitleRecords, type Title, type TransferInput, type PlanInput } from '../lib/mll/rights';
 import { sha256hex, sha256, bytesToHex, hexToBytes, utf8ToBytes, concatBytes, randomBytes } from '../lib/mll/util';
 import { CAST, persona } from './cast';
 import { rainWav, trackFile, type TrackFile } from './track';
@@ -36,7 +37,7 @@ export const USES: Record<string, string[]> = {
   remix: ['use', 'remix', 'worldwide', 'perpetual', 'non-exclusive'],
 };
 /** Placeholder kinds the Lab uses for things the spec has not named yet. Shown with a "draft" note in the UI. */
-export const LAB_KIND = { VOUCH: 1985 /* NIP-32 label */, REPORT: 1984 /* NIP-56 */, APPDATA: 30078 /* NIP-78: agent rules, status record */, BADGE_DEF: 30009, BADGE_AWARD: 8, REFUND: 3416 /* placeholder */, NOTE: 1 } as const;
+export const LAB_KIND = { VOUCH: 1985 /* NIP-32 label */, REPORT: 1984 /* NIP-56 */, APPDATA: 30078 /* NIP-78: agent rules, status record */, BADGE_DEF: 30009, BADGE_AWARD: 8, REFUND: 3420 /* placeholder (3416 is now the pricing-key quote) */, NOTE: 1 } as const;
 
 export type Badge = 'real' | 'sim' | 'limit' | 'open' | 'fail' | 'recorded';
 export interface LogEntry { id: number; t: number; step?: string; from: string; to?: string; amountSat?: number; text: string; badge: Badge; ok: boolean; code?: string; data?: unknown }
@@ -48,7 +49,7 @@ export interface PayRecord { status: 'in_flight' | 'paid' | 'failed'; amountSat:
 export interface Block { height: number; hash: string; time: number; merkleRoot: string; ors: { payload: string; txid: string }[]; note?: string }
 export interface DocCheck { n: number; label: string; status: 'pass' | 'fail' | 'skip' | 'todo'; detail?: string }
 export interface FileCheck { ok: boolean; offerHash: string; fileHash?: string; label?: string; recomputed?: boolean; reason?: string }
-export interface Verdict { result: Result & { title?: Title }; checks: DocCheck[]; ms: number; passed: number; file?: FileCheck }
+export interface Verdict { result: Result & { title?: Title }; checks: DocCheck[]; ms: number; passed: number; file?: FileCheck; ownership: DocCheck }
 export type { Title, TitleRecords };
 const HCACHE = new WeakMap<Uint8Array, string>();
 export const hashBytes = (b: Uint8Array) => { let h = HCACHE.get(b); if (!h) { h = sha256hex(b); HCACHE.set(b, h); } return h; };
@@ -58,10 +59,18 @@ export const NINE = ['Offer signed by the artist', 'Node binding by the same key
   'Invoice amount equals the price', 'Preimage matches (it was paid)', 'Timestamped; no revocation or rights transfer cancels it'];
 // Where each library failure code lands in the document's nine checks, and its order inside verifyLicence.
 const CODE_MAP: [RegExp, number, number][] = [[/^offer_/, 1, 0], [/^consent_/, 3, 1], [/^binding_(?!not_before)/, 2, 2], [/^request_use$/, 5, 3.5], [/^request_/, 4, 3], [/^link_invalid$/, 4, 3.9],
-  [/^invoice_(decode|description|not_committed)$/, 6, 4], [/^invoice_wrong_node$/, 6, 5], [/^invoice_amount$/, 7, 5.5], [/^invoice_network$/, 6, 5.7], [/^preimage$/, 8, 6], [/./, 9, 7]];
+  [/^invoice_(decode|description|not_committed)$/, 6, 4], [/^invoice_wrong_node$/, 6, 5], [/^invoice_amount$/, 7, 5.5], [/^invoice_network$/, 6, 5.7], [/^preimage$/, 8, 6], [/^(rights_|ownership_)/, 10, 9], [/./, 9, 7]];
 const POS: Record<number, number> = { 1: 0, 3: 1, 2: 2, 4: 3, 5: 3.5, 6: 5, 7: 5.5, 8: 6, 9: 7 };
+/** Check 10 (V2): who owns the recording. Checks 1-9 prove this key sold the licence; only a voucher you trust or a chain of title says the key owns the music. */
+export function ownershipCheck(r: Result): DocCheck {
+  const o = r.ownership; const label = 'Who owns the recording (check 10)';
+  if (!o) return { n: 10, label, status: 'todo', detail: 'not checked' };
+  if (o.status === 'verified') return { n: 10, label, status: 'pass', detail: o.via === 'title' ? 'the chain of title says this key holds the rights' : 'a voucher you trust says this key owns it' };
+  if (o.status === 'disputed') return { n: 10, label, status: 'fail', detail: o.reason };
+  return { n: 10, label, status: 'skip', detail: 'unverified ownership: this proves the key sold it, not that it owns the music' };
+}
 export function mapChecks(r: Result, withChain: boolean): DocCheck[] {
-  const fail = r.ok ? null : CODE_MAP.find(([re]) => re.test(r.code ?? ''))!;
+  const fail = r.ok ? null : CODE_MAP.find(([re]) => re.test(r.code ?? ''))!; if (fail && fail[1] === 10) return mapChecks({ ...r, ok: true, code: undefined }, withChain);
   return NINE.map((label, i) => { const n = i + 1;
     if (!fail) return { n, label, status: n === 9 && !withChain ? 'skip' : 'pass', detail: n === 9 && !withChain ? 'needs a chain (no timestamp checked)' : undefined };
     if (n === fail[1]) return { n, label, status: 'fail', detail: r.reason };
@@ -124,11 +133,18 @@ export class Lab {
   /** Named artefacts: events, bundles, requirements, anything a later step needs. */
   a: Record<string, any> = {};
   /** Chain of title for "Rain" (rights transfers, succession plans, co-signatures, vouches). Used by verify() once titleOrigin is set. */
-  title: Required<TitleRecords> = { transfers: [], plans: [], cosigns: [], vouches: [] }; titleOrigin?: string; titleTrust: string[] = [];
+  title: Required<TitleRecords> = { transfers: [], plans: [], cosigns: [], vouches: [], bindings: [] }; titleOrigin?: string; titleTrust: string[] = [];
+  /** Check 10: owner vouches (NIP-32 label, kind 1985) and the keys this verifier trusts to make them (e.g. the distributor). */
+  ownerVouches: Event[] = []; ownerTrust: string[] = [];
+  ownerVouch(voucher: string, owner: string, ref = 'distributor record') { const v = makeOwnerVouch(this.key(voucher), this.pub(owner), this.trackHash, ref); this.ownerVouches.push(v); if (!this.ownerTrust.includes(this.pub(voucher))) this.ownerTrust.push(this.pub(voucher)); this.publish(v, voucher, 'owner vouch ✍'); return v; }
   /** Timestamp a title record on the (simulated) chain with an "MLT1" OP_RETURN that commits to the record and the co-signatures collected so far. A record can be timestamped again (new entry) after more co-signatures. */
   anchorTitle(r: Anchored, note: string) { const co = this.title.cosigns.filter(c => tagv(c, 'e') === r.event.id).map(c => c.id); const b = this.chain.mine({ time: this.now, opReturns: [titlePayload(titleDigest(r.event.id, co))], note }); const o = b.ors[0];
     if (r.anchor) { r = { event: r.event }; this.title.transfers.push(r); } r.anchor = { type: 'opreturn', txid: o.txid, blockhash: b.hash, height: b.height }; r.cosigns = co; this.flow('bitcoin', 'bitcoin', `⛓ title record in block ${b.height}`, 'anchor'); return r; }
   addTransfer(signer: string, t: TransferInput, o: { anchor?: boolean; note?: string } = {}) { const e = makeTransfer(this.key(signer), t); const r: Anchored = { event: e }; this.title.transfers.push(r); this.publish(e, signer, `transfer ✍ (${t.reason})`); if (o.anchor !== false) this.anchorTitle(r, o.note ?? `rights transfer (${t.reason})`); return r; }
+  /** V2 pre-rotation: timestamp a binding that commits to the next key, so only that key can later retire this one. */
+  commitBinding(bd: Event, note = 'binding commits to the next key') { const b = this.chain.mine({ time: this.now, opReturns: [titlePayload(titleDigest(bd.id))], note }); const r: Anchored = { event: bd, anchor: { type: 'opreturn', txid: b.ors[0].txid, blockhash: b.hash, height: b.height } }; this.title.bindings.push(r); this.flow('bitcoin', 'bitcoin', `⛓ next-key commitment in block ${b.height}`, 'anchor'); return r; }
+  /** A title record signed by a key other than the party's main key (e.g. the pre-committed next key). */
+  addTransferAs(signer: string, purpose: string, t: TransferInput, note = 'key rotation') { const e = makeTransfer(this.key(signer, purpose), t); const r: Anchored = { event: e }; this.title.transfers.push(r); this.publish(e, signer, `transfer ✍ (${t.reason})`); this.anchorTitle(r, note); return r; }
   addPlan(owner: string, p: PlanInput) { const e = makeSuccessionPlan(this.key(owner), p); const r: Anchored = { event: e }; this.title.plans.push(r); this.publish(e, owner, 'succession plan ✍'); const b = this.chain.mine({ time: this.now, opReturns: [titlePayload(titleDigest(e.id))], note: 'succession plan' }); r.anchor = { type: 'opreturn', txid: b.ors[0].txid, blockhash: b.hash, height: b.height }; return r; }
   cosign(who: string, t: Event, role: 'co-owner' | 'plan-key') { const c = makeCosign(this.key(who), t, role); this.title.cosigns.push(c); this.publish(c, who, 'co-sign ✍'); return c; }
   courtVouch(who: string, t: Event, ref: string) { const v = makeCourtVouch(this.key(who), t, ref); this.title.vouches.push(v); this.publish(v, who, 'court voucher ✍'); return v; }
@@ -179,9 +195,9 @@ export class Lab {
     if (this.nodes[id]) return this.nodes[id]; const priv = this.key(operator, 'node:' + id);
     return (this.nodes[id] = { id, label, priv: bytesToHex(priv), pub: bytesToHex(secp256k1.getPublicKey(priv, true)), operator, tenants, online: true });
   }
-  bind(artist: string, nodeId: string, scope: string[] = ['*']) {
+  bind(artist: string, nodeId: string, scope: string[] = ['*'], o: { next?: string } = {}) {
     const n = this.nodes[nodeId]; const nodeSig = signLnMessage(bindMessage(this.pub(artist)), hexToBytes(n.priv));
-    return makeBinding(this.key(artist), n.pub, nodeSig, scope, this.chain.blocks[0].hash);
+    return makeBinding(this.key(artist), n.pub, nodeSig, scope, this.chain.blocks[0].hash, { next: o.next });
   }
   /** The seller side: check the deal, then make an invoice whose description hash commits to the exact request. */
   issueInvoice(o: { nodeId: string; creditTo: string; offer: Event; binding: Event; consents: Event[]; request: Event; amountMsat?: number; timestamp?: number; expiry?: number; dh?: string; label: string; skipDealCheck?: boolean }) {
@@ -274,11 +290,13 @@ export class Lab {
   attachProof(b: LicenceBundle) { const D = grantDigest(b); const p = this.proofs[D]; if (p) b.anchor = { type: 'ots', ots: p.ots, height: p.height }; return !!p; }
   async verify(b: LicenceBundle, o: { chain?: ChainOracle | false; link?: Event; title?: false } = {}): Promise<Verdict> {
     const t0 = performance.now(); const chain = o.chain === false ? undefined : (o.chain ?? this.chain);
-    const result = await verifyLicenceWithTitle(structuredClone(b), chain, { link: o.link, title: this.titleOrigin && o.title !== false ? { ...this.title, origin: this.titleOrigin, trust: this.titleTrust } : undefined }); const checks = mapChecks(result, !!chain);
-    return { result, checks, ms: performance.now() - t0, passed: checks.filter(c => c.status === 'pass').length, file: b.offer ? this.fileCheck(b.offer) : undefined };
+    const forRain = tagv(b.offer, 'x') === this.trackHash; // the verifier's knowledge of who first owned "Rain" applies to "Rain" only
+    const own = o.title === false ? undefined : { trust: [...this.ownerTrust, ...this.titleTrust], vouches: this.ownerVouches, origin: forRain ? this.titleOrigin : undefined, title: forRain && this.titleOrigin ? this.title : undefined };
+    const r0 = await verifyLicence(structuredClone(b), chain, { link: o.link, ownership: own }); const result = { ...r0, title: r0.ownership?.title }; const checks = mapChecks(result, !!chain);
+    return { result, checks, ms: performance.now() - t0, passed: checks.filter(c => c.status === 'pass').length, file: b.offer ? this.fileCheck(b.offer) : undefined, ownership: ownershipCheck(result) };
   }
   // ---------- protocol building blocks, re-exported so scenario code reads plainly ----------
-  lib = { makeTransfer, makeSuccessionPlan, makeCosign, makeOffer, makeConsent, makeRequest, makePrivateRequest, makeRevocation, makeStatement, checkDeal, revocationPayloadCompact, clientCheck, requestHash, httpBinding, requestBytes, grantDigest, MLA1 };
+  lib = { nextKeyHash, makeTransfer, makeSuccessionPlan, makeCosign, makeOffer, makeConsent, makeRequest, makePrivateRequest, makeRevocation, makeStatement, checkDeal, revocationPayloadCompact, clientCheck, requestHash, httpBinding, requestBytes, grantDigest, MLA1 };
   offerInput(artist: string, kind: keyof typeof USES, o: Partial<OfferInput> & { coOwners?: OfferInput['coOwners'] }): OfferInput {
     return { track: 'rain', title: 'Rain', masterSha256: this.trackHash, use: USES[kind].slice(1), termsText: TERMS[kind], priceSats: 2_000, payLink: `https://${artist}.lab.test/licence/rain/${kind}`,
       bindingId: '', validUntil: this.chain.tip.height + 52_560, coOwners: [], ...Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) };

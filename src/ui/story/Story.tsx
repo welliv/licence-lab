@@ -12,6 +12,8 @@ import { useStory, story, sleep, STOPS, PERSONAS, type StopId, type Persona } fr
 import { useProof } from './proof';
 import { verdictLine, plainReason } from '../plain';
 import { testkit } from '../testkit';
+import { faucetReachable, realLicence, type RealResult } from '../../live/realpay';
+import { sha256hex } from '../../engine/lab';
 
 export const HEADLINE = 'Artists license their music directly. Any agent can buy it in seconds and prove it on Bitcoin.';
 export const SHORT = 'Music rights, sold directly, bought by any agent, proven on Bitcoin.';
@@ -53,9 +55,10 @@ export function VerdictCard({ v, title, line, compact, children, testid = 'verdi
     {title && <div className="mb-1 text-[13px] text-neutral-500">{title}</div>}
     <div className={cx('flex items-start gap-3 font-semibold', compact ? 'text-[18px]' : 'text-[24px] leading-tight', ok ? 'text-emerald-700' : 'text-red-700')}>{ok ? <CheckCircle2 className="mt-0.5 shrink-0" size={compact ? 22 : 28} /> : <XCircle className="mt-0.5 shrink-0" size={compact ? 22 : 28} />}<span>{line ?? verdictLine(v)}</span></div>
     {children}
-    {!noChecks && <button onClick={() => setOpen(!open)} aria-expanded={open} className="mt-3 inline-flex items-center gap-1 text-[14px] text-neutral-600 hover:text-neutral-900"><ChevronDown size={15} className={cx('transition-transform', open && 'rotate-180')} />{open ? 'Hide' : 'Show'} the 9 checks</button>}
+    {!noChecks && <button onClick={() => setOpen(!open)} aria-expanded={open} className="mt-3 inline-flex items-center gap-1 text-[14px] text-neutral-600 hover:text-neutral-900"><ChevronDown size={15} className={cx('transition-transform', open && 'rotate-180')} />{open ? 'Hide' : 'Show'} the checks</button>}
     {open && <ol className="fade-in mt-3 space-y-1.5 text-[14px]">{v.checks.map(c => <li key={c.n} className="flex items-start gap-2"><span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold', c.status === 'pass' ? 'bg-emerald-500 text-white' : c.status === 'fail' ? 'bg-red-500 text-white' : 'bg-neutral-200 text-neutral-500')}>{c.status === 'pass' ? '✓' : c.status === 'fail' ? '✗' : c.n}</span>
       <span className="text-neutral-700">{c.label}{c.status === 'fail' && c.detail && <span className="block text-[12px] text-red-700">{c.detail}</span>}</span></li>)}
+      {v.ownership && <li className="flex items-start gap-2" data-testid="check-10"><span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold', v.ownership.status === 'pass' ? 'bg-emerald-500 text-white' : v.ownership.status === 'fail' ? 'bg-red-500 text-white' : 'bg-amber-200 text-amber-900')}>{v.ownership.status === 'pass' ? '✓' : v.ownership.status === 'fail' ? '✗' : '?'}</span><span className="text-neutral-700">{v.ownership.label}<span className={cx('block text-[12px]', v.ownership.status === 'fail' ? 'text-red-700' : 'text-neutral-500')}>{v.ownership.detail}</span></span></li>}
       {v.file && <li className="flex items-start gap-2"><span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px]', v.file.ok ? 'bg-emerald-500 text-white' : 'bg-neutral-200')}>♪</span><span className="text-neutral-700">The audio file is the one in the offer{v.file.ok ? ' (fingerprint matches)' : `: ${v.file.reason}`}</span></li>}
       <li className="pt-1"><button onClick={() => go('hood')} className="text-[13px] text-neutral-500 underline underline-offset-4">What do these mean?</button></li></ol>}
   </div>;
@@ -122,7 +125,10 @@ export function Stop1() {
   const [phase, setPhase] = useState<'idle' | 'listening'>(music.isPlaying() ? 'listening' : 'idle'); const [label, setLabel] = useState('');
   const artist = st.persona === 'artist';
   const listen = () => { music.toggle(hero?.id ?? null); setPhase('listening'); };
-  const buy = async () => { await story.run('s1', async lab => { setLabel(`Paying ${S.PRICE} sats…`); await sleep(300); setLabel('Checking the licence…'); const out = await S.hearAndLicense(lab); setLabel('Dating it on Bitcoin…'); await sleep(300); return out; });
+  const real = useRealMoney();
+  const buy = async () => { await story.run('s1', async lab => {
+      if (real.on) { try { story.r.s1real = await realLicence({ priceSat: S.PRICE, onStep: setLabel }); } catch (e: any) { story.r.s1real = { error: String(e?.message ?? e) }; } }
+      setLabel(`Paying ${S.PRICE} sats…`); await sleep(300); setLabel('Checking the licence…'); const out = await S.hearAndLicense(lab); setLabel('Dating it on Bitcoin…'); await sleep(300); return out; });
     const out = story.r.s1; if (out?.verdict.result.ok) { testkit.licence(); testkit.stopDone('stop1'); story.finish('stop1'); if (hero) { music.unlock(hero.id, { how: 'Licensed in stop 1: all 9 checks passed', fileOk: out.verdict.file?.ok, holder: 'you' }); if (!music.isPlaying(hero.id)) music.toggle(hero.id); } } };
   const total = r ? r.split.reduce((a: number, b: any) => a + b.sats, 0) : S.PRICE;
   return <Stop id="stop1" title={artist ? 'Your song, licensed in seconds' : 'Hear it, license it'} why={artist ? 'This is what a buyer sees when you put "Rain" up for licence. Play the buyer: hear the preview, pay 100 sats, and watch the money reach you and your co-writers at once.' : 'Hear the preview of "Rain". License it for 100 sats. The full track unlocks, and the one payment is shared out at once.'}>
@@ -133,13 +139,16 @@ export function Stop1() {
       <div className="mt-1 text-[14px] text-neutral-500" data-testid="track-state">{r?.verdict.result.ok ? 'Full track' : music.unlocked(hero?.id) ? 'Full track (licensed earlier)' : '30-second preview'}</div>
       {!r && <div className="mt-6 flex min-h-[64px] flex-col items-center">
         {st.busy !== 's1' && (phase === 'idle' ? <BigButton onClick={listen}><Play size={18} />Hear "Rain"</BigButton> : <BigButton onClick={buy}>License for {S.PRICE} sats</BigButton>)}
-        {st.busy === 's1' && <Busy label={label || 'Working…'} />}</div>}
+        {st.busy === 's1' && <Busy label={label || 'Working…'} />}
+        <RealToggle real={real} /></div>}
     </div>
     {r && <>
-      <VerdictCard v={r.verdict} line={r.verdict.result.ok ? 'Licensed' : undefined}>
+      {st.r.s1real && <RealCard r={st.r.s1real} />}
+      <VerdictCard v={r.verdict} line={r.verdict.result.ok ? 'Licensed' : undefined} title={st.r.s1real && !st.r.s1real.error ? 'The full check, with the Bitcoin timestamp and the shares, on the practice chain' : undefined}>
         {r.verdict.result.ok && <><p className="mt-1 text-[15px] text-neutral-600">The full track is unlocked. All 9 checks passed in your browser, in {Math.max(1, Math.round(r.ms))} ms here; a real Lightning payment adds a second or two.</p><Proven /></>}
       </VerdictCard>
       <FanOut split={r.split} total={total} />
+      <OwnSong real={real} />
       <CheatStop1 />
       <CodeDrawer><p>Alice's <b>offer</b> is a signed Nostr event (kind 30402), id <code>{short(r.bundle.offer.id)}</code>. It names the track by the SHA-256 of the audio file, the price, the use and the licence text. Carol and Dave each sign a <b>consent</b> (kind 3413) with their share.</p>
         <p>You sign a <b>request</b>; Alice's shop answers <b>402 Payment Required</b> with a Lightning <b>invoice</b> whose description hash commits to your request. Paying returns the <b>preimage</b>. The <b>bundle</b> (offer, consents, binding, request, invoice, preimage, Bitcoin timestamp) is your licence. Alice's node pays Carol and Dave and signs a statement for each ({r.statements} statements).</p>
@@ -148,6 +157,48 @@ const result = await verifyLicence(bundle, chain)
 // → { ok: ${r.verdict.result.ok}, anchoredHeight: ${r.block} }`}</Code></CodeDrawer>
       <Next from="stop1" /></>}
   </Stop>;
+}
+// ---------- real test money (faucet.nwc.dev) and "put up your own song" ----------
+type Real = { on: boolean; known: boolean; reachable: boolean; set: (v: boolean) => void };
+function useRealMoney(): Real {
+  const forced = /[?&]real=0\b/.test(location.search + location.hash) ? false : /[?&]real=1\b/.test(location.search + location.hash) ? true : undefined;
+  const [reachable, setReachable] = useState<boolean | null>(null); const [choice, setChoice] = useState<boolean | undefined>(forced);
+  useEffect(() => { if (forced === false) { setReachable(false); return; } let live = true; faucetReachable().then(ok => { if (live) setReachable(ok); }); return () => { live = false; }; }, []);
+  const on = choice ?? !!reachable; return { on: on && reachable !== false, known: reachable !== null, reachable: !!reachable, set: setChoice };
+}
+function RealToggle({ real }: { real: Real }) {
+  return <label className="mt-4 inline-flex max-w-[460px] items-start gap-2 text-left text-[14px] text-neutral-600" data-testid="real-toggle">
+    <input type="checkbox" className="mt-1" checked={real.on} disabled={!real.reachable} onChange={e => real.set(e.target.checked)} data-testid="real-money" />
+    <span><b className="font-semibold text-neutral-800">Use real test money</b><span className="block text-[12px] text-neutral-500">{!real.known ? 'Checking the test faucet…' : !real.reachable ? 'The test faucet is not reachable, so this uses practice money in your browser.' : real.on ? 'A real Lightning payment with test sats from faucet.nwc.dev. No real money.' : 'Off: practice money in your browser.'}</span></span></label>;
+}
+function RealCard({ r }: { r: RealResult | { error: string } }) {
+  const proof = useProof();
+  if ('error' in r) return <div className="fade-in rounded-2xl border border-amber-200 bg-amber-50 p-4 text-[14px] text-amber-900" data-testid="real-card">The real test payment did not go through ({r.error}). Practice money was used instead.</div>;
+  const ok = r.facts.filter(f => f.ok);
+  return <div className="fade-in rounded-2xl border border-emerald-200 bg-emerald-50 p-4" data-testid="real-card"><div className="flex items-start gap-2 text-[18px] font-semibold text-emerald-700"><CheckCircle2 className="mt-0.5 shrink-0" size={22} />Real test payment: {n(r.aliceGot)} sats reached Alice</div>
+    <p className="mt-1 text-[14px] text-neutral-600">Two test wallets were made for you on faucet.nwc.dev. Bob paid the real invoice in {(r.ms / 1000).toFixed(1)} s, and the real preimage was checked.</p>
+    <ul className="mt-2 space-y-1">{ok.map(f => <li key={f.label} className="flex items-start gap-2 text-[14px]"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />{f.label}</li>)}</ul>
+    <p className="mt-3 rounded-lg bg-amber-100/70 p-2 text-[13px] text-amber-900" data-testid="shared-node-note">Not proven here: that the node belongs to Alice. Every faucet wallet shares one node, and that node will not sign Alice's binding, so check 3 cannot pass. {proof ? <a className="underline" href={proof.txUrl} target="_blank" rel="noreferrer">See a licence where Alice's own node signed (Mutinynet)</a> : null}</p>
+    <details className="mt-2 text-[12px] text-neutral-500"><summary className="cursor-pointer">Payment details</summary><div className="mt-1 break-all font-mono">payment hash {r.paymentHash}<br />preimage {r.preimage}</div></details></div>;
+}
+function OwnSong({ real }: { real: Real }) {
+  const st = useStory(); const [file, setFile] = useState<{ name: string; sha256: string; size: number } | null>(null); const [err, setErr] = useState(''); const out = st.r.own; const rr = st.r.ownReal;
+  const pick = async (f?: File) => { if (!f) return; setErr(''); if (!/^audio\//.test(f.type) && !/\.(mp3|wav|flac|ogg|m4a|aac)$/i.test(f.name)) { setErr('Choose an audio file.'); return; } if (f.size > 200 * 1024 * 1024) { setErr('That file is over 200 MB.'); return; }
+    setFile({ name: f.name, size: f.size, sha256: sha256hex(new Uint8Array(await f.arrayBuffer())) }); story.r.own = undefined; story.r.ownReal = undefined; };
+  const sell = () => file && story.run('own', async lab => { const title = file.name.replace(/\.[a-z0-9]+$/i, '').slice(0, 60) || 'My song';
+    if (real.on) { try { story.r.ownReal = await realLicence({ priceSat: S.PRICE, buyer: 'bobagent', song: { title, sha256: file.sha256, termsText: S.ownTerms(title) } }); } catch (e: any) { story.r.ownReal = { error: String(e?.message ?? e) }; } }
+    try { return await S.ownSong(lab, file); } catch (e: any) { setErr(`Could not sell it: ${e?.message ?? e}`); return undefined; } });
+  return <section className="rounded-2xl border border-neutral-200 bg-white p-5" data-testid="own-song" onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); pick(e.dataTransfer.files[0]); }}>
+    <h2 className="text-[18px] font-semibold">Put up your own song</h2>
+    <p className="mt-1 text-[14px] text-neutral-600">Drop an audio file. It stays in your browser: only its fingerprint (SHA-256) goes into a signed offer. Then Bob's agent buys a licence for it.</p>
+    <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-neutral-300 px-4 py-2 text-[15px] hover:bg-neutral-50">Choose a song<input type="file" accept="audio/*" className="hidden" data-testid="own-file" onChange={e => pick(e.target.files?.[0])} /></label>
+    {err && <p className="mt-2 text-[13px] text-red-700">{err}</p>}
+    {file && <div className="mt-3 text-[13px] text-neutral-600" data-testid="own-hash">{file.name} · {(file.size / 1048576).toFixed(1)} MB · fingerprint <span className="font-mono">{file.sha256.slice(0, 16)}…</span></div>}
+    {file && !out && <div className="mt-3">{st.busy === 'own' ? <Busy label="Signing and selling…" /> : <BigButton onClick={sell} data-testid="own-sell">Sign the offer and let Bob's agent buy it</BigButton>}</div>}
+    {out && <div className="mt-4 space-y-3">{rr && <RealCard r={rr} />}
+      <VerdictCard compact v={out.verdict} title={`Signed offer ${short(out.offer.id)} for "${out.title}" at ${S.PRICE} sats, fingerprint ${short(file?.sha256)}`} line={out.verdict.result.ok ? `Bob's agent holds a licence for "${out.title}"` : undefined} testid="own-verdict">
+        <p className="mt-1 text-[13px] text-neutral-600">Check 10 says "unverified ownership": nothing here proves you own this recording. A distributor you work with would sign that.</p></VerdictCard></div>}
+  </section>;
 }
 function FanOut({ split, total }: { split: { who: string; id: string; sats: number }[]; total: number }) {
   const [go1, setGo] = useState(false); useEffect(() => { const t = setTimeout(() => setGo(true), 150); return () => clearTimeout(t); }, []);
@@ -208,7 +259,7 @@ function Counter({ k }: { k: number }) {
 export function Stop3() {
   const st = useStory(); const v = st.r.s3button as Verdict | undefined; const reg = st.r.s3reg; const fake = st.r.s3fake as Verdict | undefined;
   const check = async () => { const out = await story.run('s3button', S.licenseButton); if (out?.result.ok) { testkit.licence(); testkit.stopDone('stop3'); story.finish('stop3'); } };
-  return <Stop id="stop3" title="Anyone verifies" why="A video site, a regulator or a fan can check a licence alone, in seconds, without asking Alice or any company, and without anyone being online.">
+  return <Stop id="stop3" title="Anyone verifies" why="A video site, a regulator or a fan can check a licence alone, in seconds, without asking Alice or any company. It needs the licence file, a view of Bitcoin, and someone it trusts to say who owns the song.">
     <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white" data-testid="video-card">
       <div className="relative flex aspect-video items-center justify-center bg-[linear-gradient(135deg,#334155,#0f172a_55%,#000)]"><span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-black"><Play size={22} className="ml-1" /></span><span className="absolute bottom-3 left-3 rounded-md bg-black/60 px-2 py-1 text-[12px] text-white">♪ "Rain" · Alice</span></div>
       <div className="flex flex-wrap items-center gap-3 p-4"><div className="flex-1"><div className="font-semibold">Bob's travel video</div><div className="text-[13px] text-neutral-500">A video site, with a licence attached</div></div>
@@ -222,13 +273,14 @@ export function Stop3() {
       <Cheat title='sell a copy as "Alice Official"'>
         <p className="text-[15px] text-neutral-600">A copycat account calls itself "Alice Official", signs its own offer for "Rain" and sells a licence. Is it real?</p>
         {!fake ? <div className="mt-3"><BigButton variant="cheat" disabled={!!st.busy} onClick={() => story.run('s3fake', S.fakeCaught)}>Check the copycat's licence</BigButton></div>
-          : <div className="mt-3"><Bad testid="cheat-fake" line={fake.result.ok ? 'It got through' : 'Fake ✗ Caught: "Alice Official" never owned the rights to "Rain"'}><p className="mt-1 text-[14px] text-neutral-600">The copy is signed correctly. What it cannot fake is Alice's history: her account, vouched for by her distributor, and her earlier proof of release on Bitcoin.</p></Bad></div>}
+          : <div className="mt-3"><Bad testid="cheat-fake" line={fake.result.ok ? 'It got through' : 'Fake ✗ Caught: "Alice Official" never owned the rights to "Rain"'}><p className="mt-1 text-[14px] text-neutral-600">The copy is signed correctly and was really paid. What it cannot fake is who owns the song: Alice's distributor, which this checker trusts, signed that Alice's account owns "Rain". With no voucher like that, the answer would be "owner not checked", never "real".</p></Bad></div>}
       </Cheat>
-      <CodeDrawer><p><b>verifyLicence</b> runs nine checks on the <b>bundle</b>: the offer signature, the <b>binding</b> between Alice's key and her Lightning <b>node</b>, every co-owner's consent, the request, the <b>invoice</b> (signed by the bound node, committing to the request), the <b>preimage</b>, and the Bitcoin timestamp (an <b>OpenTimestamps</b> proof). Check 9 also walks the chain of title: has the offer been withdrawn, or the rights sold?</p>
+      <CodeDrawer><p><b>verifyLicence</b> runs nine checks on the <b>bundle</b>: the offer signature, the <b>binding</b> between Alice's key and her Lightning <b>node</b>, every co-owner's consent, the request, the <b>invoice</b> (signed by the bound node, committing to the request), the <b>preimage</b>, and the Bitcoin timestamp (an <b>OpenTimestamps</b> proof). Check 9: has the offer been withdrawn? These nine prove that this account sold the licence and was paid. They do not prove it owns the song. That is <b>check 10</b>: it needs a voucher you trust (here the distributor's signed vouch) or a chain of title that starts from one. Without it, the result says <i>unverified ownership</i>.</p>
         <Code>{`import { verifyLicence } from 'mll'
-const result = await verifyLicence(bundle, chain)  // no server, no one online
-if (result.ok) showBadge('Licensed ✓')
-// copycat → ${fake ? `{ ok: ${fake.result.ok}, code: '${fake.result.code}' }` : '(try it above)'}`}</Code>
+const result = await verifyLicence(bundle, chain, { ownership: { trust: [distributorKey], vouches } })
+if (result.ok && result.ownership?.status === 'verified') showBadge('Licensed ✓')
+// copycat → ${fake ? `{ ok: ${fake.result.ok}, code: '${fake.result.code}', ownership: '${fake.result.ownership?.status}' }` : '(try it above)'}
+// no voucher → { ok: true, ownership: 'unverified' }: sold and paid, owner not checked`}</Code>
         <p><button className="underline" onClick={() => go('verify')}>Check your own licence file →</button> · <button className="underline" onClick={() => go('redteam')}>Try to break it →</button></p></CodeDrawer>
       <Next from="stop3" /></>}
   </Stop>;

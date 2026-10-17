@@ -1,9 +1,9 @@
 // The licence events. Kind numbers are placeholders (see docs/01-first-principles.md).
 import { finalizeEvent, getPublicKey, getEventHash, type Event } from 'nostr-tools/pure';
 import { schnorr } from '@noble/curves/secp256k1';
-import { sha256hex, randomBytes, bytesToHex } from './util.js';
+import { sha256hex, randomBytes, bytesToHex, hexToBytes } from './util.js';
 export type { Event };
-export const KIND = { OFFER: 30402, REQUEST: 3410, BINDING: 3411, REVOCATION: 3412, CONSENT: 3413, STATEMENT: 3414, LINK: 3415 } as const;
+export const KIND = { OFFER: 30402, REQUEST: 3410, BINDING: 3411, REVOCATION: 3412, CONSENT: 3413, STATEMENT: 3414, LINK: 3415, QUOTE: 3416, OWNER_VOUCH: 1985 } as const;
 export const tag = (e: Event, n: string) => e.tags.find(t => t[0] === n);
 export const tagv = (e: Event, n: string) => tag(e, n)?.[1];
 export const tagsOf = (e: Event, n: string) => e.tags.filter(t => t[0] === n);
@@ -12,28 +12,45 @@ const sign = (sk: Uint8Array, kind: number, tags: string[][], content = '', crea
 
 export const bindMessage = (artistPub: string) => `MLL-BIND:${artistPub}`;
 /** notBefore (MUTINYNET ROUND, N-1): a recent block hash. Revocations of this binding or its offers count only from that block on,
- *  so a verifier scans [binding not-before, anchor] instead of the whole chain (3.5M blocks on Mutinynet). */
-export function makeBinding(sk: Uint8Array, nodePub: string, nodeSig: string, scope: string[] = ['*'], notBefore?: string) {
-  return sign(sk, KIND.BINDING, [['node', nodePub], ['scope', ...scope], ['node-sig', nodeSig, 'lnd-signmessage'], ['revoke-via', 'opreturn'], ...(notBefore ? [['not-before', notBefore]] : [])]);
+ *  so a verifier scans [binding not-before, anchor] instead of the whole chain (3.5M blocks on Mutinynet).
+ *  V2 A12b pre-rotation: `next` = nextKeyHash(next public key). Once a binding with `next` is timestamped (title record), only that
+ *  next key can retire this key (a rotation transfer), so a thief holding this key cannot rotate it away or out-race the owner.
+ *  V2 A18: `method` records how the node signed (`lnd-signmessage`, or `nwc-sign_message` for a per-user node reached over NWC). */
+export function makeBinding(sk: Uint8Array, nodePub: string, nodeSig: string, scope: string[] = ['*'], notBefore?: string, o: { next?: string; method?: 'lnd-signmessage' | 'nwc-sign_message' } = {}) {
+  return sign(sk, KIND.BINDING, [['node', nodePub], ['scope', ...scope], ['node-sig', nodeSig, o.method ?? 'lnd-signmessage'], ['revoke-via', 'opreturn'], ...(notBefore ? [['not-before', notBefore]] : []), ...(o.next ? [['next', o.next]] : [])]);
 }
+/** Pre-rotation commitment: SHA-256 of the next key's 32-byte x-only public key. */
+export const nextKeyHash = (nextPub: string) => sha256hex(hexToBytes(nextPub));
 export interface OfferInput { track: string; masterSha256: string; use: string[]; termsText: string; priceSats: number;
-  payLink: string; bindingId: string; validUntil: number; coOwners: { pubkey: string; role: string; bps: number }[]; title?: string; }
+  payLink: string; bindingId: string; validUntil: number; coOwners: { pubkey: string; role: string; bps: number }[]; title?: string;
+  /** V2 S21: an online pricing key may quote any price from priceSats (floor) to priceMax, signed in a QUOTE event; the main key stays offline. */
+  priceKey?: string; priceMax?: number; }
 export function makeOffer(sk: Uint8Array, o: OfferInput) {
   const d = `${o.track}:${o.use[0]}`;
   return sign(sk, KIND.OFFER, [['d', d], ['title', o.title ?? o.track], ['x', o.masterSha256], ['use', ...o.use],
     ['terms', sha256hex(o.termsText)], ['terms-text', o.termsText], ['price', String(o.priceSats), 'SATS'],
     ['pay-link', o.payLink, 'x402:exact:lnbtc', 'http:1'], ['binding', o.bindingId], ['valid-until', String(o.validUntil)],
-    ...o.coOwners.map(c => ['p', c.pubkey, c.role, String(c.bps)])]);
+    ...o.coOwners.map(c => ['p', c.pubkey, c.role, String(c.bps)]),
+    ...(o.priceKey ? [['price-key', o.priceKey], ['price-max', String(o.priceMax ?? o.priceSats)]] : [])]);
+}
+/** V2 S21: a price quote by the offer's pricing key. `expires` is a block height: a request must name a not-before block at or below it. */
+export function makeQuote(priceSk: Uint8Array, offer: Event, priceSats: number, expires: number, note = '') {
+  return sign(priceSk, KIND.QUOTE, [['e', offer.id], ['price', String(priceSats), 'SATS'], ['expires', String(expires)]], note);
+}
+/** V2 ownership root: a voucher (distributor, label, registry) states that `owner` holds the rights to the recording `x` (its SHA-256).
+ *  NIP-32 label. The protocol cannot judge ownership; a verifier decides which vouchers it trusts. */
+export function makeOwnerVouch(voucherSk: Uint8Array, owner: string, x: string, ref = '') {
+  return sign(voucherSk, KIND.OWNER_VOUCH, [['L', 'mll.owner'], ['l', 'owner', 'mll.owner'], ['p', owner], ['x', x], ...(ref ? [['ref', ref]] : [])], ref ? `Rights holder of ${x.slice(0, 12)}… (${ref})` : '');
 }
 export function makeConsent(sk: Uint8Array, offer: Event, bps: number, payout: string) {
   return sign(sk, KIND.CONSENT, [['e', offer.id], ['terms', tagv(offer, 'terms')!], ['share', String(bps)], ['payout', payout]]);
 }
-export interface RequestInput { offer: Event; binding: Event; use: string[]; network: string; notBefore: string; nonce?: string }
+export interface RequestInput { offer: Event; binding: Event; use: string[]; network: string; notBefore: string; nonce?: string; quote?: Event }
 export function makeRequest(sk: Uint8Array, r: RequestInput) {
-  const o = r.offer;
+  const o = r.offer; const price = r.quote ? tagv(r.quote, 'price')! : tagv(o, 'price')!;
   return sign(sk, KIND.REQUEST, [['e', o.id], ['terms', tagv(o, 'terms')!], ['x', tagv(o, 'x')!], ['use', ...r.use],
-    ['licensor', o.pubkey], ['node', tagv(r.binding, 'node')!], ['amount', String(Number(tagv(o, 'price')) * 1000)],
-    ['network', r.network], ['nonce', r.nonce ?? bytesToHex(randomBytes(32))], ['not-before', r.notBefore]]);
+    ['licensor', o.pubkey], ['node', tagv(r.binding, 'node')!], ['amount', String(Number(price) * 1000)],
+    ['network', r.network], ['nonce', r.nonce ?? bytesToHex(randomBytes(32))], ['not-before', r.notBefore], ...(r.quote ? [['quote', r.quote.id]] : [])]);
 }
 export function makeRevocation(sk: Uint8Array, targetId: string, reason: 'compromise' | 'retire') {
   return sign(sk, KIND.REVOCATION, [['e', targetId], ['reason', reason]]);

@@ -81,6 +81,10 @@ export function NineChecks({ v, compact }: { v?: Verdict; compact?: boolean }) {
       <span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-[11px] font-bold', st === 'pass' ? 'bg-emerald-500 text-white' : st === 'fail' ? 'bg-red-500 text-white' : 'bg-neutral-200 text-neutral-500')}>{i + 1}</span>
       <span className="flex-1"><span className={cx(st === 'todo' && 'text-neutral-400')}>{label}</span>{c?.detail && !compact && <span className={cx('block text-[11px]', st === 'fail' ? 'text-red-700' : 'text-neutral-500')}>{c.detail}</span>}</span>
       <span className="text-[11px] text-neutral-500">{st === 'pass' ? 'pass' : st === 'fail' ? 'FAIL' : st === 'skip' ? 'skipped' : 'not reached'}</span></li>; })}
+    {v?.ownership && (() => { const o = v.ownership; return <li data-testid="check-10" className={cx('flex items-start gap-2 rounded-md px-2 py-1.5 text-[13px]', o.status === 'pass' && 'bg-emerald-50', o.status === 'fail' && 'bg-red-50', o.status === 'skip' && 'bg-amber-50')}>
+      <span className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-[11px] font-bold', o.status === 'pass' ? 'bg-emerald-500 text-white' : o.status === 'fail' ? 'bg-red-500 text-white' : 'bg-amber-200 text-amber-900')}>10</span>
+      <span className="flex-1">{o.label}{o.detail && !compact && <span className={cx('block text-[11px]', o.status === 'fail' ? 'text-red-700' : 'text-neutral-500')}>{o.detail}</span>}</span>
+      <span className="text-[11px] text-neutral-500">{o.status === 'pass' ? 'pass' : o.status === 'fail' ? 'FAIL' : o.status === 'skip' ? 'unverified' : 'not reached'}</span></li>; })()}
     {v?.file && <FileRow f={v.file} />}</ol>;
 }
 function ChecksTab({ sid }: { sid: string }) {

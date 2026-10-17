@@ -15,8 +15,8 @@ export class MutinynetChain implements ChainOracle {
   async scanOpReturns(prefixHex: string, maxHeight: number, minHeight = maxHeight) {
     if (maxHeight - minHeight > this.maxScan) throw Object.assign(new Error(`revocation scan over ${maxHeight - minHeight} blocks is too large for a browser; use an index or your own node`), { code: 'SCAN_TOO_LARGE' });
     const out: { payload: string; height: number; txid: string }[] = [];
-    for (let h = minHeight; h <= maxHeight; h++) { const hash = await get(`/block-height/${h}`, false); let i = 0;
-      for (;;) { const txs = await get(`/block/${hash}/txs/${i}`); for (const t of txs) for (const o of t.vout) if (o.scriptpubkey_type === 'op_return') { const data = String(o.scriptpubkey).replace(/^6a(4c..|4d....|..)/, ''); if (data.startsWith(prefixHex)) out.push({ payload: data, height: h, txid: t.txid }); } if (txs.length < 25) break; i += 25; } }
+    for (let h = minHeight; h <= maxHeight; h++) { const hash = await get(`/block-height/${h}`, false); const n = Number((await get(`/block/${hash}`)).tx_count ?? 0); let i = 0;
+      while (i < n) { const txs = await get(`/block/${hash}/txs/${i}`); for (const t of txs) for (const o of t.vout) if (o.scriptpubkey_type === 'op_return') { const data = String(o.scriptpubkey).replace(/^6a(4c..|4d....|..)/, ''); if (data.startsWith(prefixHex)) out.push({ payload: data, height: h, txid: t.txid }); } if (txs.length < 25) break; i += 25; } } // pages of 25; a block with exactly 25 txs has no second page (audit fix)
     return out; }
   async blockTime(h: number) { try { const hash = await get(`/block-height/${h}`, false); return (await get(`/block/${hash}`)).timestamp; } catch { return null; } }
   async merkleRootAtHeight(h: number) { try { const hash = await get(`/block-height/${h}`, false); return (await get(`/block/${hash}`)).merkle_root; } catch { return null; } }
