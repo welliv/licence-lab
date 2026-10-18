@@ -2,7 +2,7 @@
 
 For: a copyright and contract lawyer in England and Wales, and one in the United States. Other countries can follow the same list.
 From: welliv, 12 October 2026.
-Read with: the project overview ([`../paper/nostr-powered-music-project-v2.pdf`](../paper/nostr-powered-music-project-v2.pdf)) and the draft NIP ([`nip-xx-music-licence-offers-draft.md`](nip-xx-music-licence-offers-draft.md)). Section numbers below refer to the design write-up these questions were first written against, which is being revised.
+Read with: the project overview ([`../paper/nostr-powered-music-project-v3.pdf`](../paper/nostr-powered-music-project-v3.pdf)) and the draft NIP ([`nip-xx-music-licence-offers-draft.md`](nip-xx-music-licence-offers-draft.md)). Section numbers below refer to the design write-up these questions were first written against, which is being revised.
 
 **What the system does, in two sentences.** An artist publishes a signed offer to license a recording for a stated use at a stated price. A buyer signs a request, pays a Lightning invoice that is tied to her request, and the payment's secret (the "preimage") is the proof that the licence was granted (design write-up §2–§3).
 

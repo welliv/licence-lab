@@ -1,7 +1,7 @@
-// Copies the browser-safe core of the protocol library from /workspace/mll-audit/src into src/lib/mll, unchanged.
+// Copies the browser-safe core of the protocol library from the protocol library (../mll-audit/src, or $MLL_SRC) into src/lib/mll, unchanged.
 // The library is the single source of truth: the Lab never re-implements signing or verification.
 import fs from 'node:fs'; import { execSync } from 'node:child_process';
-const SRC = process.env.MLL_SRC ?? '/workspace/mll-audit';
+const SRC = process.env.MLL_SRC ?? '../mll-audit';
 export const FILES = ['util.ts', 'events.ts', 'bolt11.ts', 'lnmsg.ts', 'x402.ts', 'chain.ts', 'ots.ts', 'verify.ts', 'rights.ts', 'nodebind.ts'];
 const dst = new URL('../src/lib/mll/', import.meta.url);
 for (const f of FILES) fs.copyFileSync(`${SRC}/src/${f}`, new URL(f, dst));

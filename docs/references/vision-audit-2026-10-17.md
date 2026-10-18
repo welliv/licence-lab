@@ -1,6 +1,6 @@
-> Published copy for reference. This audit was run on the /next/ build of Licence Lab as it stood on 17 October 2026. That build is now the demo at https://welliv.github.io/licence-lab/, and /next/ links redirect there. Scripts, raw results and screenshots it mentions were kept by the auditor and are not included. Times are UTC+3.
+> Published copy for reference. This audit was run on the /next/ build of Licence Lab as it stood on 17 October 2026. That build is now the demo at https://welliv.github.io/licence-lab/, and /next/ links redirect there. Scripts, raw results and screenshots it mentions were kept by the auditor and are not included.
 
-# Licence Lab /next/ — vision audit (17 Oct 2026, ~20:25–20:35 UTC+3)
+# Licence Lab /next/ — vision audit (17 Oct 2026)
 
 Live site: https://welliv.github.io/licence-lab/next/ (main = local `simple` 33c2cc6). Audit only: no code changed, nothing pushed, no PRs touched.
 Method: headless Playwright (Chrome) on the live site, fresh (`?fresh=1`, cleared storage, dark mode), 1440px and 390px. Raw numbers in `results.json` and `alby.json`; scripts `audit.mjs`, `own.mjs`, `v.mjs`, `alby.mjs`, `alby2.mjs`. No console errors on any page.

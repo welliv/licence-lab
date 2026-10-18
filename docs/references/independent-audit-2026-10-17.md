@@ -1,10 +1,10 @@
-> Published copy for reference. Scripts and screenshots this audit mentions were kept by the auditor and are not included. Times are UTC+3.
+> Published copy for reference. Scripts and screenshots this audit mentions were kept by the auditor and are not included.
 
 # Independent audit: Music Licence Link (17 Oct 2026)
 
 **Overall verdict: COMPETENT. It is a strong, honest, well-tested piece of work, with one near-magical moment and nothing yet that is exceptional.**
 
-I did not build this, and I did not trust its own scores. Everything below is from things I ran today, 17:56–18:30 UTC+3. I changed no repo: all three are clean at the same HEADs (mll-audit `07cc2d4`, mll-build `ffe4cdd`, licence-lab `aa2d84f`). The auditor kept its scripts and screenshots.
+I did not build this, and I did not trust its own scores. Everything below is from things I ran on 17 Oct 2026. I changed no repo: all three are clean at the same HEADs (mll-audit `07cc2d4`, mll-build `ffe4cdd`, licence-lab `aa2d84f`). The auditor kept its scripts and screenshots.
 
 ## The bar
 

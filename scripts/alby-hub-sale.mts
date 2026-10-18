@@ -27,7 +27,7 @@ const dh = requestHash(httpBinding('POST', tagv(offer, 'pay-link')!, requestByte
 const r = await hub.makeInvoice(100, { descriptionHash: dh }); const inv = decodeInvoice(r.invoice);
 const reqs: Requirements = { scheme: 'exact', network: NETWORKS.signet.id, amount: '100000', asset: 'BTC', payTo: inv.payee!, maxTimeoutSeconds: 600, extra: { assetTransferMethod: 'bolt11', paymentFlow: 'upfront', requestHash: dh, requestBindingProfile: 'http:1', requestBindingParams: { headers: ['content-type'] }, invoice: r.invoice } } as any;
 clientCheck(reqs, dh, node, Math.floor(Date.now() / 1000), 60, tagv(request, 'amount')); out.clientCheck = 'passed';
-const pay = JSON.parse(execFileSync('bash', ['-c', '. /workspace/mutinynet/net/env.sh; lnc sam payinvoice --force --json "$INV"'], { env: { ...process.env, INV: r.invoice }, encoding: 'utf8', timeout: 120000 }).trim().split('\n').filter(Boolean).join('\n'));
+const pay = JSON.parse(execFileSync('bash', ['-c', '. "${MUTINYNET_DIR:-../mutinynet}/net/env.sh"; lnc sam payinvoice --force --json "$INV"'], { env: { ...process.env, INV: r.invoice }, encoding: 'utf8', timeout: 120000 }).trim().split('\n').filter(Boolean).join('\n'));
 const preimage = pay.payment_preimage as string; out.paid = { status: pay.status, preimageMatchesHash: bytesToHex(sha256(hexToBytes(preimage))) === inv.paymentHash, feeSat: pay.fee_sat };
 const looked: any = await hub.lookupInvoice(inv.paymentHash); out.hubLookup = { state: looked.state, settled: !!looked.settled_at, preimageMatches: looked.preimage === preimage };
 const bundle: LicenceBundle = { version: 1, offer, binding, consents, request, invoice: r.invoice, preimage };

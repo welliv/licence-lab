@@ -1,5 +1,5 @@
 {
-  "from": "/workspace/mll-audit/src",
+  "from": "../mll-audit/src",
   "commit": "00038ff",
   "files": [
     "util.ts",

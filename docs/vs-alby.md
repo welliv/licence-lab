@@ -108,7 +108,7 @@ Shots: `docs/compare/alby/gs-slide-1.png` and `gs-after-slides.png`.
 
 ## Live test wallets: what is real
 
-Evidence: `docs/live-evidence.json`, run at 10:15 EAT on 17 Oct 2026 (`npx tsx scripts/live-run.mts`), and the browser run in `screenshots/14-17`.
+Evidence: `docs/live-evidence.json`, run on 17 Oct 2026, 07:15 UTC (`npx tsx scripts/live-run.mts`), and the browser run in `screenshots/15-17`.
 
 - **Wallets:** six faucet wallets (Alice, Bob, Carol, Dave, Erin, Bob's agent), all on node `03b6b08e…2b430c`, network "mainnet".
 - **Top-up:** Bob +300 sats through the faucet top-up API.
@@ -134,7 +134,7 @@ Evidence: `docs/live-evidence.json`, run at 10:15 EAT on 17 Oct 2026 (`npx tsx s
 - **Writing: needs login.** OP_RETURN and OpenTimestamps need Mutinynet coins, and the Mutinynet faucet needs a GitHub device login. Its other route is a mainnet L402 payment, which the Lab never makes. Public OpenTimestamps calendars only stamp Bitcoin mainnet, so the path uses mll-audit's own otsd and the real OP-RETURN-Bot.
 - **The path is built:** `scripts/mutinynet-anchor.mts` stops with "NEEDS LOGIN" until `~/.mutinynet/token` exists. Then it runs mll-audit's Mutinynet suite and checks each txid on public Mutinynet before listing it.
 - **Status file:** `scripts/mutinynet-status.mjs` writes `public/mutinynet-status.json`. Today it reads: login needed, the local node, otsd and OP-RETURN-Bot are not running, and nothing is recorded.
-- **What still needs the user:** build `mutinynet-cli` (its binary is no longer on the box), log in, and approve the GitHub device code.
+- **What still needs the user:** build `mutinynet-cli` (its binary is not included), log in, and approve the GitHub device code.
 
 ## Gaps fixed
 
