@@ -6,6 +6,8 @@ A live demo of the open music-licence protocol (Nostr, Lightning and Bitcoin): a
 
 **Live app:** https://welliv.github.io/licence-lab/
 
+**Project overview:** [nostr-powered-music-project-v3.pdf](docs/paper/nostr-powered-music-project-v3.pdf) (more in [`docs/paper/`](docs/paper/)). It is anchored on Bitcoin by an OP_RETURN in block 971984 ([tx](https://mempool.space/tx/e583615fcdf1c604d74bac81ebdf3104cc83fe7348bdfedace4f6393bf41810d)).
+
 ## What the live app shows
 
 - **Home:** one headline and one choice: "I make music", "I buy music" or "I build". The choice sets the order of the stops.
