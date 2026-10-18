@@ -7,7 +7,7 @@ The live demo is at https://welliv.github.io/licence-lab/. The documents the pap
 
 ## Timestamps (OpenTimestamps)
 
-Each PDF has an OpenTimestamps proof next to it (`.ots`). It shows that this exact file existed by a given Bitcoin block. They were stamped on 18 October 2026 through the free public calendars; no funds were spent.
+Each PDF has an OpenTimestamps proof next to it (`.ots`). It shows that this exact file existed by a given Bitcoin block. They were stamped on 18 October 2026 through the free public calendars; no funds were spent. Both proofs are confirmed in Bitcoin (blocks 971918 and 971922).
 
 | File | SHA-256 |
 |---|---|
@@ -22,4 +22,4 @@ sha256sum nostr-powered-music-paper-v4.pdf      # should match the table
 ots verify nostr-powered-music-paper-v4.pdf.ots
 ```
 
-A new proof says "Pending confirmation" until a Bitcoin block includes it, usually within a few hours. After that, run `ots upgrade nostr-powered-music-paper-v4.pdf.ots` once to add the Bitcoin part to the proof, and `ots verify` then names the block. A full check needs a Bitcoin node; without one, compare the block with a public explorer.
+A full check needs a Bitcoin node; without one, compare the named block with a public explorer.
