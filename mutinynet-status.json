@@ -80,7 +80,7 @@
   "proofs": {
     "purchase": {
       "title": "Purchase with a real payment",
-      "when": "2026-10-17 18:28 EAT (UTC+3)",
+      "when": "2026-10-17 15:28 UTC",
       "summary": "Bob's agent paid Alice's own Mutinynet node 100 sats over Lightning (NWC) for \"Rain\" (the real MP3, sha256 54bdd6209af9…). Carol got 20% and Dave 15% by keysend. The licence passed checks 1-9 plus check 10 (owner vouched by the distributor), re-checked against mutinynet.com.",
       "fields": [
         [
@@ -129,7 +129,7 @@
     },
     "revocation": {
       "title": "OP_RETURN withdrawal in a block",
-      "when": "2026-10-17 18:28 EAT (UTC+3)",
+      "when": "2026-10-17 15:28 UTC",
       "summary": "Alice signed an 80-byte MLR2 withdrawal of the \"Rain\" offer. Licence #3, paid just before the withdrawal block and timestamped one block after it, stays valid (the v1 rule voided it). The seller now answers 410.",
       "fields": [
         [
@@ -155,7 +155,7 @@
     },
     "ots": {
       "title": "OpenTimestamps proof, confirmed",
-      "when": "2026-10-17 11:29 EAT (UTC+3)",
+      "when": "2026-10-17 08:29 UTC",
       "summary": "Licence #3 was stamped on our own OpenTimestamps calendar on Mutinynet. The pending proof was refused, the upgraded proof verified against the block header in 70 s, and a tampered proof was refused. (From the v1 run, which used a placeholder track hash.)",
       "fields": [
         [
@@ -179,9 +179,9 @@
       ]
     }
   },
-  "run": "Live run 2026-10-17 18:28 EAT (UTC+3) (v2): 10/10 steps passed on Mutinynet, test coins only: real \"Rain\" hash, 100 sats, Carol and Dave paid by keysend, licence timestamped by OP_RETURN and by the real OP-RETURN-Bot, withdrawal timing, x402-ln check (44 passed, 0 failed). Earlier v1 run: 18/18 (overpay refused, wrong-node invoice refused, NWC budget held, crash recovery, OpenTimestamps).",
+  "run": "Live run 2026-10-17 15:28 UTC (v2): 10/10 steps passed on Mutinynet, test coins only: real \"Rain\" hash, 100 sats, Carol and Dave paid by keysend, licence timestamped by OP_RETURN and by the real OP-RETURN-Bot, withdrawal timing, x402-ln check (44 passed, 0 failed). Earlier v1 run: 18/18 (overpay refused, wrong-node invoice refused, NWC budget held, crash recovery, OpenTimestamps).",
   "howTo": [
-    "Start the stack: bash /workspace/mutinynet/autopilot.sh",
+    "Start the stack: bash $MUTINYNET_DIR/autopilot.sh",
     "Then: npx tsx scripts/mutinynet-anchor.mts"
   ]
 }
