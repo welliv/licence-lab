@@ -1,6 +1,6 @@
 # References
 
-Documents cited by the paper "Nostr Powered Music" and the project overview. They are published as written, with only local file paths and notes about unpublished scripts and screenshots removed.
+Supporting documents for the project overview "Nostr Powered Music". Some of them review an earlier, longer design write-up that is being revised after community feedback. They are published as written, with only local file paths and notes about unpublished scripts and screenshots removed.
 
 | File | What it is |
 |---|---|

@@ -28,7 +28,7 @@ The real cost is human: Jay must be reachable to consent, and Ava must run, or r
 ## 3. Anchoring cost per licence
 | Route | Cost | Time to proof | Trust |
 |---|---|---|---|
-| OpenTimestamps (paper default) | **0 sats** | hours (calendar aggregation, then upgrade) | Calendars can delay but cannot forge; **this code cannot yet verify a completed OTS proof (F-18)** |
+| OpenTimestamps (design default) | **0 sats** | hours (calendar aggregation, then upgrade) | Calendars can delay but cannot forge; **this code cannot yet verify a completed OTS proof (F-18)** |
 | Own OP_RETURN | 169 vB: **338 sats at 2 sat/vB, 3,380 at 20 sat/vB** | next block (~10 min mainnet) | None beyond the chain |
 | OP_RETURN-Bot style (pay an invoice) | **2,981 sats** (bot's price formula at 2 sat/vB) | next block | Operator can delay or skip; the client checks the invoice commits to the message |
 

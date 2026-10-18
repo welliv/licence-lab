@@ -63,7 +63,7 @@ Shots: `docs/compare/alby/gs-slide-1.png` and `gs-after-slides.png`.
 
 | Area | Alby Sandbox | Licence Lab | Alby | Lab |
 |---|---|---|---|---|
-| Layout and navigation | Sidebar with emoji items, groups, links out | Same pattern; adds Live test wallets, red team, library, paper and help | 9 | 9 |
+| Layout and navigation | Sidebar with emoji items, groups, links out | Same pattern; adds Live test wallets, red team, library, spec and help | 9 | 9 |
 | Scenario breadth | 18 scenarios | 24 scenarios, 19 attacks and a live tier | 8 | 9 |
 | Header | Title, complexity pill, 💡, `<>` | Same, plus status pill and "how it works" | 9 | 9 |
 | Gating banner | "Connect all required wallets" | "Set up all the parties" / "Create all (n)" | 9 | 9 |
@@ -83,7 +83,7 @@ Shots: `docs/compare/alby/gs-slide-1.png` and `gs-after-slides.png`.
 | Replay and sharing | None seen | Timeline replay and share link | — | 8 |
 | Inspect | None | JSON, bundle tray, download | — | 8 |
 | Honesty labels | Test vs production | Every row badged; the faucet's catches shown at the top of the Live page | 7 | 9 |
-| Links out | Skill, faucet, source, feedback, help | Library, paper and help (local); skill planned | 9 | 5 |
+| Links out | Skill, faucet, source, feedback, help | Library, spec and help (local); skill planned | 9 | 5 |
 | Mobile | Responsive | Responsive (`screenshots/13-mobile-s3.png`) | 8 | 8 |
 | Theme and contrast | Light (no theme toggle seen) | Dark by default plus a light toggle; all main text pairs pass WCAG AA (table below) | 8 | 9 |
 | Tests | Not visible | 55 tests (+1 live test with `LIVE=1`), plus a browser check of all 24 scenarios, free play, Getting Started and the Live page | — | 9 |

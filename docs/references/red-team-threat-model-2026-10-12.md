@@ -1,6 +1,6 @@
 # Threat model: music licence protocol (MLL), independent audit
 
-Scope: code at `mll-build` commit `ffe4cdd` (copied to a separate local copy, branch `audit`), the NIP draft and both white-paper texts. Regtest only. Neutral cast: artist **Ava**, track **Rain**, co-owner **Jay**, buyer **Sam**.
+Scope: code at `mll-build` commit `ffe4cdd` (copied to a separate local copy, branch `audit`), the NIP draft and both design write-ups. Regtest only. Neutral cast: artist **Ava**, track **Rain**, co-owner **Jay**, buyer **Sam**.
 
 ## 1. What the system does (one paragraph)
 Ava signs a **binding** (her Nostr key says "this Lightning node is mine", and the node co-signs), an **offer** (a parameterised replaceable event, kind 30402, holding the track hash, use, price, terms hash and text, pay-link, binding and valid-until) and lists co-owners, each of whom signs a **consent**. Sam (or his agent) signs a **request** naming the offer, use, amount, network, a nonce and a recent block hash (`not-before`). He POSTs it to the HTTP 402 pay-link. The seller returns a BOLT11 invoice from the bound node whose `description_hash` commits to the request bytes and URL. Sam pays it over NWC, and the **preimage** completes the licence. The **bundle** (offer, binding, consents, request, invoice, preimage) is digested and timestamped on Bitcoin (OP_RETURN, OP_RETURN-Bot or OTS). `verifyLicence` runs 9 checks. Revocations are self-authenticating `MLR1` OP_RETURNs.

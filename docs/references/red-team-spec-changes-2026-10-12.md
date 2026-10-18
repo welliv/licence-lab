@@ -1,4 +1,4 @@
-# Spec changes needed (NIP-XX draft and final white-paper spec)
+# Spec changes needed (NIP-XX draft and the design spec)
 
 Each item names the finding that forced it. "MUST" is used as in RFC 2119.
 
@@ -32,7 +32,7 @@ Each item names the finding that forced it. "MUST" is used as in RFC 2119.
 19. **Statements (F-11/F-02).** Co-owner statements MUST be signature-checked. Sellers MUST record failed payouts and retry them. A payout failure MUST NOT stop sales.
 
 ## Keep out of v1
-20. Exclusive licences and reservation keys (`K_r`, V10 in the final white-paper spec) are **not implemented and were not tested**. Keep them in "future extensions" until there is code, live tests and outside review.
+20. Exclusive licences and reservation keys (`K_r`, V10 in the design spec) are **not implemented and were not tested**. Keep them in "future extensions" until there is code, live tests and outside review.
 
 ## Added in the Mutinynet round (code first, then spec)
 21. **Per-licence key derivation (F-21, done).** `k_l = HMAC-SHA256(k_main, "MLL-LICENCE-KEY/v1/<offer id>/<nonce>/<ctr>")`, first valid scalar. The request is signed by `k_l`; the nonce is already in the request, so nothing new is stored. The main key never appears in the bundle.

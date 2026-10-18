@@ -33,7 +33,7 @@ export function Sidebar({ path, onNavigate }: { path: string; onNavigate?: () =>
 export const TOOLS = [
   { to: 'verify', icon: <ShieldCheck size={13} />, label: 'Check a licence file' }, { to: 'live', icon: <Globe size={13} />, label: 'Live test wallets' },
   { to: 'hood/runs', icon: <Radio size={13} />, label: 'Real runs on a test network' }, { to: 'about/library', icon: <Library size={13} />, label: 'Protocol library' },
-  { to: 'about/paper', icon: <FileText size={13} />, label: 'White paper and spec' },
+  { to: 'about/spec', icon: <FileText size={13} />, label: 'Protocol spec' },
 ];
 function Fold({ title, open, toggle, children }: { title: string; open: boolean; toggle: () => void; children: React.ReactNode }) {
   return <div><button onClick={toggle} aria-expanded={open} className="flex w-full items-center gap-1 rounded-md px-2 py-1 text-left text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-400 hover:text-neutral-700"><ChevronRight size={12} className={cx('transition-transform', open && 'rotate-90')} />{title}</button>{open && <div>{children}</div>}</div>;

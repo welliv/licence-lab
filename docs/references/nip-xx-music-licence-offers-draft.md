@@ -250,7 +250,7 @@ Sort the records for `x` by timestamp height, earliest first. Start with `holder
 
 ## Future extensions (not part of this NIP)
 
-Exclusive licences (on-chain reservations with a time-lock cap), a signed daily status record for light verifiers, and a `max_total_cltv` field for NIP-47 are specified in the white paper appendix. They are left out here until they have running code and outside review. Exclusivity and the status record are not in the reference library.
+Exclusive licences (on-chain reservations with a time-lock cap), a signed daily status record for light verifiers, and a `max_total_cltv` field for NIP-47 are sketched in the design write-up, which is being revised. They are left out here until they have running code and outside review. Exclusivity and the status record are not in the reference library.
 
 ## Reference implementation
 

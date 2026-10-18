@@ -47,7 +47,7 @@ Verdict key:
 | 10 | Sidebar part headings (5) and 24 scenario links | hood | Kept, grouped and folded. Only the open part expands. |
 | 11 | Sidebar "Red team" heading and "All attacks and score" | merge | Becomes one link: "Try to break it". |
 | 12 | Sidebar list of 19 individual attack links | delete | The red-team page lists them all, with score. Nineteen links in a menu add nothing. |
-| 13 | Sidebar Protocol library, White paper, Help | hood | Kept under the hood. |
+| 13 | Sidebar Protocol library, Protocol spec, Help | hood | Kept under the hood. |
 | 14 | Sidebar theme toggle | keep | Dark stays the default; light stays optional. Also in the story's top bar. |
 | 15 | Sidebar "Reset everything" | hood | Kept. |
 | 16 | Sidebar note "Test keys only…" | keep | A safety line. Shown once under the hood and in the story footer. |
@@ -84,7 +84,7 @@ Verdict key:
 | 47 | 19 attack pages (tamper editor) | hood | Plus 5 new rights attacks. |
 | 48 | 24 scenarios | hood | Plus 3 new rights scenarios (25–27). |
 | 49 | Protocol library page | hood | Now also lists the rights extension. |
-| 50 | White paper page | hood | |
+| 50 | Protocol spec page | hood | |
 | 51 | Help page | merge | Merged with the new glossary under the hood. |
 | 52 | Music player (bottom bar) | keep | The experience starts with listening. |
 | 53 | Player: "Real recording: <file>" line | keep | Honesty about demo names. |

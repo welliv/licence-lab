@@ -91,7 +91,7 @@ function ChecksTab({ sid }: { sid: string }) {
   const s = session(sid); const r = [...s.runs].reverse().find(x => x.out.verdict); const proven = [...new Set(s.runs.flatMap(x => x.out.proves ?? []))].sort();
   return <div className="grid gap-5 md:grid-cols-2"><div><h3 className="mb-1 text-[15px] font-semibold">verifyLicence: the nine checks</h3><p className="mb-3 text-[12px] text-neutral-500">{r ? `Latest verification: step "${r.step.title}". ${r.out.verdict!.result.ok ? 'Valid.' : 'Rejected: ' + r.out.verdict!.result.reason}` : 'No verification in this scenario yet.'} Re-checked from scratch every time; nothing is cached.</p><NineChecks v={r?.out.verdict} /></div>
     <div><h3 className="mb-2 text-[15px] font-semibold">What is proven so far</h3>{proven.length ? <ul className="space-y-1.5">{proven.map(n => <li key={n} className="flex items-center gap-2 text-[13px]"><span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-500 text-[11px] font-bold text-white">{n}</span>{NINE[n - 1]}</li>)}</ul> : <Empty>Run steps to fill this in.</Empty>}
-      <p className="mt-4 text-[12px] text-neutral-500">Numbering follows the white paper. Inside the library the order is offer, consents, binding, request, invoice, preimage, timestamp, revocation.</p></div></div>;
+      <p className="mt-4 text-[12px] text-neutral-500">Numbering follows the protocol spec. Inside the library the order is offer, consents, binding, request, invoice, preimage, timestamp, revocation.</p></div></div>;
 }
 function CodeTab({ sid }: { sid: string }) {
   const s = session(sid); const [cat, setCat] = useState('This scenario'); const runs = s.runs.filter(r => r.out.code);

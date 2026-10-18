@@ -41,7 +41,7 @@ I did not build this, and I did not trust its own scores. Everything below is fr
   - Story uses tokens on its own chain.
   - x402 is payment with no licence meaning, and Block added Lightning to it in Sep 2026.
   - L402 is access tokens.
-- **Compared with Satoshi:** Bitcoin solved its *hardest* problem, double spending, without trust. Here the hardest problem is **who really owns the music**, and the paper rightly says it "stays an input". So this is not a Bitcoin-class breakthrough.
+- **Compared with Satoshi:** Bitcoin solved its *hardest* problem, double spending, without trust. Here the hardest problem is **who really owns the music**, and the design write-up rightly says it "stays an input". So this is not a Bitcoin-class breakthrough.
 - **Compared with the iPhone:** Jobs won by putting known parts into one product people already wanted. There is no product yet with real users.
 - Verdict: **Competent+**. It's an elegant protocol design that a strong Nostr/Lightning team could reach in a few months.
 
@@ -56,10 +56,10 @@ I did not build this, and I did not trust its own scores. Everything below is fr
   - Suggested fix (needs tests): for *retire* revocations, void only invoices dated after the revocation's block time, with no 2-hour margin.
   - Require the anchor within about 144 blocks of the invoice date.
   - Keep the strict rule only for *compromise* revocations, where backdating is a real threat.
-- **S21 fiat:** the workaround means re-signing short-lived offers every day. That needs an online signer, which conflicts with the paper's "artist key kept offline".
+- **S21 fiat:** the workaround means re-signing short-lived offers every day. That needs an online signer, which conflicts with the design write-up's "artist key kept offline".
   - Fix: the binding names a scoped price key with a price band signed by the main key.
-- **Light verification is not as light as the copy says:** check 9 (no prior revocation) scans every OP_RETURN since the binding. The paper admits this needs a full node or trust, but the Lab says "without anyone being online".
-- **In the paper, not in the code:** exclusivity (MLX1/MLX2 reservations) and the daily status record.
+- **Light verification is not as light as the copy says:** check 9 (no prior revocation) scans every OP_RETURN since the binding. The design write-up admits this needs a full node or trust, but the Lab says "without anyone being online".
+- **In the design write-up, not in the code:** exclusivity (MLX1/MLX2 reservations) and the daily status record.
 
 ### 4. Code quality and tests: **Competent (strong)**
 - It's small and focused: about 93 KB of TypeScript, with real BOLT11, OTS and BIP-340 handling.
@@ -77,12 +77,12 @@ I did not build this, and I did not trust its own scores. Everything below is fr
   - The licensed track is a placeholder hash (`0707…07`) at 50 sats on a localhost pay-link. It is not the "Rain" recording at 100 sats that the Lab shows next to the link.
   - No real artist, no real buyer, no mainnet, no stranger.
 
-### 6. The paper against Satoshi's: **Competent+ (well written, honest)**
+### 6. The design write-up against Satoshi's: **Competent+ (well written, honest)**
 - It follows Satoshi's form closely: abstract, "Payment as Grant", timestamps, incentives, simple verification, calculations, limits. The prose is clear, and §10 is admirably honest.
 - What makes Satoshi's paper great is not the form. It's that the system works *without* the trusted party. This one admits two trusted inputs (ownership, and absence of revocation for light verifiers) and describes an exclusivity scheme that isn't in the code.
 - A cold reader will see that the core claim, "a peer-to-peer system for licensing music", depends on vouching.
 - The NIP draft (2,083 words) is usable.
-- The cast doesn't match: the paper, NIP, in-the-wild doc and Mutinynet report use Ava, Jay, Mia and Sam, while the Lab uses Alice and Bob.
+- The cast doesn't match: the design write-up, NIP, in-the-wild doc and Mutinynet report use Ava, Jay, Mia and Sam, while the Lab uses Alice and Bob.
 
 ### 7. Sandbox UX against Alby and Jobs: **near-magical for one persona, Competent overall**
 - **Artist cold walk:** 3 clicks and about 6 s from home to "Licensed". The full track unlocks, and 100 sats visibly split into 65/20/15. Home is 155 words with no console errors. **That is the closest thing to a magic moment in the project.**
@@ -115,7 +115,7 @@ I did not build this, and I did not trust its own scores. Everything below is fr
 | 3 Soundness | Competent (strong) |
 | 4 Code and tests | Competent (strong) |
 | 5 Real-world proof | Competent (real chain, no real users) |
-| 6 Paper | Competent+ |
+| 6 Design write-up | Competent+ |
 | 7 Sandbox | Near-magical (artist), Competent overall |
 | 8 Moat/GTM | Not yet competent |
 | 9 Risks | High: ownership and demand |

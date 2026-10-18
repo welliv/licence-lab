@@ -33,7 +33,7 @@ All three are fixed, with regression tests.
 | Integrating `verifyLicence` | 8 lines |
 
 ## What is still unsafe or impractical
-1. **OpenTimestamps, the paper's default anchor, cannot be verified by this code.** It fails safe (the licence shows as "pending"), but the default path never completes. Implement OTS verification or make OP_RETURN, ideally batched, an equal option.
+1. **OpenTimestamps, the design's default anchor, cannot be verified by this code.** It fails safe (the licence shows as "pending"), but the default path never completes. Implement OTS verification or make OP_RETURN, ideally batched, an equal option.
 2. **Revocation check at mainnet scale.** Check 9 scans every block. That is fine on regtest but impossible on mainnet without an OP_RETURN index or the signed status record, which means trusting someone.
 3. **A 2-hour revocation window remains.** An artist can still void a licence whose invoice is less than 2 hours older than her revocation block. Buyers should anchor immediately.
 4. **Buyer privacy.** Every licence names the buyer's long-term key, so purchases can be linked. Use a fresh key per licence.
@@ -46,5 +46,5 @@ All three are fixed, with regression tests.
 - [`red-team-threat-model-2026-10-12.md`](red-team-threat-model-2026-10-12.md): assets, actors, trust boundaries, STRIDE and attack classes
 - [`red-team-findings-2026-10-12.md`](red-team-findings-2026-10-12.md): every finding with severity, repro, fix and test IDs
 - [`red-team-practicality-report-2026-10-12.md`](red-team-practicality-report-2026-10-12.md): timings, costs, load, recovery, developer experience
-- [`red-team-spec-changes-2026-10-12.md`](red-team-spec-changes-2026-10-12.md): 20 changes the NIP and white-paper spec need
+- [`red-team-spec-changes-2026-10-12.md`](red-team-spec-changes-2026-10-12.md): 20 changes the NIP and the design spec need
 - Test code and raw results (`tests/audit/`, `scripts/audit/live.mts`, live and before/after test results, the x402 check output) were kept with the audited copy and are not included here.

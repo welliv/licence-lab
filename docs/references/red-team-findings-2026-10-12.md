@@ -33,7 +33,7 @@ Test IDs refer to `tests/audit/verify.audit.test.ts` (A–G) and `tests/audit/se
 
 ### F-04 Revocation race: the artist can void licences she has already been paid for (HIGH, fixed with a stated margin)
 - **Where:** `src/verify.ts` check 9.
-- **Problem:** a licence was rejected if any revocation was mined at or before the **buyer's anchor** height. OTS (the paper's default) takes hours to reach a block, so Ava could sell, then mine an `MLR1` for the offer before Sam's anchor confirmed, and his paid licence became "revoked". It was the same for any buyer who anchors late.
+- **Problem:** a licence was rejected if any revocation was mined at or before the **buyer's anchor** height. OTS (the design's default) takes hours to reach a block, so Ava could sell, then mine an `MLR1` for the offer before Sam's anchor confirmed, and his paid licence became "revoked". It was the same for any buyer who anchors late.
 - **Repro:** F8. Invoice issued now, offer revocation mined in a block stamped 3 hours later, anchor after that. Before: `revoked`.
 - **Fix:** for **offer** ("retire") revocations, the licence stands if the invoice timestamp (signed by Ava's own bound node) is more than 2 hours before the revocation block's time. The buyer already refuses future-dated invoices, so Ava cannot game the timestamp, and the 2 h margin covers miner time skew. **Binding** revocations (key or node compromise) stay strict, because a thief with the node key could backdate invoices.
 - **Tests:** F8 (now valid), F9 (revoked before the invoice: refused), F10 (inside the margin: refused), C4/C5 (binding revocation strict).
@@ -87,7 +87,7 @@ Test IDs refer to `tests/audit/verify.audit.test.ts` (A–G) and `tests/audit/se
 - **Fix:** an O_EXCL lock file around every read-modify-write, with a reload under the lock, atomic rename and mode 0600.
 - **Tests:** I9 (12 purchases over two instances, cap 4, exactly 4 paid), I8, I11.
 
-### F-18 OpenTimestamps proofs cannot be verified by this code, although the paper makes OTS the default (MED, FIXED in the Mutinynet round: `src/ots.ts`, tests O1–O17)
+### F-18 OpenTimestamps proofs cannot be verified by this code, although the design makes OTS the default (MED, FIXED in the Mutinynet round: `src/ots.ts`, tests O1–O17)
 - **Problem:** the code can only verify OP_RETURN anchors. A completed `.ots` proof (Merkle path to a block) is never parsed, so anchors of `type: 'ots'` either fail as pending or are checked as if they were an OP_RETURN. The verifier fails closed, so this is not exploitable, but the default path cannot complete.
 - **Fix needed:** implement OTS upgrade and verification (or use the `opentimestamps` library) and add test vectors. **Tests:** F1, F2 (fail closed).
 

@@ -2,9 +2,9 @@
 
 For: a copyright and contract lawyer in England and Wales, and one in the United States. Other countries can follow the same list.
 From: welliv, 12 October 2026.
-Read with: `music-licensing-whitepaper.pdf` (the paper) and `whitepaper-final-spec.md` (the spec). Section numbers below refer to them.
+Read with: the project overview ([`../paper/nostr-powered-music-project-v2.pdf`](../paper/nostr-powered-music-project-v2.pdf)) and the draft NIP ([`nip-xx-music-licence-offers-draft.md`](nip-xx-music-licence-offers-draft.md)). Section numbers below refer to the design write-up these questions were first written against, which is being revised.
 
-**What the system does, in two sentences.** An artist publishes a signed offer to license a recording for a stated use at a stated price. A buyer signs a request, pays a Lightning invoice that is tied to her request, and the payment's secret (the "preimage") is the proof that the licence was granted (paper §2–§3).
+**What the system does, in two sentences.** An artist publishes a signed offer to license a recording for a stated use at a stated price. A buyer signs a request, pays a Lightning invoice that is tied to her request, and the payment's secret (the "preimage") is the proof that the licence was granted (design write-up §2–§3).
 
 We are not asking whether the idea is good. We are asking whether the steps below have the legal effect we claim, and what we would need to change if they do not.
 
@@ -36,7 +36,7 @@ We are not asking whether the idea is good. We are asking whether the steps belo
 ## D. Order of grants and exclusivity
 
 12. **Prior non-exclusive licences.** An exclusive offer commits to the list (Merkle root) of non-exclusive licences already sold for the same use, and the exclusive is stated to be subject to them. Is that effective against the exclusive licensee? What about a non-exclusive licence the artist grants **after** the exclusive (a breach by her)? Does its buyer keep any right to use, or only a claim against the artist?
-13. **"First in the chain wins".** The exclusive belongs to the first valid reservation completed within the window, as recorded on the Bitcoin chain (paper §5). If the artist signs two exclusives for the same use, will a court follow that rule, or apply its own priority rules (for example, US recordation under 17 U.S.C. §205, or notice)?
+13. **"First in the chain wins".** The exclusive belongs to the first valid reservation completed within the window, as recorded on the Bitcoin chain (design write-up §5). If the artist signs two exclusives for the same use, will a court follow that rule, or apply its own priority rules (for example, US recordation under 17 U.S.C. §205, or notice)?
 14. **Deposit.** A buyer pays a 1% deposit to reserve an exclusive and loses it if she does not complete, or if an earlier reservation wins. Is this enforceable, or could it be a penalty, or a consumer-law problem?
 15. **Revocation.** If the artist's node key is stolen, she publishes a revocation; grants timestamped after it are invalid under the rule. Is a buyer who paid the thief in good faith after the revocation protected in any way? And are grants made by the thief **before** revocation binding on the artist, as the paper says (spec §I)?
 
