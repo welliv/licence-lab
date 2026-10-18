@@ -1,5 +1,7 @@
 # Licence Lab
 
+![Nostr Powered Music: artists license their music directly. Any agent can buy it in seconds and prove it on Bitcoin.](docs/images/banner.png)
+
 A live demo of the open music-licence protocol (Nostr, Lightning and Bitcoin): artists license their music directly, any agent can buy it in seconds and prove it on Bitcoin. Test coins only.
 
 **Live app:** https://welliv.github.io/licence-lab/
