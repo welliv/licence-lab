@@ -34,11 +34,11 @@ export const Busy = ({ label }: { label: string }) => <BigButton disabled><Loade
 
 /** Slim top bar: the stops in the visitor's order, the extra, who you are (changeable), theme. */
 export function StoryShell({ path, children }: { path: string; children: ReactNode }) {
-  const st = useStory(); const order = st.order(); const items: [string, string][] = [...order.map(s => [s, STOPS[s]] as [string, string]), ['rights', 'Extra: rights']];
+  const st = useStory(); const order = st.order(); const items: [string, string][] = [...order.map(s => [s, STOPS[s]] as [string, string]), ['rights', 'Extra: rights'], ['price', 'Extra: live price']];
   return <div className="flex h-full flex-col">
     <header className="flex items-center gap-2 border-b border-neutral-200 px-3 py-2.5 md:gap-3 md:px-8">
       <button onClick={() => go('')} className="flex items-center gap-2 text-[15px] font-bold tracking-tight" aria-label="Licence Lab home"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-700 via-violet-600 to-sky-500 text-[14px] text-white">♪</span><span className="hidden sm:inline">Licence Lab</span></button>
-      <nav aria-label="Progress" className="mx-auto flex items-center gap-0.5 md:gap-1.5">{items.map(([p, label], i) => { const cur = p === path; const done = st.done.has(p); const extra = p === 'rights';
+      <nav aria-label="Progress" className="mx-auto flex items-center gap-0.5 md:gap-1.5">{items.map(([p, label], i) => { const cur = p === path; const done = st.done.has(p); const extra = p === 'rights' || p === 'price';
         return <button key={p} onClick={() => go(p)} aria-current={cur ? 'step' : undefined} title={label} className={cx('flex items-center gap-1.5 rounded-full px-2 py-1 text-[13px] transition-colors md:px-3', cur ? 'bg-neutral-900 text-white' : extra ? 'text-neutral-400 hover:text-neutral-900' : 'text-neutral-500 hover:text-neutral-900')}>
           <span className={cx('flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold', cur ? 'bg-white/20' : done ? 'bg-emerald-500 text-white' : extra ? 'border border-dashed border-neutral-300' : 'border border-neutral-300')}>{done && !cur ? '✓' : extra ? '+' : i + 1}</span>
           <span className={cx(cur ? 'hidden sm:inline' : 'hidden lg:inline')}>{label}</span></button>; })}</nav>

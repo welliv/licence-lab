@@ -133,7 +133,7 @@ export function ArtistStop1() {
     {!r && <div className="flex flex-col items-center gap-2 text-center">
       {st.busy === rk ? <Busy label={label || "Bob's agent is buying…"} /> : <BigButton onClick={buy} disabled={busy || short$} data-testid="buy">Let Bob's agent buy it</BigButton>}
       {short$ ? <p className="text-[13px] text-amber-700" data-testid="low-funds">Bob's agent has {usd(st.cash.bobagent ?? 0)} left. <button className="underline" onClick={() => story.move('bobtopup', { bobagent: 10_000 })}>Top up $100</button></p>
-        : <p className="text-[13px] text-neutral-500">Test money only. No real money moves.</p>}</div>}
+        : <p className="text-[13px] text-neutral-500">Test money only. No real money moves. · <button onClick={() => go('price')} data-testid="to-live-price" className="underline decoration-neutral-300 underline-offset-4 hover:text-neutral-900">See it at today's market rate</button></p>}</div>}
     {/* The effect */}
     {r && <div className="space-y-4">
       {r.verdict.result.ok ? <Payoff key={rk} c={c} cents={cents} artist={st.persona === 'artist'} onLanded={() => setLanded(rk)} /> : <Bad line="Something went wrong with this sale" />}
