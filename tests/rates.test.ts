@@ -1,12 +1,11 @@
 // Market rates: conversion both ways, whole sats, the band check, and what happens when the rate source fails or is old.
 import { describe, it, expect } from 'vitest';
-import { RateBook, parseRate, satsToFiat, fiatToSats, satsPerUnit, checkQuote, usable, formatFiat, MAX_AGE_MS, FRESH_MS, type Rate } from '../src/live/rates';
+import { RateBook, parseRate, parseMempool, agree, spreadOf, canPrice, satsToFiat, fiatToSats, satsPerUnit, checkQuote, formatFiat, MAX_AGE_MS, FRESH_MS, type Rate } from '../src/live/rates';
 import { Lab } from '../src/engine/lab';
 import { quotedSale, signBand, bandOf, BAND } from '../src/engine/livePrice';
 
 const usd: Rate = { currency: 'USD', btc: 80_000, at: 0, source: 'test' };
 const jpy: Rate = { currency: 'JPY', btc: 12_000_000, at: 0, source: 'test' };
-const answer = (code: string, rate: number) => ({ ok: true, status: 200, json: async () => ({ code, symbol: '$', rate_float: rate }) });
 
 describe('conversion', () => {
   it('sats to dollars, rounded to the cent', () => { expect(satsToFiat(100_000, usd)).toBe(80); expect(satsToFiat(1, usd)).toBe(0); expect(satsToFiat(1_234, usd)).toBe(0.99); });
@@ -20,25 +19,59 @@ describe('conversion', () => {
   it('refuses nonsense input', () => { expect(() => satsToFiat(1.5, usd)).toThrow(); expect(() => fiatToSats(-1, usd)).toThrow(); expect(() => fiatToSats(NaN, usd)).toThrow(); });
 });
 
-describe('rate source', () => {
-  it('reads the Alby answer and refuses a wrong or empty one', () => {
+// A stub for both sources: Alby answers per currency, mempool.space answers all currencies with its own time.
+type Net = { alby?: number | null; mempool?: number | null; mempoolTime?: number };
+const stub = (net: Net, now: () => number) => async (url: string) => {
+  const ok = (body: any) => ({ ok: true, status: 200, json: async () => body });
+  if (url.includes('getalby.com')) { if (net.alby == null) throw new Error('offline'); const c = url.match(/rates\/(\w+)\.json/)![1].toUpperCase(); return ok({ code: c, rate_float: net.alby }); }
+  if (url.includes('mempool.space')) { if (net.mempool == null) throw new Error('offline'); return ok({ time: Math.floor((net.mempoolTime ?? now()) / 1000), USD: net.mempool, EUR: net.mempool, GBP: net.mempool, JPY: net.mempool }); }
+  throw new Error('unknown url ' + url);
+};
+
+describe('rate sources', () => {
+  it('reads both answers and refuses a wrong or empty one', () => {
     expect(parseRate({ code: 'USD', rate_float: 82787.46 }, 'USD', 5).btc).toBe(82787.46);
     expect(() => parseRate({ code: 'EUR', rate_float: 1 }, 'USD', 5)).toThrow(/EUR/); expect(() => parseRate({ code: 'USD', rate_float: 0 }, 'USD', 5)).toThrow();
+    const m = parseMempool({ time: 1_792_396_502, USD: 82634 }, 'USD', 1_792_396_510_000); expect(m.btc).toBe(82634); expect(m.at).toBe(1_792_396_502_000); expect(m.ownTime).toBe(true);
+    expect(() => parseMempool({ USD: 1 }, 'USD', 5)).toThrow(/time/);
+  });
+  it('agree: within 2%, the average is the rate, dated by the older time', async () => {
+    let t = 1_000_000; const book = new RateBook(stub({ alby: 80_000, mempool: 81_000, mempoolTime: t - 30_000 }, () => t), () => t);
+    const s = await book.get('USD'); expect(s.status).toBe('live'); expect(s.rate!.btc).toBe(80_500); expect(s.rate!.at).toBe(t - 30_000); expect(s.spread).toBeCloseTo(0.0125, 4);
+    expect(checkQuote(20, s, BAND, t)).toMatchObject({ ok: true }); expect(canPrice(s, t)).toBe(true);
   });
   it('asks once a minute, then again', async () => {
-    let t = 1_000, calls = 0; const book = new RateBook(async () => { calls++; return answer('USD', 80_000); }, () => t);
-    expect((await book.get('USD')).status).toBe('live'); t += FRESH_MS - 1; await book.get('USD'); expect(calls).toBe(1); t += 2; await book.get('USD'); expect(calls).toBe(2);
+    let t = 1_000, calls = 0; const f = stub({ alby: 80_000, mempool: 80_000 }, () => t); const book = new RateBook(async u => { calls++; return f(u); }, () => t);
+    await book.get('USD'); t += FRESH_MS - 1; await book.get('USD'); expect(calls).toBe(2); t += 2; await book.get('USD'); expect(calls).toBe(4);
   });
-  it('when the source fails it keeps the last rate with its time, then stops quoting once it is too old', async () => {
-    let t = 0, up = true; const book = new RateBook(async () => { if (!up) throw new Error('offline'); return answer('USD', 80_000); }, () => t);
-    await book.get('USD'); up = false; t = 5 * 60_000;
-    const s1 = await book.get('USD', { force: true }); expect(s1.status).toBe('last-known'); expect(s1.rate!.at).toBe(0); expect(s1.error).toBe('offline');
-    t = MAX_AGE_MS + 1; const s2 = await book.get('USD', { force: true }); expect(s2.status).toBe('too-old'); expect(usable(s2.rate, t)).toBe(false);
-    expect(checkQuote(20, s2.rate, BAND, t)).toMatchObject({ ok: false, code: 'rate_too_old' });
+  it('disagree by more than 2%: no quote, even with a recent agreed rate', async () => {
+    let t = 1_000_000; const net: Net = { alby: 80_000, mempool: 80_000 }; const book = new RateBook(stub(net, () => t), () => t);
+    await book.get('USD'); net.mempool = 84_000; t += 30_000; const s = await book.get('USD', { force: true });
+    expect(s.status).toBe('disagree'); expect(s.spread).toBeCloseTo(0.05, 3); expect(s.sources.every(x => x.rate)).toBe(true);
+    expect(checkQuote(20, s, BAND, t)).toMatchObject({ ok: false, code: 'sources_disagree' }); expect(canPrice(s, t)).toBe(false);
+    expect(spreadOf(80_000, 81_600)).toBeCloseTo(0.02, 6); expect(agree({ currency: 'USD', btc: 80_000, at: 0, source: 'a' }, { currency: 'USD', btc: 81_600, at: 0, source: 'b' })).not.toBeNull();
+    expect(agree({ currency: 'USD', btc: 80_000, at: 0, source: 'a' }, { currency: 'USD', btc: 81_700, at: 0, source: 'b' })).toBeNull();
   });
-  it('no rate at all: no quote', async () => {
-    const book = new RateBook(async () => ({ ok: false, status: 503, json: async () => ({}) }));
-    const s = await book.get('GBP'); expect(s.status).toBe('none'); expect(s.error).toMatch(/503/); expect(checkQuote(20, s.rate, BAND, Date.now())).toMatchObject({ ok: false, code: 'no_rate' });
+  it('one source down with no agreed rate yet: no quote', async () => {
+    const t = 1_000_000; const book = new RateBook(stub({ alby: 80_000, mempool: null }, () => t), () => t);
+    const s = await book.get('USD'); expect(s.status).toBe('one-source'); expect(s.rate).toBeNull(); expect(s.error).toMatch(/mempool.space: offline/);
+    expect(checkQuote(20, s, BAND, t)).toMatchObject({ ok: false, code: 'one_source' });
+  });
+  it('one source down after an agreed rate: the last agreed rate prices sales for 10 minutes, then stops', async () => {
+    let t = 1_000_000; const net: Net = { alby: 80_000, mempool: 80_000 }; const book = new RateBook(stub(net, () => t), () => t);
+    await book.get('USD'); net.mempool = null; t += 5 * 60_000;
+    const s1 = await book.get('USD', { force: true }); expect(s1.status).toBe('last-known'); expect(s1.rate!.at).toBe(1_000_000); expect(checkQuote(20, s1, BAND, t)).toMatchObject({ ok: true, sats: 25_000 });
+    t = 1_000_000 + MAX_AGE_MS + 1; const s2 = await book.get('USD', { force: true }); expect(s2.status).toBe('too-old'); expect(checkQuote(20, s2, BAND, t)).toMatchObject({ ok: false, code: 'rate_too_old' });
+  });
+  it('both down: last agreed rate with its time, then too old; never had one: no rate', async () => {
+    let t = 1_000_000; const net: Net = { alby: 80_000, mempool: 80_000 }; const book = new RateBook(stub(net, () => t), () => t);
+    await book.get('USD'); net.alby = null; net.mempool = null; t += 60_000;
+    expect((await book.get('USD', { force: true })).status).toBe('last-known'); t += MAX_AGE_MS; expect((await book.get('USD', { force: true })).status).toBe('too-old');
+    const fresh = new RateBook(stub({}, () => t), () => t); const s = await fresh.get('GBP'); expect(s.status).toBe('none'); expect(checkQuote(20, s, BAND, t)).toMatchObject({ ok: false, code: 'no_rate' });
+  });
+  it('a source whose own time is over 10 minutes old counts as not answering', async () => {
+    const t = 10_000_000; const book = new RateBook(stub({ alby: 80_000, mempool: 80_000, mempoolTime: t - MAX_AGE_MS - 1_000 }, () => t), () => t);
+    const s = await book.get('USD'); expect(s.status).toBe('one-source'); expect(s.sources.find(x => x.id === 'mempool')!.error).toMatch(/too old/);
   });
 });
 
