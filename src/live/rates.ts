@@ -93,23 +93,32 @@ export class RateBook {
       return { id: s.id, name: s.name, rate };
     } catch (e: any) { return { id: s.id, name: s.name, rate: null, error: e?.message ?? String(e) }; }
   }
+  /** The newest check per currency. A check that answers after a newer one has started is not stored, so a late
+   *  answer from before a source went down cannot bring back an old "live" state. */
+  private newest = new Map<Currency, Promise<RateState>>();
   async get(currency: string, o: { force?: boolean } = {}): Promise<RateState> {
     if (!isCurrency(currency)) throw new Error(`unsupported currency ${currency}`);
     const t = this.now(); const prev = this.last.get(currency);
     if (!o.force && prev && prev.status === 'live' && t - prev.checkedAt < FRESH_MS) return prev;
+    const run: Promise<RateState> = this.check(currency, t, () => this.newest.get(currency) === run); this.newest.set(currency, run);
+    const st = await run; const latest = this.newest.get(currency)!;
+    return latest === run ? st : latest;
+  }
+  private async check(currency: Currency, t: number, isNewest: () => boolean): Promise<RateState> {
     const sources = await Promise.all(this.sources.map(s => this.ask(s, currency)));
     const ok = sources.filter(s => s.rate); const lastAgreed = this.agreed.get(currency) ?? null;
-    let st: RateState;
+    let st: RateState; let agreed: Rate | null = null;
     if (ok.length === 2) {
-      const spread = spreadOf(ok[0].rate!.btc, ok[1].rate!.btc); const a = agree(ok[0].rate!, ok[1].rate!);
-      if (a) { this.agreed.set(currency, a); st = { currency, rate: a, status: 'live', sources, spread, checkedAt: t }; }
-      else st = { currency, rate: lastAgreed, status: 'disagree', sources, spread, error: `the sources are ${(spread * 100).toFixed(1)}% apart`, checkedAt: t };
+      const spread = spreadOf(ok[0].rate!.btc, ok[1].rate!.btc); agreed = agree(ok[0].rate!, ok[1].rate!);
+      st = agreed ? { currency, rate: agreed, status: 'live', sources, spread, checkedAt: t }
+        : { currency, rate: lastAgreed, status: 'disagree', sources, spread, error: `the sources are ${(spread * 100).toFixed(1)}% apart`, checkedAt: t };
     } else {
       const error = sources.filter(s => !s.rate).map(s => `${s.name}: ${s.error}`).join('; ');
       const status: RateStatus = lastAgreed ? (usable(lastAgreed, t) ? 'last-known' : 'too-old') : ok.length === 1 ? 'one-source' : 'none';
       st = { currency, rate: lastAgreed, status, sources, error, checkedAt: t };
     }
-    this.last.set(currency, st); return st;
+    if (isNewest()) { if (agreed) this.agreed.set(currency, agreed); this.last.set(currency, st); }
+    return st;
   }
 }
 

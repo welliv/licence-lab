@@ -99,3 +99,19 @@ describe('source labels', () => {
     for (const s of SOURCES) expect(s.name).not.toMatch(/alby|mempool/i);
   });
 });
+
+describe('late answers', () => {
+  it('an older check that answers late does not overwrite a newer one', async () => {
+    const t = 1_000_000; const net: Net = { alby: 80_000, mempool: 80_000 }; const base = stub(net, () => t);
+    let release!: () => void; const gate = new Promise<void>(r => { release = r; }); let slow = true;
+    const book = new RateBook(async u => { const res = await base(u); if (slow) { await gate; } return res; }, () => t);
+    await (async () => { slow = false; await book.get('USD', { force: true }); slow = true; })(); // a first agreed rate
+    const old = book.get('USD', { force: true });          // both sources answered; reply held back
+    await Promise.resolve(); slow = false; net.mempool = null;
+    const fresh = await book.get('USD', { force: true });  // source 2 is now down
+    expect(fresh.status).toBe('last-known');
+    release(); const late = await old;
+    expect(late.status).toBe('last-known');                // the late caller gets the newest answer
+    expect((await book.get('USD')).status).toBe('last-known'); // and the stored state is still the newest
+  });
+});
