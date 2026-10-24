@@ -25,8 +25,8 @@ const waitStatus = (p, t) => p.waitForFunction(t => document.querySelector('[dat
   await p.getByTestId('to-live-price').click(); await waitStatus(p, 'Live');
   ok((await status(p)) === 'Live · 2 sources agree', 'both sources agree: Live'); const line = await p.getByTestId('rate-line').innerText();
   ok(REAL ? /= [\d,]+ sats/.test(line) : line === `1 US dollar = ${Math.round(1e8 / AVG).toLocaleString('en-GB')} sats`, `rate line (average): ${line}`);
-  ok(/Alby rates API[\s\S]*fetched \d\d:\d\d UTC/.test(await p.getByTestId('source-alby').innerText()), 'Alby row: rate and fetch time');
-  ok(/mempool\.space[\s\S]*as of \d\d:\d\d UTC/.test(await p.getByTestId('source-mempool').innerText()), 'mempool.space row: rate and its own time');
+  ok(/Rate source 1[\s\S]*fetched \d\d:\d\d UTC/.test(await p.getByTestId('source-alby').innerText()), 'source 1 row (Alby): neutral name, rate and fetch time');
+  ok(/Rate source 2[\s\S]*as of \d\d:\d\d UTC/.test(await p.getByTestId('source-mempool').innerText()), 'source 2 row (mempool.space): neutral name, rate and its own time');
   ok(/% apart \(limit 2%\)/.test(await p.getByTestId('spread').innerText()), `spread shown: ${await p.getByTestId('spread').innerText()}`);
   if (!REAL) { ok(await p.getByTestId('sats-input').inputValue() === String(sats(20)), `$20 → ${sats(20)} sats`);
     await p.getByTestId('sats-input').fill('12345'); ok(await p.getByTestId('fiat-input').inputValue() === String(Math.round(12345 * AVG / 1e6) / 100), '12,345 sats → dollars');
@@ -34,7 +34,7 @@ const waitStatus = (p, t) => p.waitForFunction(t => document.querySelector('[dat
   await shot(p, '01-two-sources-agree', false);
   await p.getByTestId('buy-quoted').click(); await p.waitForSelector('[data-testid=quote-sold]', { timeout: 20000 });
   ok(REAL || (await p.getByTestId('quote-sold').innerText()).includes(`Licensed for ${sats(20).toLocaleString('en-GB')} sats`), 'agreed rate: sold inside the band');
-  ok((await p.getByTestId('quote-sold').innerText()).includes('average of Alby rates API and mempool.space'), 'sale names both sources');
+  ok((await p.getByTestId('quote-sold').innerText()).includes('average of rate sources 1 and 2'), 'sale names both sources');
   await p.getByTestId('quote-sold').scrollIntoViewIfNeeded(); await shot(p, '02-sold-on-agreed-rate');
   await p.getByTestId('price-input').fill('40'); await p.getByTestId('buy-quoted').click(); await p.waitForSelector('[data-testid=quote-refused]', { timeout: 20000 });
   ok((await p.getByTestId('quote-refused').innerText()).includes('quote_band'), '$40: refused by quote_band'); await p.getByTestId('price-input').fill('20');
@@ -42,8 +42,10 @@ const waitStatus = (p, t) => p.waitForFunction(t => document.querySelector('[dat
   ok((await p.getByTestId('rate-line').innerText()).startsWith('Last agreed:'), 'disagree: headline marked as last agreed'); await p.getByTestId('buy-quoted').click(); await p.waitForSelector('[data-testid=quote-blocked]'); ok((await p.getByTestId('quote-blocked').innerText()).includes('apart'), 'disagree: no quote');
   await p.getByTestId('rate-card').scrollIntoViewIfNeeded(); await shot(p, '03-sources-disagree', false);
   await p.getByTestId('try-disagree').click(); await waitStatus(p, 'Live');
-  await p.getByTestId('try-one').click(); await waitStatus(p, 'Last agreed rate'); ok((await p.getByTestId('source-mempool').innerText()).includes('did not answer'), 'one source off: shown as not answering');
+  ok((await p.getByTestId('try-one').innerText()) === 'Switch rate source 2 off', 'try-it button uses the neutral name'); await p.getByTestId('try-one').click(); await waitStatus(p, 'Last agreed rate'); ok((await p.getByTestId('source-mempool').innerText()).includes('did not answer'), 'one source off: shown as not answering');
   await p.getByTestId('buy-quoted').click(); await p.waitForSelector('[data-testid=quote-sold]', { timeout: 20000 }); ok((await p.getByTestId('quote-sold').innerText()).includes('last agreed rate'), 'one source off, agreed rate under 10 min: still sells, says so');
+  { const vis = await p.evaluate(() => ['rate-card', 'try-fail', 'quote-sold', 'converter', 'band-line'].map(t => document.querySelector(`[data-testid=${t}]`)?.innerText ?? '').join('\n'));
+    ok(/Rate source 2 did not answer/.test(vis) && !/alby|mempool/i.test(vis), 'visible text names no service: "Rate source 2 did not answer"'); }
   await p.getByTestId('rate-card').scrollIntoViewIfNeeded(); await shot(p, '04-one-source-last-agreed', false);
   await p.getByTestId('try-old').click(); await waitStatus(p, 'Too old'); await p.getByTestId('buy-quoted').click(); await p.waitForSelector('[data-testid=quote-blocked]'); ok(true, 'both off and 11 min later: too old, no quote'); await shot(p, '05-too-old');
   await p.getByTestId('try-reset').click(); await waitStatus(p, 'Live'); ok(true, 'back to normal: Live');
@@ -51,7 +53,7 @@ const waitStatus = (p, t) => p.waitForFunction(t => document.querySelector('[dat
   await p.getByTestId('rate-card').scrollIntoViewIfNeeded(); await shot(p, '06-yen', false);
   ok(errs.length === 0, `no page errors ${errs.join('; ')}`); await p.close(); }
 if (!REAL) { const { p, errs } = await page(390, 844, { noMempool: true }); await p.goto(base + '#/price'); await waitStatus(p, 'Only one source');
-  ok(true, 'phone, mempool.space down from the start: Only one source'); await p.getByTestId('buy-quoted').click(); await p.waitForSelector('[data-testid=quote-blocked]');
+  ok(true, 'phone, source 2 (mempool.space) down from the start: Only one source'); await p.getByTestId('buy-quoted').click(); await p.waitForSelector('[data-testid=quote-blocked]');
   ok((await p.getByTestId('quote-blocked').innerText()).includes('Only one source'), 'one source, no agreed rate: no quote'); await p.getByTestId('rate-card').scrollIntoViewIfNeeded(); await shot(p, '07-phone-one-source', false);
   await p.getByTestId('quote-blocked').scrollIntoViewIfNeeded(); await shot(p, '08-phone-one-source-blocked', false); ok(errs.length === 0, 'no page errors (phone)'); await p.close(); }
 { const { p, errs } = await page(390, 844); await p.goto(base + '?rates=fail#/price'); await waitStatus(p, 'No rate'); ok(true, 'phone, both down from the start: No rate');

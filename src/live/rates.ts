@@ -31,17 +31,18 @@ const positive = (x: unknown) => { const n = Number(x); if (!Number.isFinite(n) 
 /** Read one Alby answer. Anything odd is an error, never a guessed rate. */
 export function parseRate(json: any, currency: Currency, at: number): Rate {
   if (String(json?.code ?? '').toUpperCase() !== currency) throw new Error(`the source answered for ${json?.code ?? 'no currency'}, not ${currency}`);
-  return { currency, btc: positive(json?.rate_float), at, source: 'Alby rates API', ownTime: false };
+  return { currency, btc: positive(json?.rate_float), at, source: 'Rate source 1', ownTime: false };
 }
 /** Read one mempool.space answer; its `time` (Unix seconds) is the time of the price. */
 export function parseMempool(json: any, currency: Currency, fetchedAt: number): Rate {
   const t = Number(json?.time); if (!Number.isFinite(t) || t <= 0) throw new Error('the source gave no time');
   const at = Math.min(t * 1000, fetchedAt);
-  return { currency, btc: positive(json?.[currency]), at, source: 'mempool.space', ownTime: true };
+  return { currency, btc: positive(json?.[currency]), at, source: 'Rate source 2', ownTime: true };
 }
+// Shown to users with neutral names: 'Rate source 1' (Alby rates API) and 'Rate source 2' (mempool.space).
 export const SOURCES: Source[] = [
-  { id: 'alby', name: 'Alby rates API', url: c => `https://getalby.com/api/rates/${c.toLowerCase()}.json`, ownTime: false, read: parseRate },
-  { id: 'mempool', name: 'mempool.space', url: () => 'https://mempool.space/api/v1/prices', ownTime: true, read: parseMempool },
+  { id: 'alby', name: 'Rate source 1', url: c => `https://getalby.com/api/rates/${c.toLowerCase()}.json`, ownTime: false, read: parseRate },
+  { id: 'mempool', name: 'Rate source 2', url: () => 'https://mempool.space/api/v1/prices', ownTime: true, read: parseMempool },
 ];
 /** Kept for the code drawer and older callers. */
 export const RATE_SOURCE = { name: SOURCES.map(s => s.name).join(' + '), url: 'https://getalby.com/api/rates/' } as const;

@@ -1,6 +1,6 @@
 // Market rates: conversion both ways, whole sats, the band check, and what happens when the rate source fails or is old.
 import { describe, it, expect } from 'vitest';
-import { RateBook, parseRate, parseMempool, agree, spreadOf, canPrice, satsToFiat, fiatToSats, satsPerUnit, checkQuote, formatFiat, MAX_AGE_MS, FRESH_MS, type Rate } from '../src/live/rates';
+import { RateBook, SOURCES, parseRate, parseMempool, agree, spreadOf, canPrice, satsToFiat, fiatToSats, satsPerUnit, checkQuote, formatFiat, MAX_AGE_MS, FRESH_MS, type Rate } from '../src/live/rates';
 import { Lab } from '../src/engine/lab';
 import { quotedSale, signBand, bandOf, BAND } from '../src/engine/livePrice';
 
@@ -54,7 +54,7 @@ describe('rate sources', () => {
   });
   it('one source down with no agreed rate yet: no quote', async () => {
     const t = 1_000_000; const book = new RateBook(stub({ alby: 80_000, mempool: null }, () => t), () => t);
-    const s = await book.get('USD'); expect(s.status).toBe('one-source'); expect(s.rate).toBeNull(); expect(s.error).toMatch(/mempool.space: offline/);
+    const s = await book.get('USD'); expect(s.status).toBe('one-source'); expect(s.rate).toBeNull(); expect(s.error).toMatch(/Rate source 2: offline/);
     expect(checkQuote(20, s, BAND, t)).toMatchObject({ ok: false, code: 'one_source' });
   });
   it('one source down after an agreed rate: the last agreed rate prices sales for 10 minutes, then stops', async () => {
@@ -88,5 +88,14 @@ describe('band check', () => {
   it('Alice\'s node refuses a quote outside the band, even if the pricing key signs it', async () => {
     const lab = new Lab('rates-bad'); const r = await quotedSale(lab, fiatToSats(40, usd), '≈ $40.00'); expect(r.ok).toBe(false); if (!r.ok) expect(r.code).toBe('quote_band');
     const low = await quotedSale(lab, 14_999, 'too low'); expect(low.ok).toBe(false);
+  });
+});
+
+describe('source labels', () => {
+  it('shows the sources with neutral names, not service names', () => {
+    expect(SOURCES.map(s => s.name)).toEqual(['Rate source 1', 'Rate source 2']);
+    expect(parseRate({ code: 'USD', rate_float: 1 }, 'USD', 5).source).toBe('Rate source 1');
+    expect(parseMempool({ time: 1, USD: 1 }, 'USD', 5000).source).toBe('Rate source 2');
+    for (const s of SOURCES) expect(s.name).not.toMatch(/alby|mempool/i);
   });
 });

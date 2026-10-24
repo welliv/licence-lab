@@ -77,8 +77,8 @@ export function LivePrice() {
     try {
       const st = await book.get('USD'); const p = Number(price); const pre = checkQuote(p, st, BAND, now());
       if (!pre.ok && pre.code !== 'below_band' && pre.code !== 'above_band') { setOut({ kind: 'blocked', text: pre.text }); return; }
-      const q = fiatToSats(p, st.rate!); const note = `≈ ${formatFiat(p, 'USD')} at 1 BTC = ${formatFiat(st.rate!.btc, 'USD')} (${st.status === 'live' ? 'average of Alby and mempool.space' : 'last agreed rate'}, ${utcTime(st.rate!.at)})`;
-      setOutSrc(st.status === 'live' ? 'the average of Alby rates API and mempool.space' : 'the last agreed rate');
+      const q = fiatToSats(p, st.rate!); const note = `≈ ${formatFiat(p, 'USD')} at 1 BTC = ${formatFiat(st.rate!.btc, 'USD')} (${st.status === 'live' ? 'average of rate sources 1 and 2' : 'last agreed rate'}, ${utcTime(st.rate!.at)})`;
+      setOutSrc(st.status === 'live' ? 'the average of rate sources 1 and 2' : 'the last agreed rate');
       const res = await quotedSale(story.world('price'), q, note); setOut({ kind: 'sale', r: res, usdRate: st.rate!.btc, at: st.rate!.at, price: p });
     } finally { setBusy(false); }
   };
@@ -125,14 +125,14 @@ export function LivePrice() {
       <p className="mb-3 text-[14px] text-neutral-600">A sale is priced only when both sources agree within {MAX_SPREAD * 100}%. If one stops answering, the last agreed rate is used for up to {MAX_AGE_MS / 60_000} minutes, with its time shown.</p>
       <div className="flex flex-wrap gap-2">
         <button onClick={tryDisagree} data-testid="try-disagree" className="rounded-full border border-amber-300 px-4 py-2 text-[14px] text-amber-700 hover:bg-amber-50">{ctl.drift ? 'Make them agree again' : 'Make the sources disagree'}</button>
-        <button onClick={tryOne} data-testid="try-one" className="rounded-full border border-amber-300 px-4 py-2 text-[14px] text-amber-700 hover:bg-amber-50">{ctl.off.has('mempool') ? 'Bring mempool.space back' : 'Switch mempool.space off'}</button>
+        <button onClick={tryOne} data-testid="try-one" className="rounded-full border border-amber-300 px-4 py-2 text-[14px] text-amber-700 hover:bg-amber-50">{ctl.off.has('mempool') ? 'Bring rate source 2 back' : 'Switch rate source 2 off'}</button>
         <button onClick={tryBoth} data-testid="try-down" className="rounded-full border border-amber-300 px-4 py-2 text-[14px] text-amber-700 hover:bg-amber-50">{ctl.off.size === 2 ? 'Bring both back' : 'Switch both off'}</button>
         <button onClick={tryOld} data-testid="try-old" className="rounded-full border border-amber-300 px-4 py-2 text-[14px] text-amber-700 hover:bg-amber-50">Jump {MAX_AGE_MS / 60_000 + 1} minutes ahead</button>
         {(ctl.off.size > 0 || ctl.drift > 0 || ctl.skew > 0) && <button onClick={reset} data-testid="try-reset" className="rounded-full px-4 py-2 text-[14px] text-neutral-500 underline underline-offset-4">Back to normal</button>}</div>
     </section>
 
     <p className="rounded-xl bg-neutral-100 px-4 py-3 text-[14px] text-neutral-600">The rate is real. The money here is practice money, and the sale runs on a practice copy of Bitcoin in your browser.</p>
-    <CodeDrawer><p>Rates: <code>GET https://getalby.com/api/rates/usd.json</code> (field <code>rate_float</code>; no time of its own, so the fetch time is shown) and <code>GET https://mempool.space/api/v1/prices</code> (one field per currency, plus its own <code>time</code>). Both are keyless and allow browser calls. The agreed rate is their average, dated by the older time, and only if they are within {MAX_SPREAD * 100}% of each other. Rates are reused for 1 minute. If a source stops answering, the last agreed rate prices sales for up to {MAX_AGE_MS / 60_000} minutes; after that, or if the sources disagree, or only one has ever answered, no quote is signed.</p>
+    <CodeDrawer><p>Rates: rate source 1 is <code>GET https://getalby.com/api/rates/usd.json</code> (field <code>rate_float</code>; no time of its own, so the fetch time is shown) and rate source 2 is <code>GET https://mempool.space/api/v1/prices</code> (one field per currency, plus its own <code>time</code>). Both are keyless and allow browser calls. The agreed rate is their average, dated by the older time, and only if they are within {MAX_SPREAD * 100}% of each other. Rates are reused for 1 minute. If a source stops answering, the last agreed rate prices sales for up to {MAX_AGE_MS / 60_000} minutes; after that, or if the sources disagree, or only one has ever answered, no quote is signed.</p>
       <p>Alice's main key signs the offer once with <code>price</code> {BAND.min} and <code>price-max</code> {BAND.max} and names Echo's <b>pricing key</b>. Echo signs a <b>quote</b> (draft kind 3416) with the sats price, an expiry block and a note with the rate and its time. Bob's request names the quote, and the invoice must match it. Alice's node runs <code>checkDeal</code>: a quote outside the band fails with <code>quote_band</code>. The rate never enters the licence check; only the signed sats price does.</p></CodeDrawer>
     <div className="pt-2 text-center"><BigButton variant="quiet" onClick={() => history.back()}>Back</BigButton></div>
   </Stop>;
